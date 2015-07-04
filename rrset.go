@@ -2,7 +2,7 @@ package udnssdk
 
 import (
 	"fmt"
-  "log"
+	"log"
 )
 
 // ZonesService handles communication with the Zone related blah blah
@@ -11,21 +11,21 @@ type RRSetsService struct {
 }
 
 type RRSet struct {
-  OwnerName string `json:"ownerName"`
-  RRType string `json:"rrtype"`
-  TTL int `json:"ttl"`
-  RData []string `json:"rdata"`
+	OwnerName string   `json:"ownerName"`
+	RRType    string   `json:"rrtype"`
+	TTL       int      `json:"ttl"`
+	RData     []string `json:"rdata"`
 }
 
 type RRSetListDTO struct {
-  ZoneName string `json:"zoneName"`
-  Rrsets []RRSet `json:"rrsets"`
-  Queryinfoq string `json:"queryinfo/q"`
-  Queryinfosort string `json:"queryinfo/reverse"`
-  Queryinfolimit string `json:"queryinfo/limit"`
-  ResultinfototalCount string `json:"resultinfo/totalCount"`
-  Resultinfooffset string `json:"resultinfo/offset"`
-  ResultinforeturnedCount string `json:"resultinfo/returnedCount"`
+	ZoneName                string  `json:"zoneName"`
+	Rrsets                  []RRSet `json:"rrsets"`
+	Queryinfoq              string  `json:"queryinfo/q"`
+	Queryinfosort           string  `json:"queryinfo/reverse"`
+	Queryinfolimit          string  `json:"queryinfo/limit"`
+	ResultinfototalCount    string  `json:"resultinfo/totalCount"`
+	Resultinfooffset        string  `json:"resultinfo/offset"`
+	ResultinforeturnedCount string  `json:"resultinfo/returnedCount"`
 }
 type rrsetWrapper struct {
 	RRSet RRSet `json:"rrset"`
@@ -46,14 +46,14 @@ func rrsetPath(zone string, rrtype interface{}, rrset interface{}) string {
 // List the zone rrsets.
 //
 func (s *RRSetsService) GetRRSets(zone string, rrsetName, rrsetType string) ([]RRSet, *Response, error) {
-  // TODO: Soooo... This function does not handle pagination of RRSets....
+	// TODO: Soooo... This function does not handle pagination of RRSets....
 	//v := url.Values{}
 
 	if rrsetType == "" {
-    rrsetType = "ANY"
-  }
-  reqStr := rrsetPath(zone, rrsetType, rrsetName)
-  var rrsld RRSetListDTO
+		rrsetType = "ANY"
+	}
+	reqStr := rrsetPath(zone, rrsetType, rrsetName)
+	var rrsld RRSetListDTO
 	//wrappedRRSets := []RRSet{}
 
 	res, err := s.client.get(reqStr, &rrsld)
@@ -72,10 +72,10 @@ func (s *RRSetsService) GetRRSets(zone string, rrsetName, rrsetType string) ([]R
 // CreateRRSet creates a zone rrset.
 //
 func (s *RRSetsService) CreateRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
-	path := rrsetPath(zone, rrsetAttributes.RRType,rrsetAttributes.OwnerName)
-  var retval interface{}
+	path := rrsetPath(zone, rrsetAttributes.RRType, rrsetAttributes.OwnerName)
+	var retval interface{}
 	res, err := s.client.post(path, rrsetAttributes, &retval)
-  log.Printf("CreateRRSet Retval: %+v", retval)
+	log.Printf("CreateRRSet Retval: %+v", retval)
 	if err != nil {
 		return res, err
 	}
@@ -84,12 +84,12 @@ func (s *RRSetsService) CreateRRSet(zone string, rrsetAttributes RRSet) (*Respon
 
 // UpdateRRSet updates a zone rrset.
 //
-func (s *RRSetsService) UpdateRRSet(zone string, rrsetAttributes RRSet) ( *Response, error) {
+func (s *RRSetsService) UpdateRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
 	path := rrsetPath(zone, rrsetAttributes.RRType, rrsetAttributes.OwnerName)
-  var retval interface{}
+	var retval interface{}
 
 	res, err := s.client.put(path, rrsetAttributes, &retval)
-  log.Printf("UpdateRRSet Retval: %+v", retval)
+	log.Printf("UpdateRRSet Retval: %+v", retval)
 
 	if err != nil {
 		return res, err
@@ -101,7 +101,7 @@ func (s *RRSetsService) UpdateRRSet(zone string, rrsetAttributes RRSet) ( *Respo
 // DeleteRRSet deletes a zone rrset.
 //
 func (s *RRSetsService) DeleteRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
-  path := rrsetPath(zone, rrsetAttributes.RRType, rrsetAttributes.OwnerName)
+	path := rrsetPath(zone, rrsetAttributes.RRType, rrsetAttributes.OwnerName)
 
 	return s.client.delete(path, nil)
 }

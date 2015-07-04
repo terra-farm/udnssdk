@@ -1,100 +1,100 @@
 package udnssdk
+
 // udnssdk - a golang sdk for the ultradns REST service.
 // based heavily on github.com/weppos/dnsimple
 // 2015-07-03 - jmasseo@gmail.com
 
 import (
-        "bytes"
-        "encoding/json"
-        "fmt"
-        "io"
-        "io/ioutil"
-        "net/url"
-        "net/http"
-        "log"
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"net/url"
 )
 
 const (
-        libraryVersion = "0.1"
-        DefaultTestBaseURL = "https://test-restapi.ultradns.com/"
-        DefaultLiveBaseURL = "https://restapi.ultradns.com/"
+	libraryVersion     = "0.1"
+	DefaultTestBaseURL = "https://test-restapi.ultradns.com/"
+	DefaultLiveBaseURL = "https://restapi.ultradns.com/"
 
-        userAgent      = "udnssdk-go/" + libraryVersion
+	userAgent = "udnssdk-go/" + libraryVersion
 
-        apiVersion = "v1"
+	apiVersion = "v1"
 )
 
 type Client struct {
-  // This is our client structure.
-  HttpClient *http.Client
+	// This is our client structure.
+	HttpClient *http.Client
 
-  // UltraDNS makes a call to an authorization API using your username and
-  // password, returning an 'Access Token' and a 'Refresh Token'.
-  // Our use case does not require the refresh token, but we should implement
-  // for completeness.
-  AccessToken string
-  RefreshToken string
-  Username string
-  Password string
-  BaseURL string
-  UserAgent string
+	// UltraDNS makes a call to an authorization API using your username and
+	// password, returning an 'Access Token' and a 'Refresh Token'.
+	// Our use case does not require the refresh token, but we should implement
+	// for completeness.
+	AccessToken  string
+	RefreshToken string
+	Username     string
+	Password     string
+	BaseURL      string
+	UserAgent    string
 
-  // UltraDNS has 'zones' and 'rrsets'.  We really only care about RR Sets for
-  // this implementation.
-  RRSets *RRSetsService
-
+	// UltraDNS has 'zones' and 'rrsets'.  We really only care about RR Sets for
+	// this implementation.
+	RRSets *RRSetsService
 }
 
 // NewClient returns a new ultradns API client.
 func NewClient(username, password, BaseURL string) (*Client, error) {
-  accesstoken, refreshtoken, err := GetAuthTokens(username, password, BaseURL)
-  if err != nil {
-    return nil, err
-  }
+	accesstoken, refreshtoken, err := GetAuthTokens(username, password, BaseURL)
+	if err != nil {
+		return nil, err
+	}
 	c := &Client{AccessToken: accesstoken, RefreshToken: refreshtoken, Username: username, Password: password, HttpClient: &http.Client{}, BaseURL: BaseURL, UserAgent: userAgent}
 	c.RRSets = &RRSetsService{client: c}
 
 	return c, nil
 }
+
 // NewAuthRequest creates an Authorization request to get an access and refresh token.
 // {"tokenType":"Bearer","refreshToken":"48472efcdce044c8850ee6a395c74a7872932c7112","accessToken":"b91d037c75934fc89a9f43fe4a","expiresIn":"3600"
 // ,"expires_in":"3600","token_type":"Bearer","refresh_token":"48472efcdce044c8850ee6a395c74a7872932c7112","access_token":"b91d037c75934fc89a9f43fe4a"}
 
 type AuthResponse struct {
-  TokenType string `json:"tokenType"`
-  RefreshToken string `json:"refreshToken"`
-  AccessToken string `json:"accessToken"`
-  ExpiresIn string `json:"expiresIn"`
-  Expires_in string `json:"expires_in"`
-  Token_type string `json:"token_type"`
-  Refresh_token string `json:"refresh_token"`
-  Access_token string `json:"access_token"`
+	TokenType     string `json:"tokenType"`
+	RefreshToken  string `json:"refreshToken"`
+	AccessToken   string `json:"accessToken"`
+	ExpiresIn     string `json:"expiresIn"`
+	Expires_in    string `json:"expires_in"`
+	Token_type    string `json:"token_type"`
+	Refresh_token string `json:"refresh_token"`
+	Access_token  string `json:"access_token"`
 }
-func  GetAuthTokens(username, password, BaseURL string) (string, string, error) {
-  res, err := http.PostForm(fmt.Sprintf("%s/%s/authorization/token",BaseURL,apiVersion), url.Values{"grant_type": {"password"},"username":{username},"password":{password}})
 
-  if err != nil {
+func GetAuthTokens(username, password, BaseURL string) (string, string, error) {
+	res, err := http.PostForm(fmt.Sprintf("%s/%s/authorization/token", BaseURL, apiVersion), url.Values{"grant_type": {"password"}, "username": {username}, "password": {password}})
+
+	if err != nil {
 		return "", "", err
 	}
 
-
-
 	//response := &Response{Response: res}
-  body, err := ioutil.ReadAll(res.Body)
-  defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 
 	err = CheckResponse(res)
 	if err != nil {
-		return string(body),"", err
+		return string(body), "", err
 	}
-  var authr AuthResponse
-  log.Printf("GetAuthTokens: %s",string(body))
-  err = json.Unmarshal(body,&authr)
-  if err != nil {
-		return string(body),"JSON Decode Error", err
+	var authr AuthResponse
+	log.Printf("GetAuthTokens: %s", string(body))
+	err = json.Unmarshal(body, &authr)
+	if err != nil {
+		return string(body), "JSON Decode Error", err
 	}
-  log.Printf("Expires: %v Access T: %v Refresh T: %v\n", authr.Expires_in, authr.Access_token,authr.Refresh_token)
-  log.Printf("%+v",authr)
+	log.Printf("Expires: %v Access T: %v Refresh T: %v\n", authr.Expires_in, authr.Access_token, authr.Refresh_token)
+	log.Printf("%+v", authr)
 	return authr.Access_token, authr.Refresh_token, err
 }
 
@@ -121,7 +121,7 @@ func (client *Client) NewRequest(method, path string, payload interface{}) (*htt
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("User-Agent", client.UserAgent)
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", client.AccessToken))
-  req.Header.Add("Token", fmt.Sprintf("Bearer %s", client.AccessToken))
+	req.Header.Add("Token", fmt.Sprintf("Bearer %s", client.AccessToken))
 
 	return req, nil
 }
@@ -152,7 +152,7 @@ func (c *Client) Do(method, path string, payload, v interface{}) (*Response, err
 	if err != nil {
 		return nil, err
 	}
-  log.Printf("Req: %+v\n",req)
+	log.Printf("Req: %+v\n", req)
 	res, err := c.HttpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -160,7 +160,7 @@ func (c *Client) Do(method, path string, payload, v interface{}) (*Response, err
 	defer res.Body.Close()
 
 	response := &Response{Response: res}
-  log.Printf("ReS: %+v\n",res)
+	log.Printf("ReS: %+v\n", res)
 
 	err = CheckResponse(res)
 	if err != nil {
@@ -188,16 +188,17 @@ type Response struct {
 // {"errorCode":60001,"errorMessage":"invalid_grant:Invalid username & password combination.","error":"invalid_grant","error_description":"60001: invalid_grant:Invalid username & password combination."}
 
 type ErrorResponse struct {
-	Response *http.Response // HTTP response that caused this error
-	ErrorCode int						`json:"errorCode"`   //  error code
-	ErrorMessage  string         `json:"errorMessage"` // human-readable message
-  ErrorStr string `json:"error"`
-  ErrorDescription string `json:"error_description"`
+	Response         *http.Response // HTTP response that caused this error
+	ErrorCode        int            `json:"errorCode"`    //  error code
+	ErrorMessage     string         `json:"errorMessage"` // human-readable message
+	ErrorStr         string         `json:"error"`
+	ErrorDescription string         `json:"error_description"`
 }
 type ErrorResponseList struct {
-  Response *http.Response // HTTP response that caused this error
-  Responses []ErrorResponse
+	Response  *http.Response // HTTP response that caused this error
+	Responses []ErrorResponse
 }
+
 // Error implements the error interface.
 func (r *ErrorResponse) Error() string {
 	return fmt.Sprintf("%v %v: %d %d %v",
@@ -206,10 +207,10 @@ func (r *ErrorResponse) Error() string {
 }
 
 func (r *ErrorResponseList) Error() string {
-  return fmt.Sprintf("%v %v: %d %d %v",
+	return fmt.Sprintf("%v %v: %d %d %v",
 		r.Response.Request.Method, r.Response.Request.URL,
 		r.Response.StatusCode, r.Responses[0].ErrorCode, r.Responses[0].ErrorMessage)
-    }
+}
 
 // CheckResponse checks the API response for errors, and returns them if present.
 // A response is considered an error if the status code is different than 2xx. Specific requests
@@ -220,18 +221,18 @@ func CheckResponse(r *http.Response) error {
 	}
 
 	//errorResponse := &ErrorResponseList{Response: r}
-  body, err := ioutil.ReadAll(r.Body)
-  if err != nil {
-    return err
-  }
-  //var er ErrorResponseList
-  var er []ErrorResponse
-  err = json.Unmarshal(body,&er)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+	//var er ErrorResponseList
+	var er []ErrorResponse
+	err = json.Unmarshal(body, &er)
 	//err = json.NewDecoder(r.Body).Decode(errorResponse)
 	if err != nil {
 		return err
 	}
-  log.Printf("CheckResponse: %+v",er)
-  x := &ErrorResponseList{Response: r, Responses: er}
+	log.Printf("CheckResponse: %+v", er)
+	x := &ErrorResponseList{Response: r, Responses: er}
 	return x
 }
