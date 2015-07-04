@@ -46,7 +46,7 @@ type Client struct {
 }
 
 // NewClient returns a new ultradns API client.
-func NewClient(username, password, BaseURL string) *Client, error {
+func NewClient(username, password, BaseURL string) (*Client, error) {
   accesstoken, refreshtoken, err := GetAuthTokens(username, password, BaseURL)
   if err != nil {
     return nil, err
