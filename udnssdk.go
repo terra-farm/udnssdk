@@ -46,15 +46,15 @@ type Client struct {
 }
 
 // NewClient returns a new ultradns API client.
-func NewClient(username, password, BaseURL string) *Client {
+func NewClient(username, password, BaseURL string) *Client, error {
   accesstoken, refreshtoken, err := GetAuthTokens(username, password, BaseURL)
   if err != nil {
-    return nil
+    return nil, err
   }
 	c := &Client{AccessToken: accesstoken, RefreshToken: refreshtoken, Username: username, Password: password, HttpClient: &http.Client{}, BaseURL: BaseURL, UserAgent: userAgent}
 	c.RRSets = &RRSetsService{client: c}
 
-	return c
+	return c, nil
 }
 // NewAuthRequest creates an Authorization request to get an access and refresh token.
 // {"tokenType":"Bearer","refreshToken":"48472efcdce044c8850ee6a395c74a7872932c7112","accessToken":"b91d037c75934fc89a9f43fe4a","expiresIn":"3600"
