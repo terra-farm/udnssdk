@@ -88,13 +88,13 @@ func GetAuthTokens(username, password, BaseURL string) (string, string, error) {
 		return string(body), "", err
 	}
 	var authr AuthResponse
-	log.Printf("GetAuthTokens: %s", string(body))
+	//log.Printf("GetAuthTokens: %s", string(body))
 	err = json.Unmarshal(body, &authr)
 	if err != nil {
 		return string(body), "JSON Decode Error", err
 	}
-	log.Printf("Expires: %v Access T: %v Refresh T: %v\n", authr.Expires_in, authr.Access_token, authr.Refresh_token)
-	log.Printf("%+v", authr)
+	//log.Printf("Expires: %v Access T: %v Refresh T: %v\n", authr.Expires_in, authr.Access_token, authr.Refresh_token)
+	//log.Printf("%+v", authr)
 	return authr.Access_token, authr.Refresh_token, err
 }
 
@@ -102,7 +102,7 @@ func GetAuthTokens(username, password, BaseURL string) (string, string, error) {
 // The path is expected to be a relative path and will be resolved
 // according to the BaseURL of the Client. Paths should always be specified without a preceding slash.
 func (client *Client) NewRequest(method, path string, payload interface{}) (*http.Request, error) {
-	url := client.BaseURL + fmt.Sprintf("%s/%s", apiVersion, path)
+	url := client.BaseURL + fmt.Sprintf("/%s/%s", apiVersion, path)
 
 	body := new(bytes.Buffer)
 	if payload != nil {
@@ -152,7 +152,7 @@ func (c *Client) Do(method, path string, payload, v interface{}) (*Response, err
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("Req: %+v\n", req)
+	//log.Printf("Req: %+v\n", req)
 	res, err := c.HttpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -160,7 +160,7 @@ func (c *Client) Do(method, path string, payload, v interface{}) (*Response, err
 	defer res.Body.Close()
 
 	response := &Response{Response: res}
-	log.Printf("ReS: %+v\n", res)
+	//log.Printf("ReS: %+v\n", res)
 
 	err = CheckResponse(res)
 	if err != nil {

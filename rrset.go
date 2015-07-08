@@ -2,7 +2,6 @@ package udnssdk
 
 import (
 	"fmt"
-	"log"
 )
 
 // ZonesService handles communication with the Zone related blah blah
@@ -75,7 +74,7 @@ func (s *RRSetsService) CreateRRSet(zone string, rrsetAttributes RRSet) (*Respon
 	path := rrsetPath(zone, rrsetAttributes.RRType, rrsetAttributes.OwnerName)
 	var retval interface{}
 	res, err := s.client.post(path, rrsetAttributes, &retval)
-	log.Printf("CreateRRSet Retval: %+v", retval)
+	//log.Printf("CreateRRSet Retval: %+v", retval)
 	if err != nil {
 		return res, err
 	}
@@ -89,7 +88,7 @@ func (s *RRSetsService) UpdateRRSet(zone string, rrsetAttributes RRSet) (*Respon
 	var retval interface{}
 
 	res, err := s.client.put(path, rrsetAttributes, &retval)
-	log.Printf("UpdateRRSet Retval: %+v", retval)
+	//log.Printf("UpdateRRSet Retval: %+v", retval)
 
 	if err != nil {
 		return res, err
