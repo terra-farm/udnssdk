@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 const (
@@ -43,6 +44,8 @@ type Client struct {
 	// UltraDNS has 'zones' and 'rrsets'.  We really only care about RR Sets for
 	// this implementation.
 	RRSets *RRSetsService
+	// UltraDNS Tasks API
+	Tasks *TasksService
 }
 
 // NewClient returns a new ultradns API client.
@@ -158,11 +161,46 @@ func (c *Client) Do(method, path string, payload, v interface{}) (*Response, err
 		return nil, err
 	}
 	defer res.Body.Close()
+	origresponse := &Response{Response: res}
 
-	response := &Response{Response: res}
+	//response := &Response{Response: res}
 	//log.Printf("ReS: %+v\n", res)
+	var nres *http.Response
+	nres = res
+	if res.StatusCode == 202 {
+		// This is a deferred task.
+		mytaskid := res.Header.Get("X-Task-Id")
+		timeout := 5
+		waittime := 5 * time.Second
+		i := 0
+		breakmeout := false
+		for i < timeout || breakmeout {
+			myt, statusres, err := c.Tasks.GetTaskStatus(mytaskid)
+			if err != nil {
+				return origresponse, err
+			}
+			switch myt.TaskStatusCode {
+			case "COMPLETE":
+				// Yay
+				tres, err := c.Tasks.GetTaskResultByURI(myt.ResultUri)
+				if err != nil {
+					return origresponse, err
+				}
+				nres = tres.Response
+				breakmeout = true
+			case "PENDING", "IN_PROCESS":
+				i = i + 1
+				time.Sleep(waittime)
+				continue
+			case "ERROR":
+				return statusres, err
 
-	err = CheckResponse(res)
+			}
+		}
+	}
+	response := &Response{Response: nres}
+
+	err = CheckResponse(nres)
 	if err != nil {
 		return response, err
 	}
@@ -216,6 +254,7 @@ func (r *ErrorResponseList) Error() string {
 // A response is considered an error if the status code is different than 2xx. Specific requests
 // may have additional requirements, but this is sufficient in most of the cases.
 func CheckResponse(r *http.Response) error {
+
 	if code := r.StatusCode; 200 <= code && code <= 299 {
 		return nil
 	}
