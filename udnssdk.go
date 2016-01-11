@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 const (
@@ -43,6 +44,8 @@ type Client struct {
 	// UltraDNS has 'zones' and 'rrsets'.  We really only care about RR Sets for
 	// this implementation.
 	RRSets *RRSetsService
+	// UltraDNS Tasks API
+	Tasks *TasksService
 }
 
 // NewClient returns a new ultradns API client.
@@ -53,7 +56,7 @@ func NewClient(username, password, BaseURL string) (*Client, error) {
 	}
 	c := &Client{AccessToken: accesstoken, RefreshToken: refreshtoken, Username: username, Password: password, HttpClient: &http.Client{}, BaseURL: BaseURL, UserAgent: userAgent}
 	c.RRSets = &RRSetsService{client: c}
-
+	c.Tasks = &TasksService{client: c}
 	return c, nil
 }
 
@@ -80,13 +83,19 @@ func GetAuthTokens(username, password, BaseURL string) (string, string, error) {
 	}
 
 	//response := &Response{Response: res}
-	body, err := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
-
-	err = CheckResponse(res)
+	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return string(body), "", err
+		return "", "", err
 	}
+	// BUG: Looking for an intermittant edge case causing a JSON error
+	fmt.Printf("ResCode: %d Body: %s\n", res.StatusCode, body)
+
+	err = CheckAuthResponse(res, body)
+	if err != nil {
+		return "", "", err
+	}
+
 	var authr AuthResponse
 	//log.Printf("GetAuthTokens: %s", string(body))
 	err = json.Unmarshal(body, &authr)
@@ -102,7 +111,7 @@ func GetAuthTokens(username, password, BaseURL string) (string, string, error) {
 // The path is expected to be a relative path and will be resolved
 // according to the BaseURL of the Client. Paths should always be specified without a preceding slash.
 func (client *Client) NewRequest(method, path string, payload interface{}) (*http.Request, error) {
-	url := client.BaseURL + fmt.Sprintf("/%s/%s", apiVersion, path)
+	url := client.BaseURL + fmt.Sprintf("%s/%s", apiVersion, path)
 
 	body := new(bytes.Buffer)
 	if payload != nil {
@@ -158,11 +167,48 @@ func (c *Client) Do(method, path string, payload, v interface{}) (*Response, err
 		return nil, err
 	}
 	defer res.Body.Close()
+	origresponse := &Response{Response: res}
 
-	response := &Response{Response: res}
+	//response := &Response{Response: res}
 	//log.Printf("ReS: %+v\n", res)
+	var nres *http.Response
+	nres = res
+	if res.StatusCode == 202 {
+		// This is a deferred task.
+		mytaskid := res.Header.Get("X-Task-Id")
+		log.Printf("Received Async Task %+v..  will retry...\n", mytaskid)
+		timeout := 5
+		waittime := 5 * time.Second
+		i := 0
+		breakmeout := false
+		for i < timeout || breakmeout {
+			myt, statusres, err := c.Tasks.GetTaskStatus(mytaskid)
+			if err != nil {
+				return origresponse, err
+			}
+			log.Printf("ID %+v Retry %d Status Code %s\n", mytaskid, i, myt.TaskStatusCode)
+			switch myt.TaskStatusCode {
+			case "COMPLETE":
+				// Yay
+				tres, err := c.Tasks.GetTaskResultByURI(myt.ResultUri)
+				if err != nil {
+					return origresponse, err
+				}
+				nres = tres.Response
+				breakmeout = true
+			case "PENDING", "IN_PROCESS":
+				i = i + 1
+				time.Sleep(waittime)
+				continue
+			case "ERROR":
+				return statusres, err
 
-	err = CheckResponse(res)
+			}
+		}
+	}
+	response := &Response{Response: nres}
+
+	err = CheckResponse(nres)
 	if err != nil {
 		return response, err
 	}
@@ -200,22 +246,48 @@ type ErrorResponseList struct {
 }
 
 // Error implements the error interface.
-func (r *ErrorResponse) Error() string {
+func (r ErrorResponse) Error() string {
 	return fmt.Sprintf("%v %v: %d %d %v",
 		r.Response.Request.Method, r.Response.Request.URL,
 		r.Response.StatusCode, r.ErrorCode, r.ErrorMessage)
 }
 
-func (r *ErrorResponseList) Error() string {
+func (r ErrorResponseList) Error() string {
 	return fmt.Sprintf("%v %v: %d %d %v",
 		r.Response.Request.Method, r.Response.Request.URL,
 		r.Response.StatusCode, r.Responses[0].ErrorCode, r.Responses[0].ErrorMessage)
 }
 
+// CheckAuthResponse checks the API response for errors, and returns them if so
+func CheckAuthResponse(r *http.Response, body []byte) error {
+
+	if code := r.StatusCode; 200 <= code && code <= 299 {
+		return nil
+	}
+
+	//var er ErrorResponseList
+	var er ErrorResponse
+	//fmt.Printf("Body: %s\n", body)
+
+	err := json.Unmarshal(body, &er)
+	//err = json.NewDecoder(r.Body).Decode(errorResponse)
+	if err != nil {
+		fmt.Printf("ERROR: %+v - Body: %s", err, body)
+		return err
+	}
+	er.Response = r
+	//log.Printf("CheckAuthResponse: %d", er)
+
+	return er
+
+}
+
 // CheckResponse checks the API response for errors, and returns them if present.
 // A response is considered an error if the status code is different than 2xx. Specific requests
 // may have additional requirements, but this is sufficient in most of the cases.
+
 func CheckResponse(r *http.Response) error {
+
 	if code := r.StatusCode; 200 <= code && code <= 299 {
 		return nil
 	}
@@ -232,7 +304,7 @@ func CheckResponse(r *http.Response) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("CheckResponse: %+v", er)
+	//log.Printf("CheckResponse: %+v", er)
 	x := &ErrorResponseList{Response: r, Responses: er}
 	return x
 }

@@ -34,6 +34,7 @@ type rrsetWrapper struct {
 func rrsetPath(zone string, rrtype interface{}, rrset interface{}) string {
 	path := fmt.Sprintf("zones/%s/rrsets", zone)
 	if rrtype != nil {
+
 		path += fmt.Sprintf("/%v", rrtype)
 		if rrset != nil {
 			path += fmt.Sprintf("/%v", rrset)
