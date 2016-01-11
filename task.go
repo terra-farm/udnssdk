@@ -56,23 +56,34 @@ func (s *TasksService) GetTaskStatus(tid string) (Task, *Response, error) {
 	}
 	return t, res, err
 }
+
+// HTTP BS to dance around bad program structure
 func (s *TasksService) GetTaskResultByURI(uri string) (*Response, error) {
-	var str string
-	res, err := s.client.get(uri, &str)
+	req, err := s.client.NewRequest("GET", uri, nil)
 	if err != nil {
-		return res, err
+		return nil, err
 	}
-	return res, err
+	res, err := s.client.HttpClient.Do(req)
+
+	if err != nil {
+		return &Response{Response: res}, err
+	}
+	return &Response{Response: res}, err
 }
 
 func (s *TasksService) GetTaskResult(tid string) (*Response, error) {
-	reqStr := taskResultPath(tid)
-	var str string
-	res, err := s.client.get(reqStr, &str)
+	uri := taskResultPath(tid)
+
+	req, err := s.client.NewRequest("GET", uri, nil)
 	if err != nil {
-		return res, err
+		return nil, err
 	}
-	return res, err
+	res, err := s.client.HttpClient.Do(req)
+
+	if err != nil {
+		return &Response{Response: res}, err
+	}
+	return &Response{Response: res}, err
 }
 
 // List tasks
@@ -81,7 +92,7 @@ func (s *TasksService) ListTasks(query string, offset, limit int) ([]Task, *Resp
 	// TODO: Soooo... This function does not handle pagination of Tasks....
 	//v := url.Values{}
 
-	reqStr := "/tasks"
+	reqStr := "tasks"
 	var tld TaskListDTO
 	//wrappedTasks := []Task{}
 

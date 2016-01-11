@@ -88,11 +88,14 @@ func GetAuthTokens(username, password, BaseURL string) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
+	// BUG: Looking for an intermittant edge case causing a JSON error
+	fmt.Printf("ResCode: %d Body: %s\n", res.StatusCode, body)
+
 	err = CheckAuthResponse(res, body)
 	if err != nil {
 		return "", "", err
 	}
-	fmt.Printf("ResCode: %d Body: %s\n", res.StatusCode, body)
+
 	var authr AuthResponse
 	//log.Printf("GetAuthTokens: %s", string(body))
 	err = json.Unmarshal(body, &authr)
@@ -108,7 +111,7 @@ func GetAuthTokens(username, password, BaseURL string) (string, string, error) {
 // The path is expected to be a relative path and will be resolved
 // according to the BaseURL of the Client. Paths should always be specified without a preceding slash.
 func (client *Client) NewRequest(method, path string, payload interface{}) (*http.Request, error) {
-	url := client.BaseURL + fmt.Sprintf("/%s/%s", apiVersion, path)
+	url := client.BaseURL + fmt.Sprintf("%s/%s", apiVersion, path)
 
 	body := new(bytes.Buffer)
 	if payload != nil {

@@ -77,6 +77,9 @@ func Test_GetRRSetsPre(t *testing.T) {
 	t.Logf("RRSets: %+v\n", rrsets)
 	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
+		if resp.Response.StatusCode == 404 {
+			t.SkipNow()
+		}
 		t.Fatal(err)
 	}
 }
@@ -163,6 +166,21 @@ func Test_GetRRSetsPost(t *testing.T) {
 	t.Logf("RRSets: %+v\n", rrsets)
 	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
+		if resp.Response.StatusCode == 404 {
+			return
+		}
+		t.Fatal(err)
+	}
+}
+
+func Test_ListTasks(t *testing.T) {
+	tasks, resp, err := testClient.Tasks.ListTasks("", 0, 100)
+	t.Logf("Tasks: %+v \n", tasks)
+	t.Logf("Response: %+v\n", resp.Response)
+	if err != nil {
+		if resp.Response.StatusCode == 404 {
+			t.SkipNow()
+		}
 		t.Fatal(err)
 	}
 }
