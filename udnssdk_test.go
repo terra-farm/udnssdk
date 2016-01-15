@@ -19,6 +19,7 @@ var (
 	testIP2      = os.Getenv("ULTRADNS_TEST_IP2")
 	testBaseURL  = os.Getenv("ULTRADNS_BASEURL")
 	testClient   *Client
+	testAccounts []Account
 )
 
 func TestMain(m *testing.M) {
@@ -50,7 +51,7 @@ func TestMain(m *testing.M) {
 	if testIP2 == "" {
 		testIP2 = fmt.Sprintf("54.86.13.%d", (rand.Intn(254) + 1))
 	}
-
+	testAccounts = nil
 	os.Exit(m.Run())
 }
 
@@ -183,4 +184,81 @@ func Test_ListTasks(t *testing.T) {
 		}
 		t.Fatal(err)
 	}
+}
+
+func Test_ListRRSets(t *testing.T) {
+	t.SkipNow()
+}
+
+func Test_ListAccountsOfUser(t *testing.T) {
+	accounts, resp, err := testClient.Accounts.GetAccountsOfUser()
+	t.Logf("Accounts: %+v \n", accounts)
+	t.Logf("Response: %+v\n", resp.Response)
+	testAccounts = accounts
+	if err != nil {
+		if resp.Response.StatusCode == 404 {
+			t.SkipNow()
+		}
+		t.Fatal(err)
+	}
+}
+
+/*
+// TODO: Implement Zones
+func TestListZonesOfAccount(t *testing.T) {
+	if testAccounts == nil {
+		t.Logf("No Accounts Present, skipping...")
+		t.SkipNow()
+	}
+	zones, resp, err := testClient.Accounts.GetAccountsOfUser()
+	t.Logf("Zones: %v \n", zones)
+	t.Logf("Response: %+v\n", resp.Response)
+	testZones = zones
+	if err != nil {
+		if resp.Response.StatusCode == 404 {
+			t.SkipNow()
+		}
+		t.Fatal(err)
+	}
+}
+*/
+
+func Test_ListDirectionPoolsGeo(t *testing.T) {
+	if testAccounts == nil {
+		t.Logf("No Accounts Present, skipping...")
+		t.SkipNow()
+	}
+	accountName := testAccounts[0].AccountName
+	dpools, resp, err := testClient.DirectionalPools.ListDirectionalPools("", "geo", accountName)
+	t.Logf("Geo Pools: %v \n", dpools)
+	t.Logf("Response: %+v\n", resp.Response)
+	if err != nil {
+		if resp.Response.StatusCode == 404 {
+			t.Logf("Error: %+v", err)
+			t.SkipNow()
+		}
+		t.Fatal(err)
+	}
+
+	t.SkipNow()
+}
+
+func Test_ListDirectionalPoolsIP(t *testing.T) {
+	if testAccounts == nil {
+		t.Logf("No Accounts Present, skipping...")
+		t.SkipNow()
+	}
+	accountName := testAccounts[0].AccountName
+	dpools, resp, err := testClient.DirectionalPools.ListDirectionalPools("", "ip", accountName)
+	t.Logf("IP Pools: %v \n", dpools)
+	t.Logf("Response: %+v\n", resp.Response)
+	if err != nil {
+		if resp.Response.StatusCode == 404 {
+			t.Logf("Error: %+v", err)
+			t.SkipNow()
+		}
+		t.Fatal(err)
+	}
+
+	t.SkipNow()
 }
