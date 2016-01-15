@@ -26,6 +26,19 @@ const (
 	apiVersion = "v1"
 )
 
+type QueryInfo struct {
+	Q       string `json:"q"`
+	Sort    string `json:"sort"`
+	Reverse bool   `json:"reverse"`
+	Limit   int    `json:"limit"`
+}
+
+type ResultInfo struct {
+	TotalCount    int `json:"totalCount"`
+	Offset        int `json:"offset"`
+	ReturnedCount int `json:"returnedCount"`
+}
+
 type Client struct {
 	// This is our client structure.
 	HttpClient *http.Client
@@ -46,6 +59,10 @@ type Client struct {
 	RRSets *RRSetsService
 	// UltraDNS Tasks API
 	Tasks *TasksService
+	// Accounts API
+	Accounts *AccountsService
+	// Directional Pools API
+	DirectionalPools *DirectionalPoolsService
 }
 
 // NewClient returns a new ultradns API client.
@@ -57,6 +74,8 @@ func NewClient(username, password, BaseURL string) (*Client, error) {
 	c := &Client{AccessToken: accesstoken, RefreshToken: refreshtoken, Username: username, Password: password, HttpClient: &http.Client{}, BaseURL: BaseURL, UserAgent: userAgent}
 	c.RRSets = &RRSetsService{client: c}
 	c.Tasks = &TasksService{client: c}
+	c.Accounts = &AccountsService{client: c}
+	c.DirectionalPools = &DirectionalPoolsService{client: c}
 	return c, nil
 }
 
@@ -170,7 +189,7 @@ func (c *Client) Do(method, path string, payload, v interface{}) (*Response, err
 	origresponse := &Response{Response: res}
 
 	//response := &Response{Response: res}
-	//log.Printf("ReS: %+v\n", res)
+	log.Printf("ReS: %+v\n", res)
 	var nres *http.Response
 	nres = res
 	if res.StatusCode == 202 {

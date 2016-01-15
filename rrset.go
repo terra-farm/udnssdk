@@ -17,14 +17,10 @@ type RRSet struct {
 }
 
 type RRSetListDTO struct {
-	ZoneName                string  `json:"zoneName"`
-	Rrsets                  []RRSet `json:"rrsets"`
-	Queryinfoq              string  `json:"queryinfo/q"`
-	Queryinfosort           string  `json:"queryinfo/reverse"`
-	Queryinfolimit          string  `json:"queryinfo/limit"`
-	ResultinfototalCount    string  `json:"resultinfo/totalCount"`
-	Resultinfooffset        string  `json:"resultinfo/offset"`
-	ResultinforeturnedCount string  `json:"resultinfo/returnedCount"`
+	ZoneName   string     `json:"zoneName"`
+	Rrsets     []RRSet    `json:"rrsets"`
+	Queryinfo  QueryInfo  `json:"queryInfo"`
+	Resultinfo ResultInfo `json:"resultInfo"`
 }
 type rrsetWrapper struct {
 	RRSet RRSet `json:"rrset"`

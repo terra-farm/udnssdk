@@ -4,18 +4,20 @@ import (
 	"fmt"
 )
 
-// ZonesService handles communication with the Zone related blah blah
+// TasksService provides access to the tasks resources
 type TasksService struct {
 	client *Client
 }
 
+// Task wraps a task response
 type Task struct {
-	TaskId         string `json:"taskId"`
+	TaskID         string `json:"taskId"`
 	TaskStatusCode string `json:"taskStatusCode"`
 	Message        string `json:"message"`
-	ResultUri      string `json:"resultUri"`
+	ResultURI      string `json:"resultUri"`
 }
 
+// TaskListDTO wraps a list of Task resources, from an HTTP response
 type TaskListDTO struct {
 	Tasks                   []Task `json:"tasks"`
 	Queryinfoq              string `json:"queryinfo/q"`
@@ -29,24 +31,18 @@ type taskWrapper struct {
 	Task Task `json:"task"`
 }
 
-// taskPath links to the task url.
+// taskResultPath links to the task result url.
 func taskResultPath(tid string) string {
 	path := fmt.Sprintf("tasks/%s/result", tid)
-	/*
-		if tasktype != nil {
-			path += fmt.Sprintf("/%v", tasktype)
-			if task != nil {
-				path += fmt.Sprintf("/%v", task)
-			}
-		}
-	*/
 	return path
 }
+
+// taskPath links to the task url.
 func taskPath(tid string) string {
 	return fmt.Sprintf("tasks/%s", tid)
 }
 
-// Get the status of a task.
+// GetTaskStatus Get the status of a task.
 func (s *TasksService) GetTaskStatus(tid string) (Task, *Response, error) {
 	reqStr := taskPath(tid)
 	var t Task
@@ -57,7 +53,7 @@ func (s *TasksService) GetTaskStatus(tid string) (Task, *Response, error) {
 	return t, res, err
 }
 
-// HTTP BS to dance around bad program structure
+// GetTaskResultByURI requests a task by its URI
 func (s *TasksService) GetTaskResultByURI(uri string) (*Response, error) {
 	req, err := s.client.NewRequest("GET", uri, nil)
 	if err != nil {
@@ -71,6 +67,7 @@ func (s *TasksService) GetTaskResultByURI(uri string) (*Response, error) {
 	return &Response{Response: res}, err
 }
 
+// GetTaskResult requests a task by its task id
 func (s *TasksService) GetTaskResult(tid string) (*Response, error) {
 	uri := taskResultPath(tid)
 
@@ -86,8 +83,7 @@ func (s *TasksService) GetTaskResult(tid string) (*Response, error) {
 	return &Response{Response: res}, err
 }
 
-// List tasks
-//
+// ListTasks request tasks by query & offset, list them also returning list metadata, the actual response, or an error
 func (s *TasksService) ListTasks(query string, offset, limit int) ([]Task, *Response, error) {
 	// TODO: Soooo... This function does not handle pagination of Tasks....
 	//v := url.Values{}
@@ -110,7 +106,6 @@ func (s *TasksService) ListTasks(query string, offset, limit int) ([]Task, *Resp
 }
 
 // DeleteTask deletes a task.
-//
 func (s *TasksService) DeleteTask(tid string) (*Response, error) {
 	path := taskPath(tid)
 	return s.client.delete(path, nil)
