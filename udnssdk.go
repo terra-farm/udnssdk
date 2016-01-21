@@ -196,6 +196,7 @@ func (c *Client) Do(method, path string, payload, v interface{}) (*Response, err
 		// This is a deferred task.
 		mytaskid := res.Header.Get("X-Task-Id")
 		log.Printf("Received Async Task %+v..  will retry...\n", mytaskid)
+		// TODO: Sane Configuration for timeouts / retries
 		timeout := 5
 		waittime := 5 * time.Second
 		i := 0
@@ -290,15 +291,23 @@ func CheckAuthResponse(r *http.Response, body []byte) error {
 
 	err := json.Unmarshal(body, &er)
 	//err = json.NewDecoder(r.Body).Decode(errorResponse)
+
+	if err == nil {
+		er.Response = r
+		//log.Printf("CheckAuthResponse: %d", er)
+
+		return er
+	}
+	fmt.Printf("ERROR: %+v - Body: %s", err, body)
+	var er2 []ErrorResponse
+	err = json.Unmarshal(body, &er2)
+	//err = json.NewDecoder(r.Body).Decode(errorResponse)
 	if err != nil {
-		fmt.Printf("ERROR: %+v - Body: %s", err, body)
 		return err
 	}
-	er.Response = r
-	//log.Printf("CheckAuthResponse: %d", er)
-
-	return er
-
+	//log.Printf("CheckResponse: %+v", er)
+	x := &ErrorResponseList{Response: r, Responses: er2}
+	return x
 }
 
 // CheckResponse checks the API response for errors, and returns them if present.
@@ -316,14 +325,24 @@ func CheckResponse(r *http.Response) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Printf("Body: %s\n", body)
 	//var er ErrorResponseList
 	var er []ErrorResponse
 	err = json.Unmarshal(body, &er)
 	//err = json.NewDecoder(r.Body).Decode(errorResponse)
+	if err == nil {
+		//log.Printf("CheckResponse: %+v", er)
+		x := &ErrorResponseList{Response: r, Responses: er}
+		return x
+	}
+	var er2 ErrorResponse
+	err = json.Unmarshal(body, &er2)
 	if err != nil {
 		return err
+
 	}
-	//log.Printf("CheckResponse: %+v", er)
-	x := &ErrorResponseList{Response: r, Responses: er}
-	return x
+	er2.Response = r
+	return er2
+
 }

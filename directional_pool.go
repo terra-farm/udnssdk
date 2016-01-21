@@ -88,7 +88,7 @@ func (s *DirectionalPoolsService) ListDirectionalPools(query, dptype, account st
 
 	reqStr := DirectionalPoolPath(account, dptype, "")
 	if query != "" {
-		reqStr = fmt.Sprintf("%s?q=%s", reqStr, query)
+		reqStr = fmt.Sprintf("%s?sort=NAME&query=%s", reqStr, query)
 	}
 	fmt.Printf("ListDirectionalPools: %s\n", reqStr)
 	var tld DirectionalPoolListDTO
