@@ -18,6 +18,7 @@ var (
 	testIP1      = os.Getenv("ULTRADNS_TEST_IP1")
 	testIP2      = os.Getenv("ULTRADNS_TEST_IP2")
 	testBaseURL  = os.Getenv("ULTRADNS_BASEURL")
+	testQuery    = os.Getenv("ULTRADNS_TEST_QUERY")
 	testClient   *Client
 	testAccounts []Account
 )
@@ -51,6 +52,9 @@ func TestMain(m *testing.M) {
 	if testIP2 == "" {
 		testIP2 = fmt.Sprintf("54.86.13.%d", (rand.Intn(254) + 1))
 	}
+	if testQuery == "" {
+		testQuery = "nexus"
+	}
 	testAccounts = nil
 	os.Exit(m.Run())
 }
@@ -82,6 +86,29 @@ func Test_GetRRSetsPre(t *testing.T) {
 			t.SkipNow()
 		}
 		t.Fatal(err)
+	}
+}
+
+func Test_ListRRSets(t *testing.T) {
+	rrsets, resp, err := testClient.RRSets.GetRRSets(testDomain, "", "")
+	t.Logf("GetRRSets(%s, \"\", \"\")", testDomain)
+	t.Logf("RRSets: %+v\n", rrsets)
+	t.Logf("Response: %+v\n", resp.Response)
+	if err != nil {
+		if resp.Response.StatusCode == 404 {
+			t.SkipNow()
+		}
+		t.Fatal(err)
+	}
+	t.Logf("Checking for profiles...\n")
+	for _, rr := range rrsets {
+		if rr.Profile != nil {
+			typ := rr.Profile.GetType()
+			if typ == "" {
+				t.Fatal("Could not get type for profile %+v\n", rr.Profile)
+			}
+			t.Logf("Found Profile %s for %s\n", rr.Profile.GetType(), rr.OwnerName)
+		}
 	}
 }
 
@@ -186,10 +213,6 @@ func Test_ListTasks(t *testing.T) {
 	}
 }
 
-func Test_ListRRSets(t *testing.T) {
-	t.SkipNow()
-}
-
 func Test_ListAccountsOfUser(t *testing.T) {
 	accounts, resp, err := testClient.Accounts.GetAccountsOfUser()
 	t.Logf("Accounts: %+v \n", accounts)
@@ -223,7 +246,7 @@ func TestListZonesOfAccount(t *testing.T) {
 }
 */
 
-func Test_ListDirectionPoolsGeo(t *testing.T) {
+func Test_ListDirectionPoolsGeoNoQuery(t *testing.T) {
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
@@ -242,14 +265,52 @@ func Test_ListDirectionPoolsGeo(t *testing.T) {
 
 	t.SkipNow()
 }
+func Test_ListDirectionPoolsGeoQuery(t *testing.T) {
+	if testAccounts == nil {
+		t.Logf("No Accounts Present, skipping...")
+		t.SkipNow()
+	}
+	accountName := testAccounts[0].AccountName
+	dpools, resp, err := testClient.DirectionalPools.ListDirectionalPools(testQuery, "geo", accountName)
+	t.Logf("Geo Pools: %v \n", dpools)
+	t.Logf("Response: %+v\n", resp.Response)
+	if err != nil {
+		if resp.Response.StatusCode == 404 {
+			t.Logf("Error: %+v", err)
+			t.SkipNow()
+		}
+		t.Fatal(err)
+	}
 
-func Test_ListDirectionalPoolsIP(t *testing.T) {
+	t.SkipNow()
+}
+
+func Test_ListDirectionalPoolsIPNoQuery(t *testing.T) {
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
 	}
 	accountName := testAccounts[0].AccountName
 	dpools, resp, err := testClient.DirectionalPools.ListDirectionalPools("", "ip", accountName)
+	t.Logf("IP Pools: %v \n", dpools)
+	t.Logf("Response: %+v\n", resp.Response)
+	if err != nil {
+		if resp.Response.StatusCode == 404 {
+			t.Logf("Error: %+v", err)
+			t.SkipNow()
+		}
+		t.Fatal(err)
+	}
+
+	t.SkipNow()
+}
+func Test_ListDirectionalPoolsIPQuery(t *testing.T) {
+	if testAccounts == nil {
+		t.Logf("No Accounts Present, skipping...")
+		t.SkipNow()
+	}
+	accountName := testAccounts[0].AccountName
+	dpools, resp, err := testClient.DirectionalPools.ListDirectionalPools(testQuery, "ip", accountName)
 	t.Logf("IP Pools: %v \n", dpools)
 	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
