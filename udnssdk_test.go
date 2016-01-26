@@ -606,3 +606,21 @@ func Test_GetProbeAlerts(t *testing.T) {
 /* TODO: A full probe test suite.  I'm not really even sure I understand how this
  * works well enough to write one yet.  What is the correct order of operations?
  */
+
+func Test_ListEvents(t *testing.T) {
+	if !enableProbeTests {
+		t.SkipNow()
+	}
+	events, resp, err := testClient.SBTCService.ListEvents("", testProbeName, testProbeType, testProbeDomain)
+	t.Logf("Events: %+v \n", events)
+	t.Logf("Response: %+v\n", resp.Response)
+	if err != nil {
+		if resp.Response.StatusCode == 404 {
+			t.Logf("ERROR - %+v", err)
+			t.SkipNow()
+		}
+		t.Fatal(err)
+	}
+}
+
+// TODO: Write a full Event test suite.  We do not use these at my firm.
