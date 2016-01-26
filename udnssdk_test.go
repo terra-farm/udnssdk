@@ -1,6 +1,7 @@
 package udnssdk
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
@@ -11,14 +12,39 @@ import (
 )
 
 var (
-	testUsername = os.Getenv("ULTRADNS_USERNAME")
-	testPassword = os.Getenv("ULTRADNS_PASSWORD")
-	testDomain   = os.Getenv("ULTRADNS_DOMAIN")
-	testHostname = os.Getenv("ULTRADNS_TEST_HOSTNAME")
-	testIP1      = os.Getenv("ULTRADNS_TEST_IP1")
-	testIP2      = os.Getenv("ULTRADNS_TEST_IP2")
-	testBaseURL  = os.Getenv("ULTRADNS_BASEURL")
-	testQuery    = os.Getenv("ULTRADNS_TEST_QUERY")
+	testUsername    = os.Getenv("ULTRADNS_USERNAME")
+	testPassword    = os.Getenv("ULTRADNS_PASSWORD")
+	testDomain      = os.Getenv("ULTRADNS_DOMAIN")
+	testHostname    = os.Getenv("ULTRADNS_TEST_HOSTNAME")
+	testIP1         = os.Getenv("ULTRADNS_TEST_IP1")
+	testIP2         = os.Getenv("ULTRADNS_TEST_IP2")
+	testBaseURL     = os.Getenv("ULTRADNS_BASEURL")
+	testQuery       = os.Getenv("ULTRADNS_TEST_QUERY")
+	testProbeType   = os.Getenv("ULTRADNS_TEST_PROBE_TYPE")
+	testProbeName   = os.Getenv("ULTRADNS_TEST_PROBE_NAME")
+	testProbeDomain = os.Getenv("ULTRADNS_TEST_PROBE_DOMAIN")
+
+	testIPDPoolName    = "testipdpool"
+	testIPDPoolAddress = "127.0.0.1"
+	testIPDPoolDescr   = "A Test IP Directional Pool Group"
+	testIPAddrDTO      = IPAddrDTO{Address: "127.0.0.1"}
+	testIPDPool        = AccountLevelIPDirectionalGroupDTO{Name: "testippool", Description: "An IP Test Pool", Ips: []IPAddrDTO{IPAddrDTO{Address: "127.0.0.1"}}}
+	testGeoDPool       = AccountLevelGeoDirectionalGroupDTO{Name: "testgeopool", Description: "A test geo pool", Codes: []string{"US, UK"}}
+	testGeoDPoolName   = "testgeodpool"
+	testGeoDPoolDescr  = "A Test Geo Directional Pool Group"
+	testGeoDPoolCodes  = []string{"US", "UK"}
+
+	envenableAccountTests         = os.Getenv("ULTRADNS_ENABLE_ACCOUNT_TESTS")
+	envenableRRSetTests           = os.Getenv("ULTRADNS_ENABLE_RRSET_TESTS")
+	envenableProbeTests           = os.Getenv("ULTRADNS_ENABLE_PROBE_TESTS")
+	envenableChanges              = os.Getenv("ULTRADNS_ENABLE_CHANGES")
+	envenableDirectionalPoolTests = os.Getenv("ULTRADNS_ENABLE_DPOOL_TESTS")
+	enableAccountTests            = true
+	enableRRSetTests              = false
+	enableProbeTests              = true
+	enableChanges                 = true
+	enableDirectionalPoolTests    = false
+
 	testClient   *Client
 	testAccounts []Account
 )
@@ -55,6 +81,52 @@ func TestMain(m *testing.M) {
 	if testQuery == "" {
 		testQuery = "nexus"
 	}
+
+	if testProbeName == "" || testProbeType == "" {
+		testProbeName = "nexus2"
+		testProbeType = "A"
+	}
+	if testProbeDomain == "" {
+		testProbeDomain = testDomain
+	}
+	if envenableAccountTests == "false" || envenableAccountTests == "0" {
+		enableAccountTests = false
+	} else if envenableAccountTests == "true" || envenableAccountTests == "1" {
+		enableAccountTests = true
+	}
+
+	if envenableRRSetTests == "false" || envenableRRSetTests == "0" {
+		enableRRSetTests = false
+	} else if envenableRRSetTests == "true" || envenableRRSetTests == "1" {
+		enableRRSetTests = true
+	}
+	// TODO: I need a better way of handling this.
+	/*
+		if envenableFUDGETests == "false" || envenableFUDGETests == "0" {
+			enableFUDGETests = false
+		} else if envenableFUDGETests == "true" || envenableFUDGETests == "1" {
+			enableFUDGETests = true
+		}
+	*/
+
+	if envenableProbeTests == "false" || envenableProbeTests == "0" {
+		enableProbeTests = false
+	} else if envenableProbeTests == "true" || envenableProbeTests == "1" {
+		enableProbeTests = true
+	}
+
+	if envenableChanges == "false" || envenableChanges == "0" {
+		enableChanges = false
+	} else if envenableChanges == "true" || envenableChanges == "1" {
+		enableChanges = true
+	}
+
+	if envenableDirectionalPoolTests == "false" || envenableDirectionalPoolTests == "0" {
+		enableDirectionalPoolTests = false
+	} else if envenableDirectionalPoolTests == "true" || envenableDirectionalPoolTests == "1" {
+		enableDirectionalPoolTests = true
+	}
+
 	testAccounts = nil
 	os.Exit(m.Run())
 }
@@ -76,6 +148,10 @@ func Test_GetRRSetsPre(t *testing.T) {
 	if testClient == nil {
 		t.Fatalf("TestClient Not Defined?\n")
 	}
+	if !enableRRSetTests {
+		t.SkipNow()
+	}
+
 	rrsets, resp, err := testClient.RRSets.GetRRSets(testDomain, testHostname, "ANY")
 
 	t.Logf("GetRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
@@ -90,6 +166,9 @@ func Test_GetRRSetsPre(t *testing.T) {
 }
 
 func Test_ListRRSets(t *testing.T) {
+	if !enableRRSetTests {
+		t.SkipNow()
+	}
 	rrsets, resp, err := testClient.RRSets.GetRRSets(testDomain, "", "")
 	t.Logf("GetRRSets(%s, \"\", \"\")", testDomain)
 	t.Logf("RRSets: %+v\n", rrsets)
@@ -108,12 +187,23 @@ func Test_ListRRSets(t *testing.T) {
 				t.Fatal("Could not get type for profile %+v\n", rr.Profile)
 			}
 			t.Logf("Found Profile %s for %s\n", rr.Profile.GetType(), rr.OwnerName)
+			st, er := json.Marshal(rr.Profile)
+			t.Logf("Marshal the profile to JSON: %s / %+v", string(st), er)
 		}
 	}
 }
 
 // Create Test
 func Test_Create_RRSets(t *testing.T) {
+
+	if !enableRRSetTests {
+		t.SkipNow()
+
+	}
+	if !enableChanges {
+		t.SkipNow()
+
+	}
 	t.Logf("Creating %s with %s\n", testHostname, testIP1)
 	rr1 := &RRSet{OwnerName: testHostname, RRType: "A", TTL: 300, RData: []string{testIP1}}
 	resp, err := testClient.RRSets.CreateRRSet(testDomain, *rr1)
@@ -127,6 +217,16 @@ func Test_Create_RRSets(t *testing.T) {
 
 //Update Test
 func Test_Update_RRSets(t *testing.T) {
+
+	if !enableRRSetTests {
+		t.SkipNow()
+
+	}
+	if !enableChanges {
+		t.SkipNow()
+
+	}
+
 	t.Logf("Updating %s to %s\n", testHostname, testIP2)
 	rr2 := &RRSet{OwnerName: testHostname, RRType: "A", TTL: 300, RData: []string{testIP2}}
 	resp, err := testClient.RRSets.UpdateRRSet(testDomain, *rr2)
@@ -138,6 +238,12 @@ func Test_Update_RRSets(t *testing.T) {
 
 // Another Get Test if it matches the Ip in IP2
 func Test_GetRRSetsMid(t *testing.T) {
+
+	if !enableRRSetTests {
+		t.SkipNow()
+
+	}
+
 	rrsets, resp, err := testClient.RRSets.GetRRSets(testDomain, testHostname, "ANY")
 
 	t.Logf("GetRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
@@ -154,6 +260,15 @@ func Test_GetRRSetsMid(t *testing.T) {
 
 // Delete Test
 func Test_Delete_RRSets(t *testing.T) {
+
+	if !enableRRSetTests {
+		t.SkipNow()
+
+	}
+	if !enableChanges {
+		t.SkipNow()
+
+	}
 	if testHostname == "" || testHostname[0] == '*' || testHostname[0] == '@' || testHostname == "www" || testHostname[0] == '.' {
 		t.Fatalf("NO testHostname DEFINED!  DANGER")
 		os.Exit(1)
@@ -188,6 +303,11 @@ func Test_Delete_RRSets(t *testing.T) {
 }
 
 func Test_GetRRSetsPost(t *testing.T) {
+
+	if !enableRRSetTests {
+		t.SkipNow()
+
+	}
 	rrsets, resp, err := testClient.RRSets.GetRRSets(testDomain, testHostname, "ANY")
 
 	t.Logf("GetRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
@@ -214,6 +334,10 @@ func Test_ListTasks(t *testing.T) {
 }
 
 func Test_ListAccountsOfUser(t *testing.T) {
+
+	if !enableAccountTests {
+		t.SkipNow()
+	}
 	accounts, resp, err := testClient.Accounts.GetAccountsOfUser()
 	t.Logf("Accounts: %+v \n", accounts)
 	t.Logf("Response: %+v\n", resp.Response)
@@ -247,12 +371,15 @@ func TestListZonesOfAccount(t *testing.T) {
 */
 
 func Test_ListDirectionPoolsGeoNoQuery(t *testing.T) {
+	if !enableDirectionalPoolTests {
+		t.SkipNow()
+	}
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
 	}
 	accountName := testAccounts[0].AccountName
-	dpools, resp, err := testClient.DirectionalPools.ListDirectionalPools("", "geo", accountName)
+	dpools, resp, err := testClient.DirectionalPools.ListDirectionalGeoPools("", accountName)
 	t.Logf("Geo Pools: %v \n", dpools)
 	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
@@ -266,12 +393,15 @@ func Test_ListDirectionPoolsGeoNoQuery(t *testing.T) {
 	t.SkipNow()
 }
 func Test_ListDirectionPoolsGeoQuery(t *testing.T) {
+	if !enableDirectionalPoolTests {
+		t.SkipNow()
+	}
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
 	}
 	accountName := testAccounts[0].AccountName
-	dpools, resp, err := testClient.DirectionalPools.ListDirectionalPools(testQuery, "geo", accountName)
+	dpools, resp, err := testClient.DirectionalPools.ListDirectionalGeoPools(testQuery, accountName)
 	t.Logf("Geo Pools: %v \n", dpools)
 	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
@@ -286,12 +416,15 @@ func Test_ListDirectionPoolsGeoQuery(t *testing.T) {
 }
 
 func Test_ListDirectionalPoolsIPNoQuery(t *testing.T) {
+	if !enableDirectionalPoolTests {
+		t.SkipNow()
+	}
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
 	}
 	accountName := testAccounts[0].AccountName
-	dpools, resp, err := testClient.DirectionalPools.ListDirectionalPools("", "ip", accountName)
+	dpools, resp, err := testClient.DirectionalPools.ListDirectionalIPPools("", accountName)
 	t.Logf("IP Pools: %v \n", dpools)
 	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
@@ -305,12 +438,15 @@ func Test_ListDirectionalPoolsIPNoQuery(t *testing.T) {
 	t.SkipNow()
 }
 func Test_ListDirectionalPoolsIPQuery(t *testing.T) {
+	if !enableDirectionalPoolTests {
+		t.SkipNow()
+	}
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
 	}
 	accountName := testAccounts[0].AccountName
-	dpools, resp, err := testClient.DirectionalPools.ListDirectionalPools(testQuery, "ip", accountName)
+	dpools, resp, err := testClient.DirectionalPools.ListDirectionalIPPools(testQuery, accountName)
 	t.Logf("IP Pools: %v \n", dpools)
 	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
@@ -321,5 +457,126 @@ func Test_ListDirectionalPoolsIPQuery(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	t.SkipNow()
+}
+
+// Create Test
+func Test_Create_DirectionalPoolIP(t *testing.T) {
+
+	if !enableDirectionalPoolTests {
+		t.SkipNow()
+
+	}
+	if !enableChanges {
+		t.SkipNow()
+
+	}
+	if testAccounts == nil {
+		t.Logf("No Accounts Present, skipping...")
+		t.SkipNow()
+	}
+
+	accountName := testAccounts[0].AccountName
+	t.Logf("Creating %s with %+v\n", testIPDPool.Name, testIPDPool)
+	resp, err := testClient.DirectionalPools.CreateDirectionalIPPool(testIPDPool.Name, accountName, testIPDPool)
+	t.Logf("Response: %+v\n", resp.Response)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+func Test_Get_DirectionalPoolIP(t *testing.T) {
+	if !enableDirectionalPoolTests {
+		t.SkipNow()
+
+	}
+	if !enableChanges {
+		t.SkipNow()
+
+	}
+	if testAccounts == nil {
+		t.Logf("No Accounts Present, skipping...")
+		t.SkipNow()
+	}
+
+	accountName := testAccounts[0].AccountName
+
+	dp, resp, err := testClient.DirectionalPools.GetDirectionalIPPool(testIPDPool.Name, accountName)
+
+	t.Logf("Test Get IP DPool Group (%s, %s)\n", testIPDPool.Name, testIPDPool)
+	t.Logf("Response: %+v\n", resp.Response)
+	t.Logf("DPool: %+v\n", dp)
+	if err != nil {
+		t.Logf("GetDirectionalPoolIP Error: %+v\n", err)
+		if resp.Response.StatusCode == 404 {
+			return
+		}
+		t.Fatal(err)
+	}
+	dp2, er := json.Marshal(dp)
+	t.Logf("DPool Marshalled back: %s - %+v\n", string(dp2), er)
+
+}
+
+func Test_Delete_DirectionalPoolIP(t *testing.T) {
+	if !enableDirectionalPoolTests {
+		t.SkipNow()
+
+	}
+	if !enableChanges {
+		t.SkipNow()
+
+	}
+	if testAccounts == nil {
+		t.Logf("No Accounts Present, skipping...")
+		t.SkipNow()
+	}
+
+	accountName := testAccounts[0].AccountName
+	resp, err := testClient.DirectionalPools.DeleteDirectionalIPPool(testIPDPool.Name, accountName)
+
+	t.Logf("Delete IP DPool Group (%s, %s)\n", testIPDPool.Name, testIPDPool)
+	t.Logf("Response: %+v\n", resp.Response)
+	if err != nil {
+		t.Logf("DeleteDirectionalPoolIP Error: %+v\n", err)
+		if resp.Response.StatusCode == 404 {
+			return
+		}
+		t.Fatal(err)
+	}
+}
+func Test_ListProbes(t *testing.T) {
+	if !enableProbeTests {
+		t.SkipNow()
+	}
+	probes, resp, err := testClient.ProbesService.ListProbes("", testProbeName, testProbeType, testProbeDomain)
+	t.Logf("Probes: %+v \n", probes)
+	t.Logf("Response: %+v\n", resp.Response)
+	if err != nil {
+		if resp.Response.StatusCode == 404 {
+			t.Logf("Error: %+v", err)
+			t.SkipNow()
+		}
+		t.Fatal(err)
+	}
+	for i, e := range probes {
+		t.Logf("DEBUG - Probe %d Data - %s\n", i, e.Details.data)
+		err = e.Details.Populate(e.ProbeType)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("Populated Probe: %+v\n", e)
+
+		st, er := json.Marshal(e)
+		if er != nil {
+			t.Errorf("Serialization 1 failed! %+v", er)
+		}
+		t.Logf("Testing Serialization 1: %s\n", string(st))
+
+		st, er = json.Marshal(e.Details)
+		if er != nil {
+			t.Errorf("Serialization 2 failed! %+v", er)
+		}
+		t.Logf("Testing Serialization 2 : %+v -> %s\n", e.Details, string(st))
+	}
 	t.SkipNow()
 }

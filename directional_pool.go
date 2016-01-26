@@ -26,10 +26,10 @@ type AccountLevelGeoDirectionalGroupDTO struct {
 
 // IPAddrDTO wraps an IP address range or CIDR block
 type IPAddrDTO struct {
-	Start   string `json:"start"`
-	End     string `json:"end"`
-	CIDR    string `json:"cidr"`
-	Address string `json:"address"`
+	Start   string `json:"start,omitempty"`
+	End     string `json:"end,omitempty"`
+	CIDR    string `json:"cidr,omitempty"`
+	Address string `json:"address,omitempty"`
 }
 
 // AccountLevelIPDirectionalGroupDTO wraps an account-level, IP directional-group response
@@ -67,48 +67,101 @@ func DirectionalPoolPath(acct, typ, slugID string) string {
 	if slugID == "" {
 		return fmt.Sprintf("accounts/%s/dirgroups/%s", acct, typ)
 	}
-        return fmt.Sprintf("accounts/%s/dirgroups/%s/%s", acct, typ, slugID)
+	return fmt.Sprintf("accounts/%s/dirgroups/%s/%s", acct, typ, slugID)
 }
 
-// GetDirectionalPoolStatus Get the status of a task.
-func (s *DirectionalPoolsService) GetDirectionalPoolStatus(tid string) (DirectionalPool, *Response, error) {
-	reqStr := taskPath(tid)
-	var t DirectionalPool
-	res, err := s.client.get(reqStr, &t)
-	if err != nil {
-		return t, res, err
-	}
+// GetDirectionalGeoPool requests a geo directional-pool by name & account
+func (s *DirectionalPoolsService) GetDirectionalGeoPool(name, acct string) (AccountLevelGeoDirectionalGroupDTO, *Response, error) {
+	uri := DirectionalPoolPath(acct, "geo", name)
+	var t AccountLevelGeoDirectionalGroupDTO
+	res, err := s.client.get(uri, &t)
 	return t, res, err
 }
 
-// ListDirectionalPools requests all directional-pools, by query, type & account, returning the list of IP groups & the actual response, or an error
-func (s *DirectionalPoolsService) ListDirectionalPools(query, dptype, account string) ([]DirectionalPool, *Response, error) {
-	// TODO: Soooo... This function does not handle pagination of DirectionalPools....
-	//v := url.Values{}
-
-	reqStr := DirectionalPoolPath(account, dptype, "")
-	if query != "" {
-		reqStr = fmt.Sprintf("%s?sort=NAME&query=%s", reqStr, query)
-	}
-	fmt.Printf("ListDirectionalPools: %s\n", reqStr)
-	var tld DirectionalPoolListDTO
-	//wrappedDirectionalPools := []DirectionalPool{}
-
-	res, err := s.client.get(reqStr, &tld)
-	if err != nil {
-		return []DirectionalPool{}, res, err
-	}
-
-	dps := []DirectionalPool{}
-	for _, t := range tld.DirectionalPools {
-		dps = append(dps, t)
-	}
-
-	return dps, res, nil
+// GetDirectionalIPPool requests a IP directional-pool by name & account
+func (s *DirectionalPoolsService) GetDirectionalIPPool(name, acct string) (AccountLevelIPDirectionalGroupDTO, *Response, error) {
+	uri := DirectionalPoolPath(acct, "ip", name)
+	var t AccountLevelIPDirectionalGroupDTO
+	res, err := s.client.get(uri, &t)
+	return t, res, err
 }
 
-// DeleteDirectionalPool deletes a task.
-func (s *DirectionalPoolsService) DeleteDirectionalPool(tid string) (*Response, error) {
-	path := taskPath(tid)
+// CreateDirectionalGeoPool requests creation of a geo direcctional-pool by name & account, given a directional-pool
+func (s *DirectionalPoolsService) CreateDirectionalGeoPool(name, acct string, dp AccountLevelGeoDirectionalGroupDTO) (*Response, error) {
+	uri := DirectionalPoolPath(acct, "geo", name)
+	var ignored interface{}
+	return s.client.post(uri, dp, &ignored)
+}
+
+// CreateDirectionalIPPool requests creation of an IP directional-pool by name & account, given a directional-pool
+func (s *DirectionalPoolsService) CreateDirectionalIPPool(name, acct string, dp AccountLevelIPDirectionalGroupDTO) (*Response, error) {
+	uri := DirectionalPoolPath(acct, "ip", name)
+	var ignored interface{}
+	return s.client.post(uri, dp, &ignored)
+}
+
+// UpdateDirectionalGeoPool requests update of a geo directional-pool by name & account, given a directional-pool
+func (s *DirectionalPoolsService) UpdateDirectionalGeoPool(name, acct string, dp AccountLevelGeoDirectionalGroupDTO) (*Response, error) {
+	uri := DirectionalPoolPath(acct, "geo", name)
+	var ignored interface{}
+	return s.client.put(uri, dp, &ignored)
+}
+
+// UpdateDirectionalIPPool requests update of an IP directional-pool by name & account, given a directional-pool
+func (s *DirectionalPoolsService) UpdateDirectionalIPPool(name, acct string, dp AccountLevelIPDirectionalGroupDTO) (*Response, error) {
+	uri := DirectionalPoolPath(acct, "ip", name)
+	var ignored interface{}
+	return s.client.put(uri, dp, &ignored)
+}
+
+// ListDirectionalGeoPools requests list of geo directional-pools, by query & account, and an offset, returning the directional-group, the list-metadata, the actual response, or an error
+func (s *DirectionalPoolsService) ListDirectionalGeoPools(query, account string) ([]AccountLevelGeoDirectionalGroupDTO, *Response, error) {
+	uri := DirectionalPoolPath(account, "geo", "")
+	if query != "" {
+		uri = fmt.Sprintf("%s?sort=NAME&query=%s", uri, query)
+	}
+	fmt.Printf("ListDirectionalPools: %s\n", uri)
+	var tld AccountLevelGeoDirectionalGroupListDTO
+
+	res, err := s.client.get(uri, &tld)
+	dps := []AccountLevelGeoDirectionalGroupDTO{}
+
+	if err == nil {
+		for _, t := range tld.GeoGroups {
+			dps = append(dps, t)
+		}
+	}
+	return dps, res, err
+}
+
+// ListDirectionalIPPools requests all IP directional-pools, by query & account, and an offset, returning the list of IP groups, list metadata & the actual response, or an error
+func (s *DirectionalPoolsService) ListDirectionalIPPools(query, account string) ([]AccountLevelIPDirectionalGroupDTO, *Response, error) {
+	uri := DirectionalPoolPath(account, "ip", "")
+	if query != "" {
+		uri = fmt.Sprintf("%s?sort=NAME&query=%s", uri, query)
+	}
+	fmt.Printf("ListDirectionalPools: %s\n", uri)
+	var tld AccountLevelIPDirectionalGroupListDTO
+
+	res, err := s.client.get(uri, &tld)
+	dps := []AccountLevelIPDirectionalGroupDTO{}
+
+	if err == nil {
+		for _, t := range tld.IPGroups {
+			dps = append(dps, t)
+		}
+	}
+	return dps, res, err
+}
+
+// DeleteDirectionalGeoPool deletes a geo directional-pool
+func (s *DirectionalPoolsService) DeleteDirectionalGeoPool(dp, acct string) (*Response, error) {
+	path := DirectionalPoolPath(acct, "geo", dp)
+	return s.client.delete(path, nil)
+}
+
+// DeleteDirectionalIPPool deletes an IP directional-pool
+func (s *DirectionalPoolsService) DeleteDirectionalIPPool(dp, acct string) (*Response, error) {
+	path := DirectionalPoolPath(acct, "ip", dp)
 	return s.client.delete(path, nil)
 }

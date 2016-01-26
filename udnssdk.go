@@ -63,6 +63,8 @@ type Client struct {
 	Accounts *AccountsService
 	// Directional Pools API
 	DirectionalPools *DirectionalPoolsService
+	// Probes API
+	ProbesService *ProbesService
 }
 
 // NewClient returns a new ultradns API client.
@@ -76,6 +78,7 @@ func NewClient(username, password, BaseURL string) (*Client, error) {
 	c.Tasks = &TasksService{client: c}
 	c.Accounts = &AccountsService{client: c}
 	c.DirectionalPools = &DirectionalPoolsService{client: c}
+	c.ProbesService = &ProbesService{client: c}
 	return c, nil
 }
 
@@ -298,7 +301,7 @@ func CheckAuthResponse(r *http.Response, body []byte) error {
 
 		return er
 	}
-	fmt.Printf("ERROR: %+v - Body: %s", err, body)
+	log.Printf("ERROR: %+v - Body: %s\n", err, body)
 	var er2 []ErrorResponse
 	err = json.Unmarshal(body, &er2)
 	//err = json.NewDecoder(r.Body).Decode(errorResponse)
