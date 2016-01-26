@@ -201,9 +201,10 @@ func (s *SBTCService) GetProbeAlerts(name, typ, zone string) ([]ProbeAlertDataDT
 	var tld ProbeAlertDataListDTO
 	//wrappedProbes := []Probe{}
 
-	res, err := s.client.get(reqStr, &tld)
+	//	res, err := s.client.get(reqStr, &tld)
 	pads := []ProbeAlertDataDTO{}
-
+	var res *Response
+	var err error
 	// TODO: Sane Configuration for timeouts / retries
 	timeout := 5
 	waittime := 5 * time.Second
