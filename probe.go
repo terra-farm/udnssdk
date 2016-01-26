@@ -5,14 +5,29 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 )
 
 /* Manages Probes */
 
-type ProbesService struct {
+type SBTCService struct {
 	client *Client
 }
 
+type ProbeAlertDataDTO struct {
+	PoolRecord      string    `json:"poolRecord"`
+	ProbeType       string    `json:"probeType"`
+	ProbeStatus     string    `json:"probeStatus"`
+	AlertDate       time.Time `json:"alertDate"`
+	FailoverOccured bool      `json:"failoverOccured"`
+	OwnerName       string    `json:"ownerName"`
+	Status          string    `json:"status"`
+}
+type ProbeAlertDataListDTO struct {
+	Alerts     []ProbeAlertDataDTO `json:"alerts"`
+	Queryinfo  QueryInfo           `json:"queryInfo"`
+	Resultinfo ResultInfo          `json:"resultInfo"`
+}
 type ProbeInfoDTO struct {
 	Id         string           `json:"id"`
 	PoolRecord string           `json:"poolRecord"`
@@ -37,7 +52,7 @@ type ProbeDetailsDTO struct {
 }
 
 func (s *ProbeDetailsDTO) Populate(typ string) (err error) {
-	log.Printf("DEBUG - ProbeDetailsDTO.Populate(\"%s\")\n", typ)
+	//log.Printf("DEBUG - ProbeDetailsDTO.Populate(\"%s\")\n", typ)
 	switch strings.ToUpper(typ) {
 	case "HTTP":
 		var pp HTTPProbeDetailsDTO
@@ -92,10 +107,9 @@ func (s *ProbeDetailsDTO) UnmarshalJSON(b []byte) (err error) {
 }
 func (s *ProbeDetailsDTO) MarshalJSON() ([]byte, error) {
 	var err error
-	log.Printf("In marshal\n\n")
 	if s.Detail != nil {
 		d, e := json.Marshal(s.Detail)
-		log.Printf("DEBUG - Detail Marshal: %+v Err: %+v\n", string(d), e)
+		//log.Printf("DEBUG - Detail Marshal: %+v Err: %+v\n", string(d), e)
 		return d, e
 	}
 	if len(s.data) != 0 {
@@ -174,8 +188,56 @@ func ProbePath(zone, typ, name, guid string) string {
 	}
 }
 
+func AlertPath(zone, typ, name string) string {
+	return fmt.Sprintf("zones/%s/rrsets/%s/%s/alerts", zone, typ, name)
+}
+
+// Get Probe Alerts
+func (s *SBTCService) GetProbeAlerts(name, typ, zone string) ([]ProbeAlertDataDTO, *Response, error) {
+	offset := 0
+
+	reqStr := AlertPath(zone, typ, name)
+	log.Printf("DEBUG - ListProbes: %s\n", reqStr)
+	var tld ProbeAlertDataListDTO
+	//wrappedProbes := []Probe{}
+
+	res, err := s.client.get(reqStr, &tld)
+	pads := []ProbeAlertDataDTO{}
+
+	// TODO: Sane Configuration for timeouts / retries
+	timeout := 5
+	waittime := 5 * time.Second
+	errcnt := 0
+	for true {
+
+		res, err := s.client.get(fmt.Sprintf("%s?offset=%d", reqStr, offset), &tld)
+		if err != nil {
+			if res.StatusCode >= 500 {
+				errcnt = errcnt + 1
+				if errcnt < timeout {
+					time.Sleep(waittime)
+					continue
+				}
+			}
+			return pads, res, err
+
+		}
+		fmt.Printf("ResultInfo: %+v\n", tld.Resultinfo)
+		for _, pad := range tld.Alerts {
+			pads = append(pads, pad)
+		}
+		if tld.Resultinfo.ReturnedCount+tld.Resultinfo.Offset >= tld.Resultinfo.TotalCount {
+			return pads, res, nil
+		} else {
+			offset = tld.Resultinfo.ReturnedCount + tld.Resultinfo.Offset
+			continue
+		}
+	}
+	return pads, res, err
+}
+
 // Get a Probe.
-func (s *ProbesService) GetProbe(name, typ, zone, guid string) (ProbeInfoDTO, *Response, error) {
+func (s *SBTCService) GetProbe(name, typ, zone, guid string) (ProbeInfoDTO, *Response, error) {
 	reqStr := ProbePath(zone, typ, name, guid)
 	var t ProbeInfoDTO
 	res, err := s.client.get(reqStr, &t)
@@ -183,7 +245,7 @@ func (s *ProbesService) GetProbe(name, typ, zone, guid string) (ProbeInfoDTO, *R
 }
 
 // Create a Probe
-func (s *ProbesService) CreateProbe(name, typ, zone string, dp ProbeInfoDTO) (*Response, error) {
+func (s *SBTCService) CreateProbe(name, typ, zone string, dp ProbeInfoDTO) (*Response, error) {
 	reqStr := ProbePath(zone, typ, name, "")
 	var retval interface{}
 	res, err := s.client.post(reqStr, dp, &retval)
@@ -192,7 +254,7 @@ func (s *ProbesService) CreateProbe(name, typ, zone string, dp ProbeInfoDTO) (*R
 }
 
 // Update
-func (s *ProbesService) UpdateProbe(name, typ, zone, guid string, dp ProbeInfoDTO) (*Response, error) {
+func (s *SBTCService) UpdateProbe(name, typ, zone, guid string, dp ProbeInfoDTO) (*Response, error) {
 	reqStr := ProbePath(zone, typ, name, guid)
 	var retval interface{}
 	res, err := s.client.put(reqStr, dp, &retval)
@@ -201,7 +263,7 @@ func (s *ProbesService) UpdateProbe(name, typ, zone, guid string, dp ProbeInfoDT
 }
 
 // List
-func (s *ProbesService) ListProbes(query, name, typ, zone string) ([]ProbeInfoDTO, *Response, error) {
+func (s *SBTCService) ListProbes(query, name, typ, zone string) ([]ProbeInfoDTO, *Response, error) {
 	// TODO: Soooo... This function does not handle pagination of Probes....
 	//v := url.Values{}
 
@@ -226,7 +288,7 @@ func (s *ProbesService) ListProbes(query, name, typ, zone string) ([]ProbeInfoDT
 
 // DeleteProbe
 //
-func (s *ProbesService) DeleteProbe(name, typ, zone, guid string) (*Response, error) {
+func (s *SBTCService) DeleteProbe(name, typ, zone, guid string) (*Response, error) {
 	path := ProbePath(zone, typ, name, guid)
 	return s.client.delete(path, nil)
 }
