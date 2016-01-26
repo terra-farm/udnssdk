@@ -4,40 +4,29 @@ import (
 	"fmt"
 )
 
-// ZonesService handles communication with the Zone related blah blah
+/* Directional Pools - This manages 'account level' 'geo' and 'ip' groups for
+   Directional Pools.  */
+
 type DirectionalPoolsService struct {
 	client *Client
 }
 
-type DirectionalPool struct {
-	DirectionalPoolId         string `json:"taskId"`
-	DirectionalPoolStatusCode string `json:"taskStatusCode"`
-	Message                   string `json:"message"`
-	ResultUri                 string `json:"resultUri"`
-}
 type AccountLevelGeoDirectionalGroupDTO struct {
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 	Codes       []string `json:"codes"`
 }
 type IPAddrDTO struct {
-	Start   string `json:"start"`
-	End     string `json:"end"`
-	Cidr    string `json:"cidr"`
-	Address string `json:"address"`
+	Start   string `json:"start,omitempty"`
+	End     string `json:"end,omitempty"`
+	Cidr    string `json:"cidr,omitempty"`
+	Address string `json:"address,omitempty"`
 }
 type AccountLevelIPDirectionalGroupDTO struct {
 	Name        string      `json:"name"`
 	Description string      `json:"description"`
 	Ips         []IPAddrDTO `json:"ips"`
 }
-
-type DirectionalPoolListDTO struct {
-	DirectionalPools []DirectionalPool `json:"tasks"`
-	Queryinfo        QueryInfo         `json:"queryInfo"`
-	Resultinfo       ResultInfo        `json:"resultInfo"`
-}
-
 type AccountLevelGeoDirectionalGroupListDTO struct {
 	AccountName string                               `json:"zoneName"`
 	GeoGroups   []AccountLevelGeoDirectionalGroupDTO `json:"geoGroups"`
@@ -62,51 +51,121 @@ func DirectionalPoolPath(acct, typ, val string) string {
 		return fmt.Sprintf("accounts/%s/dirgroups/%s", acct, typ)
 	} else {
 
-		return fmt.Sprintf("accounts/%s/dirgroups/geo/%s/%s", acct, typ, val)
+		return fmt.Sprintf("accounts/%s/dirgroups/%s/%s", acct, typ, val)
 	}
 }
 
-// Get the status of a task.
-func (s *DirectionalPoolsService) GetDirectionalPoolStatus(tid string) (DirectionalPool, *Response, error) {
-	reqStr := taskPath(tid)
-	var t DirectionalPool
+// Get a Direction Geo Pool.
+func (s *DirectionalPoolsService) GetDirectionalGeoPool(name, acct string) (AccountLevelGeoDirectionalGroupDTO, *Response, error) {
+	reqStr := DirectionalPoolPath(acct, "geo", name)
+	var t AccountLevelGeoDirectionalGroupDTO
 	res, err := s.client.get(reqStr, &t)
-	if err != nil {
-		return t, res, err
-	}
 	return t, res, err
 }
 
-// List tasks
-//
-func (s *DirectionalPoolsService) ListDirectionalPools(query, dptype, account string) ([]DirectionalPool, *Response, error) {
+// Get a Direction Geo Pool.
+func (s *DirectionalPoolsService) GetDirectionalIPPool(name, acct string) (AccountLevelIPDirectionalGroupDTO, *Response, error) {
+	reqStr := DirectionalPoolPath(acct, "ip", name)
+	var t AccountLevelIPDirectionalGroupDTO
+	res, err := s.client.get(reqStr, &t)
+	return t, res, err
+}
+
+// Create a Direction Pool
+func (s *DirectionalPoolsService) CreateDirectionalGeoPool(name, acct string, dp AccountLevelGeoDirectionalGroupDTO) (*Response, error) {
+	reqStr := DirectionalPoolPath(acct, "geo", name)
+	var retval interface{}
+	res, err := s.client.post(reqStr, dp, &retval)
+
+	return res, err
+}
+
+// Create a Direction Pool
+func (s *DirectionalPoolsService) CreateDirectionalIPPool(name, acct string, dp AccountLevelIPDirectionalGroupDTO) (*Response, error) {
+	reqStr := DirectionalPoolPath(acct, "ip", name)
+	var retval interface{}
+	res, err := s.client.post(reqStr, dp, &retval)
+
+	return res, err
+}
+
+// Update
+func (s *DirectionalPoolsService) UpdateDirectionalGeoPool(name, acct string, dp AccountLevelGeoDirectionalGroupDTO) (*Response, error) {
+	reqStr := DirectionalPoolPath(acct, "geo", name)
+	var retval interface{}
+	res, err := s.client.put(reqStr, dp, &retval)
+
+	return res, err
+}
+
+// Update
+func (s *DirectionalPoolsService) UpdateDirectionalIPPool(name, acct string, dp AccountLevelIPDirectionalGroupDTO) (*Response, error) {
+	reqStr := DirectionalPoolPath(acct, "ip", name)
+	var retval interface{}
+	res, err := s.client.put(reqStr, dp, &retval)
+
+	return res, err
+}
+
+// List Directional Pools
+func (s *DirectionalPoolsService) ListDirectionalGeoPools(query, account string) ([]AccountLevelGeoDirectionalGroupDTO, *Response, error) {
 	// TODO: Soooo... This function does not handle pagination of DirectionalPools....
 	//v := url.Values{}
 
-	reqStr := DirectionalPoolPath(account, dptype, "")
+	reqStr := DirectionalPoolPath(account, "geo", "")
 	if query != "" {
 		reqStr = fmt.Sprintf("%s?sort=NAME&query=%s", reqStr, query)
 	}
 	fmt.Printf("ListDirectionalPools: %s\n", reqStr)
-	var tld DirectionalPoolListDTO
+	var tld AccountLevelGeoDirectionalGroupListDTO
 	//wrappedDirectionalPools := []DirectionalPool{}
 
 	res, err := s.client.get(reqStr, &tld)
-	if err != nil {
-		return []DirectionalPool{}, res, err
-	}
+	dps := []AccountLevelGeoDirectionalGroupDTO{}
 
-	dps := []DirectionalPool{}
-	for _, t := range tld.DirectionalPools {
-		dps = append(dps, t)
+	if err == nil {
+		for _, t := range tld.GeoGroups {
+			dps = append(dps, t)
+		}
 	}
+	return dps, res, err
+}
 
-	return dps, res, nil
+// List Directional Pools
+func (s *DirectionalPoolsService) ListDirectionalIPPools(query, account string) ([]AccountLevelIPDirectionalGroupDTO, *Response, error) {
+	// TODO: Soooo... This function does not handle pagination of DirectionalPools....
+	//v := url.Values{}
+
+	reqStr := DirectionalPoolPath(account, "ip", "")
+	if query != "" {
+		reqStr = fmt.Sprintf("%s?sort=NAME&query=%s", reqStr, query)
+	}
+	fmt.Printf("ListDirectionalPools: %s\n", reqStr)
+	var tld AccountLevelIPDirectionalGroupListDTO
+	//wrappedDirectionalPools := []DirectionalPool{}
+
+	res, err := s.client.get(reqStr, &tld)
+	dps := []AccountLevelIPDirectionalGroupDTO{}
+
+	if err == nil {
+		for _, t := range tld.IpGroups {
+			dps = append(dps, t)
+		}
+	}
+	return dps, res, err
+}
+
+// Delete
+//
+func (s *DirectionalPoolsService) DeleteDirectionalGeoPool(dp, acct string) (*Response, error) {
+	path := DirectionalPoolPath(acct, "geo", dp)
+	return s.client.delete(path, nil)
 }
 
 // DeleteDirectionalPool deletes a task.
 //
-func (s *DirectionalPoolsService) DeleteDirectionalPool(tid string) (*Response, error) {
-	path := taskPath(tid)
+func (s *DirectionalPoolsService) DeleteDirectionalIPPool(dp, acct string) (*Response, error) {
+	path := DirectionalPoolPath(acct, "ip", dp)
+
 	return s.client.delete(path, nil)
 }

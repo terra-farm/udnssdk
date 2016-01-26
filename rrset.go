@@ -128,20 +128,15 @@ func (s *RRSetsService) GetRRSets(zone string, rrsetName, rrsetType string) ([]R
 }
 
 // CreateRRSet creates a zone rrset.
-//
 func (s *RRSetsService) CreateRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
 	path := rrsetPath(zone, rrsetAttributes.RRType, rrsetAttributes.OwnerName)
 	var retval interface{}
 	res, err := s.client.post(path, rrsetAttributes, &retval)
 	//log.Printf("CreateRRSet Retval: %+v", retval)
-	if err != nil {
-		return res, err
-	}
 	return res, err
 }
 
 // UpdateRRSet updates a zone rrset.
-//
 func (s *RRSetsService) UpdateRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
 	path := rrsetPath(zone, rrsetAttributes.RRType, rrsetAttributes.OwnerName)
 	var retval interface{}
@@ -149,11 +144,7 @@ func (s *RRSetsService) UpdateRRSet(zone string, rrsetAttributes RRSet) (*Respon
 	res, err := s.client.put(path, rrsetAttributes, &retval)
 	//log.Printf("UpdateRRSet Retval: %+v", retval)
 
-	if err != nil {
-		return res, err
-	}
-
-	return res, nil
+	return res, err
 }
 
 // DeleteRRSet deletes a zone rrset.
