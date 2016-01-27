@@ -2,6 +2,7 @@ package udnssdk
 
 import (
 	"fmt"
+	"time"
 )
 
 // DirectionalPoolsService manages 'account level' 'geo' and 'ip' groups for directional-pools
@@ -124,14 +125,41 @@ func (s *DirectionalPoolsService) ListDirectionalGeoPools(query, account string)
 	var tld AccountLevelGeoDirectionalGroupListDTO
 
 	res, err := s.client.get(uri, &tld)
-	dps := []AccountLevelGeoDirectionalGroupDTO{}
-
-	if err == nil {
-		for _, t := range tld.GeoGroups {
-			dps = append(dps, t)
-		}
+	pis := []AccountLevelGeoDirectionalGroupDTO{}
+	if query != "" {
+		uri = fmt.Sprintf("%s?sort=NAME&query=%s&offset=", uri, query)
+	} else {
+		uri = fmt.Sprintf("%s?offset=", uri)
 	}
-	return dps, res, err
+	// TODO: Sane Configuration for timeouts / retries
+	timeout := 5
+	waittime := 5 * time.Second
+	errcnt := 0
+	offset := 0
+	for true {
+
+		res, err := s.client.get(fmt.Sprintf("%s%d", uri, offset), &tld)
+		if err != nil {
+			if res.StatusCode >= 500 {
+				errcnt = errcnt + 1
+				if errcnt < timeout {
+					time.Sleep(waittime)
+					continue
+				}
+			}
+			return pis, res, err
+		}
+		fmt.Printf("ResultInfo: %+v\n", tld.Resultinfo)
+		for _, pi := range tld.GeoGroups {
+			pis = append(pis, pi)
+		}
+		if tld.Resultinfo.ReturnedCount+tld.Resultinfo.Offset >= tld.Resultinfo.TotalCount {
+			return pis, res, nil
+		}
+		offset = tld.Resultinfo.ReturnedCount + tld.Resultinfo.Offset
+		continue
+	}
+	return pis, res, err
 }
 
 // ListDirectionalIPPools requests all IP directional-pools, by query & account, and an offset, returning the list of IP groups, list metadata & the actual response, or an error
@@ -144,14 +172,41 @@ func (s *DirectionalPoolsService) ListDirectionalIPPools(query, account string) 
 	var tld AccountLevelIPDirectionalGroupListDTO
 
 	res, err := s.client.get(uri, &tld)
-	dps := []AccountLevelIPDirectionalGroupDTO{}
-
-	if err == nil {
-		for _, t := range tld.IPGroups {
-			dps = append(dps, t)
-		}
+	pis := []AccountLevelIPDirectionalGroupDTO{}
+	if query != "" {
+		uri = fmt.Sprintf("%s?sort=NAME&query=%s&offset=", uri, query)
+	} else {
+		uri = fmt.Sprintf("%s?offset=", uri)
 	}
-	return dps, res, err
+	// TODO: Sane Configuration for timeouts / retries
+	timeout := 5
+	waittime := 5 * time.Second
+	errcnt := 0
+	offset := 0
+	for true {
+
+		res, err := s.client.get(fmt.Sprintf("%s%d", uri, offset), &tld)
+		if err != nil {
+			if res.StatusCode >= 500 {
+				errcnt = errcnt + 1
+				if errcnt < timeout {
+					time.Sleep(waittime)
+					continue
+				}
+			}
+			return pis, res, err
+		}
+		fmt.Printf("ResultInfo: %+v\n", tld.Resultinfo)
+		for _, pi := range tld.IPGroups {
+			pis = append(pis, pi)
+		}
+		if tld.Resultinfo.ReturnedCount+tld.Resultinfo.Offset >= tld.Resultinfo.TotalCount {
+			return pis, res, nil
+		}
+		offset = tld.Resultinfo.ReturnedCount + tld.Resultinfo.Offset
+		continue
+	}
+	return pis, res, err
 }
 
 // DeleteDirectionalGeoPool deletes a geo directional-pool
