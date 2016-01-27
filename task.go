@@ -2,6 +2,8 @@ package udnssdk
 
 import (
 	"fmt"
+	"log"
+	"time"
 )
 
 // TasksService provides access to the tasks resources
@@ -19,22 +21,18 @@ type Task struct {
 
 // TaskListDTO wraps a list of Task resources, from an HTTP response
 type TaskListDTO struct {
-	Tasks                   []Task `json:"tasks"`
-	Queryinfoq              string `json:"queryinfo/q"`
-	Queryinfosort           string `json:"queryinfo/reverse"`
-	Queryinfolimit          string `json:"queryinfo/limit"`
-	ResultinfototalCount    string `json:"resultinfo/totalCount"`
-	Resultinfooffset        string `json:"resultinfo/offset"`
-	ResultinforeturnedCount string `json:"resultinfo/returnedCount"`
+	Tasks      []Task     `json:"tasks"`
+	Queryinfo  QueryInfo  `json:"queryInfo"`
+	Resultinfo ResultInfo `json:"resultInfo"`
 }
+
 type taskWrapper struct {
 	Task Task `json:"task"`
 }
 
 // taskResultPath links to the task result url.
 func taskResultPath(tid string) string {
-	path := fmt.Sprintf("tasks/%s/result", tid)
-	return path
+	return fmt.Sprintf("tasks/%s/result", tid)
 }
 
 // taskPath links to the task url.
@@ -42,14 +40,18 @@ func taskPath(tid string) string {
 	return fmt.Sprintf("tasks/%s", tid)
 }
 
+func taskQueryPath(query string, offset int) string {
+	if query != "" {
+		return fmt.Sprintf("tasks?sort=NAME&query=%s&offset=%d", query, offset)
+	}
+	return fmt.Sprintf("tasks?offset=%d", offset)
+}
+
 // GetTaskStatus Get the status of a task.
 func (s *TasksService) GetTaskStatus(tid string) (Task, *Response, error) {
-	reqStr := taskPath(tid)
+	uri := taskPath(tid)
 	var t Task
-	res, err := s.client.get(reqStr, &t)
-	if err != nil {
-		return t, res, err
-	}
+	res, err := s.client.get(uri, &t)
 	return t, res, err
 }
 
@@ -59,7 +61,7 @@ func (s *TasksService) GetTaskResultByURI(uri string) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	res, err := s.client.HttpClient.Do(req)
+	res, err := s.client.HTTPClient.Do(req)
 
 	if err != nil {
 		return &Response{Response: res}, err
@@ -67,42 +69,65 @@ func (s *TasksService) GetTaskResultByURI(uri string) (*Response, error) {
 	return &Response{Response: res}, err
 }
 
-// GetTaskResult requests a task by its task id
-func (s *TasksService) GetTaskResult(tid string) (*Response, error) {
+// GetTaskResultByID  requests a task by its task id
+func (s *TasksService) GetTaskResultByID(tid string) (*Response, error) {
 	uri := taskResultPath(tid)
+	return s.client.GetResultByURI(uri)
+}
 
-	req, err := s.client.NewRequest("GET", uri, nil)
-	if err != nil {
-		return nil, err
-	}
-	res, err := s.client.HttpClient.Do(req)
+// GetTaskResultByTask  requests a task by the provided task's result uri
+func (s *TasksService) GetTaskResultByTask(t Task) (*Response, error) {
+	return s.client.GetResultByURI(t.ResultURI)
+}
 
-	if err != nil {
-		return &Response{Response: res}, err
+// ListAllTasks requests all tasks, list
+func (s *TasksService) ListAllTasks(query string) ([]Task, error) {
+	// TODO: Sane Configuration for timeouts / retries
+	maxerrs := 5
+	waittime := 5 * time.Second
+
+	// init accumulators
+	dtos := []Task{}
+	offset := 0
+	errcnt := 0
+
+	for {
+		reqDtos, ri, res, err := s.ListTasks(query, offset)
+		if err != nil {
+			if res.StatusCode >= 500 {
+				errcnt = errcnt + 1
+				if errcnt < maxerrs {
+					time.Sleep(waittime)
+					continue
+				}
+			}
+			return dtos, err
+		}
+
+		log.Printf("[DEBUG] ResultInfo: %+v\n", ri)
+		for _, d := range reqDtos {
+			dtos = append(dtos, d)
+		}
+		if ri.ReturnedCount+ri.Offset >= ri.TotalCount {
+			return dtos, nil
+		}
+		offset = ri.ReturnedCount + ri.Offset
+		continue
 	}
-	return &Response{Response: res}, err
 }
 
 // ListTasks request tasks by query & offset, list them also returning list metadata, the actual response, or an error
-func (s *TasksService) ListTasks(query string, offset, limit int) ([]Task, *Response, error) {
-	// TODO: Soooo... This function does not handle pagination of Tasks....
-	//v := url.Values{}
-
-	reqStr := "tasks"
+func (s *TasksService) ListTasks(query string, offset int) ([]Task, ResultInfo, *Response, error) {
 	var tld TaskListDTO
-	//wrappedTasks := []Task{}
 
-	res, err := s.client.get(reqStr, &tld)
-	if err != nil {
-		return []Task{}, res, err
-	}
+	uri := taskQueryPath(query, offset)
+	res, err := s.client.get(uri, &tld)
 
-	tasks := []Task{}
+	ts := []Task{}
 	for _, t := range tld.Tasks {
-		tasks = append(tasks, t)
+		ts = append(ts, t)
 	}
-
-	return tasks, res, nil
+	return ts, tld.Resultinfo, res, err
 }
 
 // DeleteTask deletes a task.
