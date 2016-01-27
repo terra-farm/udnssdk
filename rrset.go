@@ -6,7 +6,6 @@ import (
 	"time"
 )
 
-// ZonesService handles communication with the Zone related blah blah
 type RRSetsService struct {
 	client *Client
 }

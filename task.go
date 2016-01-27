@@ -4,7 +4,6 @@ import (
 	"fmt"
 )
 
-// ZonesService handles communication with the Zone related blah blah
 type TasksService struct {
 	client *Client
 }
