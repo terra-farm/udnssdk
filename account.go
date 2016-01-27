@@ -59,7 +59,7 @@ func (s *AccountsService) GetAccountsOfUser() ([]Account, *Response, error) {
 func (s *AccountsService) GetZonesOfAccount(accountName string) ([]Account, *Response, error) {
 	reqStr := fmt.Sprintf("%s/zones", accountPath(accountName))
 	var ald AccountListDTO
-	fmt.Printf("In GetZonesOfAccount(%s)..  ReqStr: %s\n", accountName, reqStr)
+	log.Printf("In GetZonesOfAccount(%s)..  ReqStr: %s\n", accountName, reqStr)
 	res, err := s.client.get(reqStr, &ald)
 	if err != nil {
 		return []Account{}, res, err
@@ -68,7 +68,7 @@ func (s *AccountsService) GetZonesOfAccount(accountName string) ([]Account, *Res
 	for _, t := range ald.Accounts {
 		accts = append(accts, t)
 	}
-	fmt.Printf("Exiting GetZonesOfAccount(%s)..\n", accountName)
+	log.Printf("Exiting GetZonesOfAccount(%s)..\n", accountName)
 	return accts, res, nil
 }
 */

@@ -3,6 +3,7 @@ package udnssdk
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -33,7 +34,7 @@ func (sp *StringProfile) GetType() string {
 	var mp Metaprofile
 	err := json.Unmarshal([]byte(sp.Profile), &mp)
 	if err != nil {
-		fmt.Printf("Error getting profile type: %+v\n", err)
+		log.Printf("Error getting profile type: %+v\n", err)
 		return ""
 	}
 	return mp.Context
@@ -112,7 +113,7 @@ func (s *RRSetsService) GetRRSets(zone string, rrsetName, rrsetType string) ([]R
 			return rrsets, res, err
 
 		}
-		fmt.Printf("ResultInfo: %+v\n", rrsld.Resultinfo)
+		log.Printf("ResultInfo: %+v\n", rrsld.Resultinfo)
 		for _, rrset := range rrsld.Rrsets {
 			rrsets = append(rrsets, rrset)
 		}

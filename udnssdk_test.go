@@ -40,10 +40,12 @@ var (
 	envenableChanges              = os.Getenv("ULTRADNS_ENABLE_CHANGES")
 	envenableDirectionalPoolTests = os.Getenv("ULTRADNS_ENABLE_DPOOL_TESTS")
 	enableAccountTests            = true
-	enableRRSetTests              = false
+	enableRRSetTests              = true
 	enableProbeTests              = true
 	enableChanges                 = true
 	enableDirectionalPoolTests    = false
+	testProfile                   = `{"@context": "http://schemas.ultradns.com/RDPool.jsonschema", "order": "ROUND_ROBIN","description": "T. migratorius"}`
+	testProfile2                  = `{"@context": "http://schemas.ultradns.com/RDPool.jsonschema", "order": "RANDOM","description": "T. migratorius"}`
 
 	testClient   *Client
 	testAccounts []Account
@@ -53,19 +55,19 @@ func TestMain(m *testing.M) {
 	rand.Seed(time.Now().UnixNano())
 
 	if testUsername == "" {
-		fmt.Printf("Please configure ULTRADNS_USERNAME.\n")
+		log.Printf("Please configure ULTRADNS_USERNAME.\n")
 		os.Exit(1)
 	}
 	if testPassword == "" {
-		fmt.Printf("Please configure ULTRADNS_PASSWORD.\n")
+		log.Printf("Please configure ULTRADNS_PASSWORD.\n")
 		os.Exit(1)
 	}
 	if testDomain == "" {
-		fmt.Printf("Please configure ULTRADNS_DOMAIN.\n")
+		log.Printf("Please configure ULTRADNS_DOMAIN.\n")
 		os.Exit(1)
 	}
 	if testHostname == "" {
-		fmt.Printf("Please configure ULTRADNS_TEST_HOSTNAME.\n")
+		log.Printf("Please configure ULTRADNS_TEST_HOSTNAME.\n")
 		os.Exit(1)
 	}
 	if testBaseURL == "" {
@@ -132,7 +134,7 @@ func TestMain(m *testing.M) {
 }
 
 func Test_CreateClient(t *testing.T) {
-	fmt.Printf("Creating Client...\n")
+	log.Printf("Creating Client...\n")
 	var err error
 	testClient, err = NewClient(testUsername, testPassword, testBaseURL)
 
@@ -205,7 +207,7 @@ func Test_Create_RRSets(t *testing.T) {
 
 	}
 	t.Logf("Creating %s with %s\n", testHostname, testIP1)
-	rr1 := &RRSet{OwnerName: testHostname, RRType: "A", TTL: 300, RData: []string{testIP1}}
+	rr1 := &RRSet{OwnerName: testHostname, RRType: "A", TTL: 300, RData: []string{testIP1}, Profile: &StringProfile{Profile: testProfile}}
 	resp, err := testClient.RRSets.CreateRRSet(testDomain, *rr1)
 	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
@@ -214,6 +216,27 @@ func Test_Create_RRSets(t *testing.T) {
 }
 
 // Another Get  Test if it matchs the Ip in IP1
+
+func Test_GetRRSetsMid1(t *testing.T) {
+
+	if !enableRRSetTests {
+		t.SkipNow()
+
+	}
+
+	rrsets, resp, err := testClient.RRSets.GetRRSets(testDomain, testHostname, "ANY")
+
+	t.Logf("GetRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
+	t.Logf("RRSets: %+v\n", rrsets)
+	t.Logf("Response: %+v\n", resp.Response)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Do the test v IP1 here
+	if rrsets[0].RData[0] != testIP1 {
+		t.Fatalf("RData[0]\"%s\" != testIP1\"%s\"", rrsets[0].RData[0], testIP1)
+	}
+}
 
 //Update Test
 func Test_Update_RRSets(t *testing.T) {
@@ -228,15 +251,13 @@ func Test_Update_RRSets(t *testing.T) {
 	}
 
 	t.Logf("Updating %s to %s\n", testHostname, testIP2)
-	rr2 := &RRSet{OwnerName: testHostname, RRType: "A", TTL: 300, RData: []string{testIP2}}
+	rr2 := &RRSet{OwnerName: testHostname, RRType: "A", TTL: 300, RData: []string{testIP2}, Profile: &StringProfile{Profile: testProfile2}}
 	resp, err := testClient.RRSets.UpdateRRSet(testDomain, *rr2)
 	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
 		t.Fatal(err)
 	}
-}
-
-// Another Get Test if it matches the Ip in IP2
+} // Another Get Test if it matches the Ip in IP2
 func Test_GetRRSetsMid(t *testing.T) {
 
 	if !enableRRSetTests {
@@ -322,7 +343,7 @@ func Test_GetRRSetsPost(t *testing.T) {
 }
 
 func Test_ListTasks(t *testing.T) {
-	tasks, resp, err := testClient.Tasks.ListTasks("", 0, 100)
+	tasks, resp, err := testClient.Tasks.ListTasks("")
 	t.Logf("Tasks: %+v \n", tasks)
 	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {

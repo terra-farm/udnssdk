@@ -66,7 +66,7 @@ func (s *SBTCService) ListEvents(query, name, typ, zone string) ([]EventInfoDTO,
 			}
 			return pis, res, err
 		}
-		fmt.Printf("ResultInfo: %+v\n", tld.Resultinfo)
+		log.Printf("ResultInfo: %+v\n", tld.Resultinfo)
 		for _, pi := range tld.Events {
 			pis = append(pis, pi)
 		}

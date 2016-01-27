@@ -2,6 +2,7 @@ package udnssdk
 
 import (
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -115,7 +116,7 @@ func (s *DirectionalPoolsService) ListDirectionalGeoPools(query, account string)
 	if query != "" {
 		reqStr = fmt.Sprintf("%s?sort=NAME&query=%s", reqStr, query)
 	}
-	fmt.Printf("ListDirectionalPools: %s\n", reqStr)
+	log.Printf("ListDirectionalPools: %s\n", reqStr)
 	var tld AccountLevelGeoDirectionalGroupListDTO
 
 	res, err := s.client.get(reqStr, &tld)
@@ -143,7 +144,7 @@ func (s *DirectionalPoolsService) ListDirectionalGeoPools(query, account string)
 			}
 			return pis, res, err
 		}
-		fmt.Printf("ResultInfo: %+v\n", tld.Resultinfo)
+		log.Printf("ResultInfo: %+v\n", tld.Resultinfo)
 		for _, pi := range tld.GeoGroups {
 			pis = append(pis, pi)
 		}
@@ -166,7 +167,7 @@ func (s *DirectionalPoolsService) ListDirectionalIPPools(query, account string) 
 	if query != "" {
 		reqStr = fmt.Sprintf("%s?sort=NAME&query=%s", reqStr, query)
 	}
-	fmt.Printf("ListDirectionalPools: %s\n", reqStr)
+	log.Printf("ListDirectionalPools: %s\n", reqStr)
 	var tld AccountLevelIPDirectionalGroupListDTO
 
 	res, err := s.client.get(reqStr, &tld)
@@ -194,7 +195,7 @@ func (s *DirectionalPoolsService) ListDirectionalIPPools(query, account string) 
 			}
 			return pis, res, err
 		}
-		fmt.Printf("ResultInfo: %+v\n", tld.Resultinfo)
+		log.Printf("ResultInfo: %+v\n", tld.Resultinfo)
 		for _, pi := range tld.IpGroups {
 			pis = append(pis, pi)
 		}

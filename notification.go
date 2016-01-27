@@ -41,13 +41,11 @@ func NotificationPath(zone, typ, name, guid string) string {
 // List Notification
 func (s *SBTCService) ListNotifications(query, name, typ, zone string) ([]NotificationDTO, *Response, error) {
 	offset := 0
-
 	reqStr := NotificationPath(zone, typ, name, "")
 	log.Printf("DEBUG - ListNotifications: %s\n", reqStr)
 	var tld NotificationListDTO
-	//wrappedNotifications := []Notification{}
-
-	res, err := s.client.get(reqStr, &tld)
+	var res *Response
+	var err error
 	pis := []NotificationDTO{}
 	if query != "" {
 		reqStr = fmt.Sprintf("%s?sort=NAME&query=%s&offset=", reqStr, query)
@@ -59,7 +57,6 @@ func (s *SBTCService) ListNotifications(query, name, typ, zone string) ([]Notifi
 	waittime := 5 * time.Second
 	errcnt := 0
 	for true {
-
 		res, err := s.client.get(fmt.Sprintf("%s%d", reqStr, offset), &tld)
 		if err != nil {
 			if res.StatusCode >= 500 {
@@ -72,7 +69,7 @@ func (s *SBTCService) ListNotifications(query, name, typ, zone string) ([]Notifi
 			return pis, res, err
 
 		}
-		fmt.Printf("ResultInfo: %+v\n", tld.Resultinfo)
+		log.Printf("DEBUG - ResultInfo: %+v\n", tld.Resultinfo)
 		for _, pi := range tld.Notifications {
 			pis = append(pis, pi)
 		}
