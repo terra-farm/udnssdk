@@ -111,7 +111,7 @@ func GetAuthTokens(username, password, BaseURL string) (string, string, error) {
 		return "", "", err
 	}
 	// BUG: Looking for an intermittant edge case causing a JSON error
-	fmt.Printf("ResCode: %d Body: %s\n", res.StatusCode, body)
+	log.Printf("ResCode: %d Body: %s\n", res.StatusCode, body)
 
 	err = CheckAuthResponse(res, body)
 	if err != nil {
@@ -290,7 +290,7 @@ func CheckAuthResponse(r *http.Response, body []byte) error {
 
 	//var er ErrorResponseList
 	var er ErrorResponse
-	//fmt.Printf("Body: %s\n", body)
+	//log.Printf("Body: %s\n", body)
 
 	err := json.Unmarshal(body, &er)
 	//err = json.NewDecoder(r.Body).Decode(errorResponse)
@@ -329,7 +329,7 @@ func CheckResponse(r *http.Response) error {
 		return err
 	}
 
-	fmt.Printf("Body: %s\n", body)
+	log.Printf("Body: %s\n", body)
 	//var er ErrorResponseList
 	var er []ErrorResponse
 	err = json.Unmarshal(body, &er)

@@ -199,9 +199,6 @@ func (s *SBTCService) GetProbeAlerts(name, typ, zone string) ([]ProbeAlertDataDT
 	reqStr := AlertPath(zone, typ, name)
 	log.Printf("DEBUG - ListProbes: %s\n", reqStr)
 	var tld ProbeAlertDataListDTO
-	//wrappedProbes := []Probe{}
-
-	//	res, err := s.client.get(reqStr, &tld)
 	pads := []ProbeAlertDataDTO{}
 	var res *Response
 	var err error
@@ -223,7 +220,7 @@ func (s *SBTCService) GetProbeAlerts(name, typ, zone string) ([]ProbeAlertDataDT
 			return pads, res, err
 
 		}
-		fmt.Printf("ResultInfo: %+v\n", tld.Resultinfo)
+		log.Printf("ResultInfo: %+v\n", tld.Resultinfo)
 		for _, pad := range tld.Alerts {
 			pads = append(pads, pad)
 		}
@@ -265,17 +262,13 @@ func (s *SBTCService) UpdateProbe(name, typ, zone, guid string, dp ProbeInfoDTO)
 
 // List
 func (s *SBTCService) ListProbes(query, name, typ, zone string) ([]ProbeInfoDTO, *Response, error) {
-	// TODO: Soooo... This function does not handle pagination of Probes....
-	//v := url.Values{}
-
+	// This API does not support pagination.
 	reqStr := ProbePath(zone, typ, name, "")
 	if query != "" {
 		reqStr = fmt.Sprintf("%s?sort=NAME&query=%s", reqStr, query)
 	}
 	log.Printf("DEBUG - ListProbes: %s\n", reqStr)
 	var tld ProbeListDTO
-	//wrappedProbes := []Probe{}
-
 	res, err := s.client.get(reqStr, &tld)
 	dps := []ProbeInfoDTO{}
 

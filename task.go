@@ -2,6 +2,8 @@ package udnssdk
 
 import (
 	"fmt"
+	"log"
+	"time"
 )
 
 type TasksService struct {
@@ -16,13 +18,9 @@ type Task struct {
 }
 
 type TaskListDTO struct {
-	Tasks                   []Task `json:"tasks"`
-	Queryinfoq              string `json:"queryinfo/q"`
-	Queryinfosort           string `json:"queryinfo/reverse"`
-	Queryinfolimit          string `json:"queryinfo/limit"`
-	ResultinfototalCount    string `json:"resultinfo/totalCount"`
-	Resultinfooffset        string `json:"resultinfo/offset"`
-	ResultinforeturnedCount string `json:"resultinfo/returnedCount"`
+	Tasks      []Task     `json:"tasks"`
+	Queryinfo  QueryInfo  `json:"queryInfo"`
+	Resultinfo ResultInfo `json:"resultInfo"`
 }
 type taskWrapper struct {
 	Task Task `json:"task"`
@@ -87,25 +85,50 @@ func (s *TasksService) GetTaskResult(tid string) (*Response, error) {
 
 // List tasks
 //
-func (s *TasksService) ListTasks(query string, offset, limit int) ([]Task, *Response, error) {
-	// TODO: Soooo... This function does not handle pagination of Tasks....
-	//v := url.Values{}
-
+func (s *TasksService) ListTasks(query string) ([]Task, *Response, error) {
 	reqStr := "tasks"
 	var tld TaskListDTO
-	//wrappedTasks := []Task{}
+	offset := 0
+
+	log.Printf("DEBUG - ListTasks: %s\n", reqStr)
 
 	res, err := s.client.get(reqStr, &tld)
-	if err != nil {
-		return []Task{}, res, err
+	pis := []Task{}
+	if query != "" {
+		reqStr = fmt.Sprintf("%s?sort=NAME&query=%s&offset=", reqStr, query)
+	} else {
+		reqStr = fmt.Sprintf("%s?offset=", reqStr)
 	}
+	// TODO: Sane Configuration for timeouts / retries
+	timeout := 5
+	waittime := 5 * time.Second
+	errcnt := 0
+	for true {
 
-	tasks := []Task{}
-	for _, t := range tld.Tasks {
-		tasks = append(tasks, t)
+		res, err := s.client.get(fmt.Sprintf("%s%d", reqStr, offset), &tld)
+		if err != nil {
+			if res.StatusCode >= 500 {
+				errcnt = errcnt + 1
+				if errcnt < timeout {
+					time.Sleep(waittime)
+					continue
+				}
+			}
+			return pis, res, err
+
+		}
+		log.Printf("DEBUG - ResultInfo: %+v\n", tld.Resultinfo)
+		for _, pi := range tld.Tasks {
+			pis = append(pis, pi)
+		}
+		if tld.Resultinfo.ReturnedCount+tld.Resultinfo.Offset >= tld.Resultinfo.TotalCount {
+			return pis, res, nil
+		} else {
+			offset = tld.Resultinfo.ReturnedCount + tld.Resultinfo.Offset
+			continue
+		}
 	}
-
-	return tasks, res, nil
+	return pis, res, err
 }
 
 // DeleteTask deletes a task.
