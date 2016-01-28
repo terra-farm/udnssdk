@@ -6,10 +6,9 @@ import (
 	"time"
 )
 
-/* Manages Events */
-
+// EventInfoDTO wraps an event's info response
 type EventInfoDTO struct {
-	Id         string    `json:"id"`
+	ID         string    `json:"id"`
 	PoolRecord string    `json:"poolRecord"`
 	EventType  string    `json:"type"`
 	Start      time.Time `json:"start"`
@@ -18,69 +17,82 @@ type EventInfoDTO struct {
 	Notify     string    `json:"notify"`
 }
 
+// EventInfoListDTO wraps a list of event info and list metadata, from an index request
 type EventInfoListDTO struct {
 	Events     []EventInfoDTO `json:"events"`
 	Queryinfo  QueryInfo      `json:"queryInfo"`
 	Resultinfo ResultInfo     `json:"resultInfo"`
 }
 
+// EventPath generates a URI by zone, type, name & guid
 func EventPath(zone, typ, name, guid string) string {
 	if guid == "" {
 		return fmt.Sprintf("zones/%s/rrsets/%s/%s/events", zone, typ, name)
-	} else {
-
-		return fmt.Sprintf("zones/%s/rrsets/%s/%s/events/%s", zone, typ, name, guid)
 	}
+	return fmt.Sprintf("zones/%s/rrsets/%s/%s/events/%s", zone, typ, name, guid)
 }
 
-// List Event
-func (s *SBTCService) ListEvents(query, name, typ, zone string) ([]EventInfoDTO, *Response, error) {
-	offset := 0
-
-	reqStr := EventPath(zone, typ, name, "")
-	log.Printf("DEBUG - ListEvents: %s\n", reqStr)
-	var tld EventInfoListDTO
-	//wrappedEvents := []Event{}
-
-	res, err := s.client.get(reqStr, &tld)
-	pis := []EventInfoDTO{}
-	if query != "" {
-		reqStr = fmt.Sprintf("%s?sort=NAME&query=%s&offset=", reqStr, query)
-	} else {
-		reqStr = fmt.Sprintf("%s?offset=", reqStr)
-	}
+// ListAllEvents requests all events, using pagination and error handling
+func (s *SBTCService) ListAllEvents(query, name, typ, zone string) ([]EventInfoDTO, error) {
 	// TODO: Sane Configuration for timeouts / retries
-	timeout := 5
+	maxerrs := 5
 	waittime := 5 * time.Second
-	errcnt := 0
-	for true {
 
-		res, err := s.client.get(fmt.Sprintf("%s%d", reqStr, offset), &tld)
+	// init accumulators
+	pis := []EventInfoDTO{}
+	offset := 0
+	errcnt := 0
+
+	for {
+		reqEvents, ri, res, err := s.ListEvents(query, name, typ, zone, offset)
 		if err != nil {
 			if res.StatusCode >= 500 {
 				errcnt = errcnt + 1
-				if errcnt < timeout {
+				if errcnt < maxerrs {
 					time.Sleep(waittime)
 					continue
 				}
 			}
-			return pis, res, err
+			return pis, err
 		}
-		log.Printf("ResultInfo: %+v\n", tld.Resultinfo)
-		for _, pi := range tld.Events {
+
+		log.Printf("ResultInfo: %+v\n", ri)
+		for _, pi := range reqEvents {
 			pis = append(pis, pi)
 		}
-		if tld.Resultinfo.ReturnedCount+tld.Resultinfo.Offset >= tld.Resultinfo.TotalCount {
-			return pis, res, nil
-		} else {
-			offset = tld.Resultinfo.ReturnedCount + tld.Resultinfo.Offset
-			continue
+		if ri.ReturnedCount+ri.Offset >= ri.TotalCount {
+			return pis, nil
 		}
+		offset = ri.ReturnedCount + ri.Offset
+		continue
 	}
-	return pis, res, err
 }
 
-// Get a Event.
+func eventQueryPath(zone, typ, name, query string, offset int) string {
+	uri := EventPath(zone, typ, name, "")
+	if query != "" {
+		uri = fmt.Sprintf("%s?sort=NAME&query=%s&offset=%d", uri, query, offset)
+	} else {
+		uri = fmt.Sprintf("%s?offset=%d", uri, offset)
+	}
+	return uri
+}
+
+// ListEvents requests list of events by query, name, type & zone, and offset, also returning list metadata, the actual response, or an error
+func (s *SBTCService) ListEvents(query, name, typ, zone string, offset int) ([]EventInfoDTO, ResultInfo, *Response, error) {
+	var tld EventInfoListDTO
+
+	uri := eventQueryPath(zone, typ, name, query, offset)
+	res, err := s.client.get(uri, &tld)
+
+	pis := []EventInfoDTO{}
+	for _, pi := range tld.Events {
+		pis = append(pis, pi)
+	}
+	return pis, tld.Resultinfo, res, err
+}
+
+// GetEvent requests an event by name, type, zone & guid, also returning the actual response, or an error
 func (s *SBTCService) GetEvent(name, typ, zone, guid string) (EventInfoDTO, *Response, error) {
 	reqStr := EventPath(zone, typ, name, guid)
 	var t EventInfoDTO
@@ -88,26 +100,21 @@ func (s *SBTCService) GetEvent(name, typ, zone, guid string) (EventInfoDTO, *Res
 	return t, res, err
 }
 
-// Create a Event
+// CreateEvent requests creation of an event by name, type, zone, with provided event-info, returning actual response or an error
 func (s *SBTCService) CreateEvent(name, typ, zone string, ev EventInfoDTO) (*Response, error) {
 	reqStr := EventPath(zone, typ, name, "")
-	var retval interface{}
-	res, err := s.client.post(reqStr, ev, &retval)
-
-	return res, err
+	var ignored interface{}
+	return s.client.post(reqStr, ev, &ignored)
 }
 
-// Update
+// UpdateEvent requests update of an event by name, type, zone & guid, withprovided event-info, returning the actual response or an error
 func (s *SBTCService) UpdateEvent(name, typ, zone, guid string, ev EventInfoDTO) (*Response, error) {
 	reqStr := EventPath(zone, typ, name, guid)
-	var retval interface{}
-	res, err := s.client.put(reqStr, ev, &retval)
-
-	return res, err
+	var ignored interface{}
+	return s.client.put(reqStr, ev, &ignored)
 }
 
-// DeleteEvent
-//
+// DeleteEvent requests deletion of an event by name, type, zone & guid, returning the actual response or an error
 func (s *SBTCService) DeleteEvent(name, typ, zone, guid string) (*Response, error) {
 	path := EventPath(zone, typ, name, guid)
 	return s.client.delete(path, nil)
