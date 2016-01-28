@@ -28,7 +28,7 @@ var (
 	testIPDPoolAddress = "127.0.0.1"
 	testIPDPoolDescr   = "A Test IP Directional Pool Group"
 	testIPAddrDTO      = IPAddrDTO{Address: "127.0.0.1"}
-	testIPDPool        = AccountLevelIPDirectionalGroupDTO{Name: "testippool", Description: "An IP Test Pool", Ips: []IPAddrDTO{IPAddrDTO{Address: "127.0.0.1"}}}
+	testIPDPool        = AccountLevelIPDirectionalGroupDTO{Name: "testippool", Description: "An IP Test Pool", IPs: []IPAddrDTO{IPAddrDTO{Address: "127.0.0.1"}}}
 	testGeoDPool       = AccountLevelGeoDirectionalGroupDTO{Name: "testgeopool", Description: "A test geo pool", Codes: []string{"US, UK"}}
 	testGeoDPoolName   = "testgeodpool"
 	testGeoDPoolDescr  = "A Test Geo Directional Pool Group"
@@ -183,6 +183,7 @@ func Test_ListRRSets(t *testing.T) {
 			t.Logf("Found Profile %s for %s\n", rr.Profile.GetType(), rr.OwnerName)
 			st, er := json.Marshal(rr.Profile)
 			t.Logf("Marshal the profile to JSON: %s / %+v", string(st), er)
+			t.Logf("Check the Magic Profile: %+v\n", rr.Profile.GetProfileObject())
 		}
 	}
 }
@@ -267,6 +268,7 @@ func Test_ListAllRRSetsMid(t *testing.T) {
 	if rrsets[0].RData[0] != testIP2 {
 		t.Fatalf("RData[0]\"%s\" != testIP2\"%s\"", rrsets[0].RData[0], testIP2)
 	}
+	t.Logf("Profile Check: %+v", rrsets[0].Profile.GetProfileObject())
 }
 
 // Delete Test
@@ -588,14 +590,9 @@ func Test_ListEvents(t *testing.T) {
 	if !enableProbeTests {
 		t.SkipNow()
 	}
-	events, resp, err := testClient.SBTCService.ListEvents("", testProbeName, testProbeType, testProbeDomain)
+	events, err := testClient.SBTCService.ListAllEvents("", testProbeName, testProbeType, testProbeDomain)
 	t.Logf("Events: %+v \n", events)
-	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
-		if resp.Response.StatusCode == 404 {
-			t.Logf("ERROR - %+v", err)
-			t.SkipNow()
-		}
 		t.Fatal(err)
 	}
 }
@@ -606,7 +603,7 @@ func Test_ListNotifications(t *testing.T) {
 	if !enableProbeTests {
 		t.SkipNow()
 	}
-	events, resp, err := testClient.SBTCService.ListNotifications("", testProbeName, testProbeType, testProbeDomain)
+	events, resp, err := testClient.SBTCService.ListAllNotifications("", testProbeName, testProbeType, testProbeDomain)
 	t.Logf("Notifications: %+v \n", events)
 	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
