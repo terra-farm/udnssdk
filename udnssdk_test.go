@@ -183,6 +183,7 @@ func Test_ListRRSets(t *testing.T) {
 			t.Logf("Found Profile %s for %s\n", rr.Profile.GetType(), rr.OwnerName)
 			st, er := json.Marshal(rr.Profile)
 			t.Logf("Marshal the profile to JSON: %s / %+v", string(st), er)
+			t.Logf("Check the Magic Profile: %+v\n", rr.Profile.GetProfileObject())
 		}
 	}
 }
@@ -267,6 +268,7 @@ func Test_ListAllRRSetsMid(t *testing.T) {
 	if rrsets[0].RData[0] != testIP2 {
 		t.Fatalf("RData[0]\"%s\" != testIP2\"%s\"", rrsets[0].RData[0], testIP2)
 	}
+	t.Logf("Profile Check: %+v", rrsets[0].Profile.GetProfileObject())
 }
 
 // Delete Test

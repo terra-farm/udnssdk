@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -12,9 +13,12 @@ type RRSetsService struct {
 	client *Client
 }
 
-// Metaprofile does unknown things
+// Here is the big 'Profile' mess that should get refactored to a more managable place
+
+//type stringProfile StringProfile
 type Metaprofile struct {
-	Context string `json:"@context"`
+	Context     string `json:"@context"`
+	realprofile interface{}
 }
 
 // UnmarshalJSON does what it says on the tin
@@ -59,8 +63,114 @@ func (sp *StringProfile) String() string {
 type StringProfile struct {
 	Profile string `json:"profile,omitempty"`
 }
+type RDPoolProfile struct {
+	Context     string `json:"@context"`
+	Order       string `json:"order"`
+	Description string `json:"description"`
+}
 
-// RRSet wraps an RRSet resource
+type GeoInfo struct {
+	Name           string   `json:"name"`
+	IsAccountLevel bool     `json:"isAccountLevel,omitempty"`
+	Codes          []string `json:"codes"`
+}
+type IpInfo struct {
+	Name           string      `json:"name"`
+	IsAccountLevel bool        `json:"isAccountLevel,omitempty"`
+	Ips            []IPAddrDTO `json:"ips"`
+}
+type DPRDataInfo struct {
+	AllNonConfigured bool    `json:"allNonConfigured,omitempty"`
+	IpInfo           IpInfo  `json:"ipInfo,omitempty"`
+	GeoInfo          GeoInfo `json:"geoInfo,omitempty"`
+}
+type DirPoolProfile struct {
+	Context         string        `json:"@context"`
+	Description     string        `json:"description"`
+	ConflictResolve string        `json:"conflictResolve,omitempty"`
+	RDataInfo       []DPRDataInfo `json:"rdataInfo"`
+	NoResponse      DPRDataInfo   `json:"noResponse"`
+}
+type SBRDataInfo struct {
+	State         string `json:"state"`
+	RunProbes     bool   `json:"runProbes,omitempty"`
+	Priority      int    `json:"priority"`
+	FailoverDelay int    `json:"failoverDelay,omitempty"`
+	Threshold     int    `json:"threshold"`
+	Weight        int    `json:"weight"`
+}
+type BackupRecord struct {
+	RData         string `json:"rdata"`
+	FailoverDelay int    `json:"failoverDelay,omitempty"`
+}
+type SBPoolProfile struct {
+	Context       string         `json:"@context"`
+	Description   string         `json:"description"`
+	RunProbes     bool           `json:"runProbes,omitempty"`
+	ActOnProbes   bool           `json:"actOnProbes,omitempty"`
+	Order         string         `json:"order,omitempty"`
+	MaxActive     int            `json:"maxActive,omitempty"`
+	MaxServed     int            `json:"maxServed,omitempty"`
+	RDataInfo     []SBRDataInfo  `json:"rdataInfo"`
+	BackupRecords []BackupRecord `json:"backupRecords"`
+}
+type TCPoolProfile struct {
+	Context      string        `json:"@context"`
+	Description  string        `json:"description"`
+	RunProbes    bool          `json:"runProbes,omitempty"`
+	ActOnProbes  bool          `json:"actOnProbes,omitempty"`
+	MaxToLB      int           `json:"maxToLB,omitempty"`
+	RDataInfo    []SBRDataInfo `json:"rdataInfo"`
+	BackupRecord BackupRecord  `json:"backupRecord"`
+}
+
+func (sp *StringProfile) GetProfileObject() interface{} {
+	typ := sp.GetType()
+	if typ == "" {
+		return nil
+	}
+	tmp := strings.Split(typ, "/")
+	x := tmp[len(tmp)-1]
+	switch x {
+	case "DirPool.jsonschema":
+		var dpp DirPoolProfile
+		err := json.Unmarshal([]byte(sp.Profile), &dpp)
+		if err != nil {
+			log.Printf("Could not Unmarshal the DirPoolProfile.\n")
+			return nil
+		}
+		return dpp
+	case "RDPool.jsonschema":
+		var rdp RDPoolProfile
+		err := json.Unmarshal([]byte(sp.Profile), &rdp)
+		if err != nil {
+			log.Printf("Could not Unmarshal the RDPoolProfile.\n")
+			return nil
+		}
+		return rdp
+	case "SBPool.jsonschema":
+		var sbp SBPoolProfile
+		err := json.Unmarshal([]byte(sp.Profile), &sbp)
+		if err != nil {
+			log.Printf("Could not Unmarshal the SBPoolProfile.\n")
+			return nil
+		}
+		return sbp
+	case "TCPool.jsonschema":
+		var tcp TCPoolProfile
+		err := json.Unmarshal([]byte(sp.Profile), &tcp)
+		if err != nil {
+			log.Printf("Could not Unmarshal the TCPoolProfile.\n")
+			return nil
+		}
+		return tcp
+	default:
+		log.Printf("ERROR - Fall through on GetProfileObject - %s.\n", x)
+		return fmt.Errorf("Fallthrough on GetProfileObject type %s\n", x)
+	}
+
+}
+
 type RRSet struct {
 	OwnerName string         `json:"ownerName"`
 	RRType    string         `json:"rrtype"`
