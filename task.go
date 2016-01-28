@@ -6,133 +6,117 @@ import (
 	"time"
 )
 
+// TasksService provides access to the tasks resources
 type TasksService struct {
 	client *Client
 }
 
+// Task wraps a task response
 type Task struct {
-	TaskId         string `json:"taskId"`
+	TaskID         string `json:"taskId"`
 	TaskStatusCode string `json:"taskStatusCode"`
 	Message        string `json:"message"`
-	ResultUri      string `json:"resultUri"`
+	ResultURI      string `json:"resultUri"`
 }
 
+// TaskListDTO wraps a list of Task resources, from an HTTP response
 type TaskListDTO struct {
 	Tasks      []Task     `json:"tasks"`
 	Queryinfo  QueryInfo  `json:"queryInfo"`
 	Resultinfo ResultInfo `json:"resultInfo"`
 }
+
 type taskWrapper struct {
 	Task Task `json:"task"`
 }
 
-// taskPath links to the task url.
+// taskResultPath links to the task result url.
 func taskResultPath(tid string) string {
-	path := fmt.Sprintf("tasks/%s/result", tid)
-	/*
-		if tasktype != nil {
-			path += fmt.Sprintf("/%v", tasktype)
-			if task != nil {
-				path += fmt.Sprintf("/%v", task)
-			}
-		}
-	*/
-	return path
+	return fmt.Sprintf("tasks/%s/result", tid)
 }
+
+// taskPath links to the task url.
 func taskPath(tid string) string {
 	return fmt.Sprintf("tasks/%s", tid)
 }
 
-// Get the status of a task.
-func (s *TasksService) GetTaskStatus(tid string) (Task, *Response, error) {
-	reqStr := taskPath(tid)
-	var t Task
-	res, err := s.client.get(reqStr, &t)
-	if err != nil {
-		return t, res, err
+func taskQueryPath(query string, offset int) string {
+	if query != "" {
+		return fmt.Sprintf("tasks?sort=NAME&query=%s&offset=%d", query, offset)
 	}
+		return fmt.Sprintf("tasks?offset=%d", offset)
+}
+
+// GetTaskStatus Get the status of a task.
+func (s *TasksService) GetTaskStatus(tid string) (Task, *Response, error) {
+	uri := taskPath(tid)
+	var t Task
+	res, err := s.client.get(uri, &t)
 	return t, res, err
 }
 
-// HTTP BS to dance around bad program structure
-func (s *TasksService) GetTaskResultByURI(uri string) (*Response, error) {
-	req, err := s.client.NewRequest("GET", uri, nil)
-	if err != nil {
-		return nil, err
-	}
-	res, err := s.client.HttpClient.Do(req)
-
-	if err != nil {
-		return &Response{Response: res}, err
-	}
-	return &Response{Response: res}, err
-}
-
-func (s *TasksService) GetTaskResult(tid string) (*Response, error) {
+// GetTaskResultByID  requests a task by its task id
+func (s *TasksService) GetTaskResultByID(tid string) (*Response, error) {
 	uri := taskResultPath(tid)
-
-	req, err := s.client.NewRequest("GET", uri, nil)
-	if err != nil {
-		return nil, err
-	}
-	res, err := s.client.HttpClient.Do(req)
-
-	if err != nil {
-		return &Response{Response: res}, err
-	}
-	return &Response{Response: res}, err
+	return s.client.GetResultByURI(uri)
 }
 
-// List tasks
-//
-func (s *TasksService) ListTasks(query string) ([]Task, *Response, error) {
-	reqStr := "tasks"
-	var tld TaskListDTO
-	offset := 0
+// GetTaskResultByTask  requests a task by the provided task's result uri
+func (s *TasksService) GetTaskResultByTask(t Task) (*Response, error) {
+	return s.client.GetResultByURI(t.ResultURI)
+}
 
-	log.Printf("DEBUG - ListTasks: %s\n", reqStr)
-
-	res, err := s.client.get(reqStr, &tld)
-	pis := []Task{}
-	if query != "" {
-		reqStr = fmt.Sprintf("%s?sort=NAME&query=%s&offset=", reqStr, query)
-	} else {
-		reqStr = fmt.Sprintf("%s?offset=", reqStr)
-	}
+// ListAllTasks requests all tasks, list
+func (s *TasksService) ListAllTasks(query string) ([]Task, error) {
 	// TODO: Sane Configuration for timeouts / retries
-	timeout := 5
+	maxerrs := 5
 	waittime := 5 * time.Second
-	errcnt := 0
-	for true {
 
-		res, err := s.client.get(fmt.Sprintf("%s%d", reqStr, offset), &tld)
+	// init accumulators
+	dtos := []Task{}
+	offset := 0
+	errcnt := 0
+
+	for {
+		reqDtos, ri, res, err := s.ListTasks(query, offset)
 		if err != nil {
 			if res.StatusCode >= 500 {
 				errcnt = errcnt + 1
-				if errcnt < timeout {
+				if errcnt < maxerrs {
 					time.Sleep(waittime)
 					continue
 				}
 			}
-			return pis, res, err
+			return dtos, err
+		}
 
+		log.Printf("[DEBUG] ResultInfo: %+v\n", ri)
+		for _, d := range reqDtos {
+			dtos = append(dtos, d)
 		}
-		log.Printf("DEBUG - ResultInfo: %+v\n", tld.Resultinfo)
-		for _, pi := range tld.Tasks {
-			pis = append(pis, pi)
+		if ri.ReturnedCount+ri.Offset >= ri.TotalCount {
+			return dtos, nil
 		}
-		if tld.Resultinfo.ReturnedCount+tld.Resultinfo.Offset >= tld.Resultinfo.TotalCount {
-			return pis, res, nil
-		} else {
-			offset = tld.Resultinfo.ReturnedCount + tld.Resultinfo.Offset
-			continue
-		}
+		offset = ri.ReturnedCount + ri.Offset
+		continue
 	}
-	return pis, res, err
+}
+
+// ListTasks request tasks by query & offset, list them also returning list metadata, the actual response, or an error
+func (s *TasksService) ListTasks(query string, offset int) ([]Task, ResultInfo, *Response, error) {
+	var tld TaskListDTO
+
+	uri := taskQueryPath(query, offset)
+	res, err := s.client.get(uri, &tld)
+
+	ts := []Task{}
+	for _, t := range tld.Tasks {
+		ts = append(ts, t)
+	}
+	return ts, tld.Resultinfo, res, err
 }
 
 // DeleteTask deletes a task.
-//
 func (s *TasksService) DeleteTask(tid string) (*Response, error) {
 	path := taskPath(tid)
 	return s.client.delete(path, nil)

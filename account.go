@@ -4,10 +4,12 @@ import (
 	"fmt"
 )
 
+// AccountsService provides access to account resources
 type AccountsService struct {
 	client *Client
 }
 
+// Account represents responses from the service
 type Account struct {
 	AccountName           string `json:"accountName"`
 	AccountHolderUserName string `json:"accountHolderUserName"`
@@ -17,12 +19,10 @@ type Account struct {
 	AccountType           string `json:"accountType"`
 }
 
+// AccountListDTO represents a account index response
 type AccountListDTO struct {
 	Accounts   []Account  `json:"accounts"`
 	Resultinfo ResultInfo `json:"resultInfo"`
-}
-type accountWrapper struct {
-	Account Account `json:"account"`
 }
 
 // accountPath links to the account url.
@@ -34,24 +34,17 @@ func accountPath(accountName string) string {
 	return path
 }
 
-/*
-func accountPath(tid string) string {
-	return fmt.Sprintf("accounts/%s", tid)
-}
-*/
-
+// GetAccountsOfUser gets all the accounts of user
 func (s *AccountsService) GetAccountsOfUser() ([]Account, *Response, error) {
-	reqStr := accountPath("")
 	var ald AccountListDTO
-	res, err := s.client.get(reqStr, &ald)
-	if err != nil {
-		return []Account{}, res, err
-	}
+	uri := accountPath("")
+	res, err := s.client.get(uri, &ald)
+
 	accts := []Account{}
 	for _, t := range ald.Accounts {
 		accts = append(accts, t)
 	}
-	return accts, res, nil
+	return accts, res, err
 }
 
 /*

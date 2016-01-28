@@ -146,7 +146,7 @@ func Test_CreateClient(t *testing.T) {
 	t.Logf("Client created successfully.\n")
 }
 
-func Test_GetRRSetsPre(t *testing.T) {
+func Test_ListAllRRSetsPre(t *testing.T) {
 	if testClient == nil {
 		t.Fatalf("TestClient Not Defined?\n")
 	}
@@ -154,15 +154,11 @@ func Test_GetRRSetsPre(t *testing.T) {
 		t.SkipNow()
 	}
 
-	rrsets, resp, err := testClient.RRSets.GetRRSets(testDomain, testHostname, "ANY")
+	rrsets, err := testClient.RRSets.ListAllRRSets(testDomain, testHostname, "ANY")
 
-	t.Logf("GetRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
+	t.Logf("ListAllRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
 	t.Logf("RRSets: %+v\n", rrsets)
-	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
-		if resp.Response.StatusCode == 404 {
-			t.SkipNow()
-		}
 		t.Fatal(err)
 	}
 }
@@ -171,14 +167,10 @@ func Test_ListRRSets(t *testing.T) {
 	if !enableRRSetTests {
 		t.SkipNow()
 	}
-	rrsets, resp, err := testClient.RRSets.GetRRSets(testDomain, "", "")
-	t.Logf("GetRRSets(%s, \"\", \"\")", testDomain)
+	rrsets, err := testClient.RRSets.ListAllRRSets(testDomain, "", "")
+	t.Logf("ListAllRRSets(%s, \"\", \"\")", testDomain)
 	t.Logf("RRSets: %+v\n", rrsets)
-	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
-		if resp.Response.StatusCode == 404 {
-			t.SkipNow()
-		}
 		t.Fatal(err)
 	}
 	t.Logf("Checking for profiles...\n")
@@ -186,7 +178,7 @@ func Test_ListRRSets(t *testing.T) {
 		if rr.Profile != nil {
 			typ := rr.Profile.GetType()
 			if typ == "" {
-				t.Fatal("Could not get type for profile %+v\n", rr.Profile)
+				t.Fatalf("Could not get type for profile %+v\n", rr.Profile)
 			}
 			t.Logf("Found Profile %s for %s\n", rr.Profile.GetType(), rr.OwnerName)
 			st, er := json.Marshal(rr.Profile)
@@ -217,18 +209,17 @@ func Test_Create_RRSets(t *testing.T) {
 
 // Another Get  Test if it matchs the Ip in IP1
 
-func Test_GetRRSetsMid1(t *testing.T) {
+func Test_ListAllRRSetsMid1(t *testing.T) {
 
 	if !enableRRSetTests {
 		t.SkipNow()
 
 	}
 
-	rrsets, resp, err := testClient.RRSets.GetRRSets(testDomain, testHostname, "ANY")
+	rrsets, err := testClient.RRSets.ListAllRRSets(testDomain, testHostname, "ANY")
 
-	t.Logf("GetRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
+	t.Logf("ListAllRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
 	t.Logf("RRSets: %+v\n", rrsets)
-	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -258,18 +249,17 @@ func Test_Update_RRSets(t *testing.T) {
 		t.Fatal(err)
 	}
 } // Another Get Test if it matches the Ip in IP2
-func Test_GetRRSetsMid(t *testing.T) {
+func Test_ListAllRRSetsMid(t *testing.T) {
 
 	if !enableRRSetTests {
 		t.SkipNow()
 
 	}
 
-	rrsets, resp, err := testClient.RRSets.GetRRSets(testDomain, testHostname, "ANY")
+	rrsets, err := testClient.RRSets.ListAllRRSets(testDomain, testHostname, "ANY")
 
-	t.Logf("GetRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
+	t.Logf("ListAllRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
 	t.Logf("RRSets: %+v\n", rrsets)
-	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -296,10 +286,9 @@ func Test_Delete_RRSets(t *testing.T) {
 	}
 	t.Logf("Deleting %s\n", testHostname)
 	t.Logf("Get RRSet for %s\n", testHostname)
-	rrsets, resp, err := testClient.RRSets.GetRRSets(testDomain, testHostname, "ANY")
-	t.Logf("GetRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
+	rrsets, err := testClient.RRSets.ListAllRRSets(testDomain, testHostname, "ANY")
+	t.Logf("ListAllRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
 	t.Logf("RRSets: %+v\n", rrsets)
-	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -323,33 +312,25 @@ func Test_Delete_RRSets(t *testing.T) {
 	}
 }
 
-func Test_GetRRSetsPost(t *testing.T) {
+func Test_ListAllRRSetsPost(t *testing.T) {
 
 	if !enableRRSetTests {
 		t.SkipNow()
 
 	}
-	rrsets, resp, err := testClient.RRSets.GetRRSets(testDomain, testHostname, "ANY")
+	rrsets, err := testClient.RRSets.ListAllRRSets(testDomain, testHostname, "ANY")
 
-	t.Logf("GetRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
+	t.Logf("ListAllRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
 	t.Logf("RRSets: %+v\n", rrsets)
-	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
-		if resp.Response.StatusCode == 404 {
-			return
-		}
 		t.Fatal(err)
 	}
 }
 
 func Test_ListTasks(t *testing.T) {
-	tasks, resp, err := testClient.Tasks.ListTasks("")
+	tasks, err := testClient.Tasks.ListAllTasks("")
 	t.Logf("Tasks: %+v \n", tasks)
-	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
-		if resp.Response.StatusCode == 404 {
-			t.SkipNow()
-		}
 		t.Fatal(err)
 	}
 }
@@ -391,7 +372,7 @@ func TestListZonesOfAccount(t *testing.T) {
 }
 */
 
-func Test_ListDirectionPoolsGeoNoQuery(t *testing.T) {
+func Test_ListAllDirectionPoolsGeoNoQuery(t *testing.T) {
 	if !enableDirectionalPoolTests {
 		t.SkipNow()
 	}
@@ -400,20 +381,15 @@ func Test_ListDirectionPoolsGeoNoQuery(t *testing.T) {
 		t.SkipNow()
 	}
 	accountName := testAccounts[0].AccountName
-	dpools, resp, err := testClient.DirectionalPools.ListDirectionalGeoPools("", accountName)
+	dpools, err := testClient.DirectionalPools.ListAllDirectionalGeoPools("", accountName)
 	t.Logf("Geo Pools: %v \n", dpools)
-	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
-		if resp.Response.StatusCode == 404 {
-			t.Logf("Error: %+v", err)
-			t.SkipNow()
-		}
 		t.Fatal(err)
 	}
 
 	t.SkipNow()
 }
-func Test_ListDirectionPoolsGeoQuery(t *testing.T) {
+func Test_ListAllDirectionPoolsGeoQuery(t *testing.T) {
 	if !enableDirectionalPoolTests {
 		t.SkipNow()
 	}
@@ -422,21 +398,16 @@ func Test_ListDirectionPoolsGeoQuery(t *testing.T) {
 		t.SkipNow()
 	}
 	accountName := testAccounts[0].AccountName
-	dpools, resp, err := testClient.DirectionalPools.ListDirectionalGeoPools(testQuery, accountName)
+	dpools, err := testClient.DirectionalPools.ListAllDirectionalGeoPools(testQuery, accountName)
 	t.Logf("Geo Pools: %v \n", dpools)
-	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
-		if resp.Response.StatusCode == 404 {
-			t.Logf("Error: %+v", err)
-			t.SkipNow()
-		}
 		t.Fatal(err)
 	}
 
 	t.SkipNow()
 }
 
-func Test_ListDirectionalPoolsIPNoQuery(t *testing.T) {
+func Test_ListAllDirectionalPoolsIPNoQuery(t *testing.T) {
 	if !enableDirectionalPoolTests {
 		t.SkipNow()
 	}
@@ -445,20 +416,15 @@ func Test_ListDirectionalPoolsIPNoQuery(t *testing.T) {
 		t.SkipNow()
 	}
 	accountName := testAccounts[0].AccountName
-	dpools, resp, err := testClient.DirectionalPools.ListDirectionalIPPools("", accountName)
+	dpools, err := testClient.DirectionalPools.ListAllDirectionalIPPools("", accountName)
 	t.Logf("IP Pools: %v \n", dpools)
-	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
-		if resp.Response.StatusCode == 404 {
-			t.Logf("Error: %+v", err)
-			t.SkipNow()
-		}
 		t.Fatal(err)
 	}
 
 	t.SkipNow()
 }
-func Test_ListDirectionalPoolsIPQuery(t *testing.T) {
+func Test_ListAllDirectionalPoolsIPQuery(t *testing.T) {
 	if !enableDirectionalPoolTests {
 		t.SkipNow()
 	}
@@ -467,14 +433,9 @@ func Test_ListDirectionalPoolsIPQuery(t *testing.T) {
 		t.SkipNow()
 	}
 	accountName := testAccounts[0].AccountName
-	dpools, resp, err := testClient.DirectionalPools.ListDirectionalIPPools(testQuery, accountName)
+	dpools, err := testClient.DirectionalPools.ListAllDirectionalIPPools(testQuery, accountName)
 	t.Logf("IP Pools: %v \n", dpools)
-	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
-		if resp.Response.StatusCode == 404 {
-			t.Logf("Error: %+v", err)
-			t.SkipNow()
-		}
 		t.Fatal(err)
 	}
 
@@ -606,14 +567,9 @@ func Test_GetProbeAlerts(t *testing.T) {
 	if !enableProbeTests {
 		t.SkipNow()
 	}
-	probes, resp, err := testClient.SBTCService.GetProbeAlerts(testProbeName, testProbeType, testProbeDomain)
+	probes, err := testClient.SBTCService.ListAllProbeAlerts(testProbeName, testProbeType, testProbeDomain)
 	t.Logf("Probe Alertss: %+v \n", probes)
-	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
-		if resp.Response.StatusCode == 404 {
-			t.Logf("ERROR - %+v", err)
-			t.SkipNow()
-		}
 		t.Fatal(err)
 	}
 	/*
