@@ -17,8 +17,7 @@ type RRSetsService struct {
 
 //type stringProfile StringProfile
 type Metaprofile struct {
-	Context     string `json:"@context"`
-	realprofile interface{}
+	Context string `json:"@context"`
 }
 
 // UnmarshalJSON does what it says on the tin
