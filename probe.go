@@ -168,7 +168,7 @@ type FTPProbeDetailsDTO struct {
 // TCPProbeDetailsDTO wraps TCP probe details
 type TCPProbeDetailsDTO struct {
 	Port      int                             `json:"port,omitempty"`
-	ControlIP string                          `json:"controlip,omitempty"`
+	ControlIP string                          `json:"controlIP,omitempty"`
 	Limits    map[string]ProbeDetailsLimitDTO `json:"limits"`
 }
 
@@ -182,8 +182,8 @@ type SMTPProbeDetailsDTO struct {
 type SMTPSENDProbeDetailsDTO struct {
 	Port    int                             `json:"port,omitempty"`
 	From    string                          `json:"from"`
-	To      string                          `json:"from"`
-	Message string                          `json:"from,omitempty"`
+	To      string                          `json:"to"`
+	Message string                          `json:"message,omitempty"`
 	Limits  map[string]ProbeDetailsLimitDTO `json:"limits"`
 }
 
