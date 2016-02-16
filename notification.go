@@ -33,7 +33,7 @@ type NotificationListDTO struct {
 }
 
 // NotificationPath generates a URI by zone, type & guid
-func NotificationPath(zone, typ, name, guid string) string {
+func notificationPath(zone, typ, name, guid string) string {
 	if guid == "" {
 		return fmt.Sprintf("zones/%s/rrsets/%s/%s/notifications", zone, typ, name)
 	}
@@ -78,7 +78,7 @@ func (s *SBTCService) ListAllNotifications(query, name, typ, zone string) ([]Not
 }
 
 func notificationQueryPath(zone, typ, name, query string, offset int) string {
-	uri := NotificationPath(zone, typ, name, "")
+	uri := notificationPath(zone, typ, name, "")
 	if query != "" {
 		uri = fmt.Sprintf("%s?sort=NAME&query=%s&offset=%d", uri, query, offset)
 	} else {
@@ -103,29 +103,29 @@ func (s *SBTCService) ListNotifications(query, name, typ, zone string, offset in
 }
 
 // GetNotification returns a notification by name, type, zone & guid
-func (s *SBTCService) GetNotification(name, typ, zone, guid string) (NotificationInfoDTO, *Response, error) {
-	reqStr := NotificationPath(zone, typ, name, guid)
-	var t NotificationInfoDTO
+func (s *SBTCService) GetNotification(name, typ, zone, email string) (NotificationDTO, *Response, error) {
+	reqStr := notificationPath(zone, typ, name, email)
+	var t NotificationDTO
 	res, err := s.client.get(reqStr, &t)
 	return t, res, err
 }
 
-// CreateNotification creates a notification by name, type & zone, with the NotificationInfoDTO ev
-func (s *SBTCService) CreateNotification(name, typ, zone string, ev NotificationInfoDTO) (*Response, error) {
-	reqStr := NotificationPath(zone, typ, name, "")
+// CreateNotification creates a notification by name, type & zone, with the NotificationDTO ev
+func (s *SBTCService) CreateNotification(name, typ, zone, email string, ev NotificationDTO) (*Response, error) {
+	reqStr := notificationPath(zone, typ, name, "")
 	var ignored interface{}
 	return s.client.post(reqStr, ev, &ignored)
 }
 
-// UpdateNotification updates a notification by name, type, zone & guid, with NotificationInfoDTO ev
-func (s *SBTCService) UpdateNotification(name, typ, zone, guid string, ev NotificationInfoDTO) (*Response, error) {
-	reqStr := NotificationPath(zone, typ, name, guid)
+// UpdateNotification updates a notification by name, type, zone & email, with NotificationDTO ev
+func (s *SBTCService) UpdateNotification(name, typ, zone, email string, ev NotificationDTO) (*Response, error) {
+	reqStr := notificationPath(zone, typ, name, email)
 	var ignored interface{}
 	return s.client.put(reqStr, ev, &ignored)
 }
 
-// DeleteNotification deletes a notification by name, type, zone & guid
-func (s *SBTCService) DeleteNotification(name, typ, zone, guid string) (*Response, error) {
-	path := NotificationPath(zone, typ, name, guid)
+// DeleteNotification deletes a notification by name, type, zone & email
+func (s *SBTCService) DeleteNotification(name, typ, zone, email string) (*Response, error) {
+	path := notificationPath(zone, typ, name, email)
 	return s.client.delete(path, nil)
 }

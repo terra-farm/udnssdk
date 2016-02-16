@@ -354,26 +354,6 @@ func Test_ListAccountsOfUser(t *testing.T) {
 	}
 }
 
-/*
-// TODO: Implement Zones
-func TestListZonesOfAccount(t *testing.T) {
-	if testAccounts == nil {
-		t.Logf("No Accounts Present, skipping...")
-		t.SkipNow()
-	}
-	zones, resp, err := testClient.Accounts.GetAccountsOfUser()
-	t.Logf("Zones: %v \n", zones)
-	t.Logf("Response: %+v\n", resp.Response)
-	testZones = zones
-	if err != nil {
-		if resp.Response.StatusCode == 404 {
-			t.SkipNow()
-		}
-		t.Fatal(err)
-	}
-}
-*/
-
 func Test_ListAllDirectionPoolsGeoNoQuery(t *testing.T) {
 	if !enableDirectionalPoolTests {
 		t.SkipNow()
