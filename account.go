@@ -83,7 +83,7 @@ func (s *AccountsService) GetAccountResultByURI(uri string) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	res, err := s.client.HttpClient.Do(req)
+	res, err := s.client.HTTPClient.Do(req)
 
 	if err != nil {
 		return &Response{Response: res}, err

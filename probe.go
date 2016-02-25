@@ -1,7 +1,6 @@
 package udnssdk
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -213,7 +212,7 @@ type ProbeListDTO struct {
 }
 
 // ProbePath generates the URI path for a probe
-func probePath(zone, typ, name, guid string) string {
+func ProbePath(zone, typ, name, guid string) string {
 	if guid == "" {
 		return fmt.Sprintf("zones/%s/rrsets/%s/%s/probes", zone, typ, name)
 	}
@@ -221,12 +220,12 @@ func probePath(zone, typ, name, guid string) string {
 }
 
 // AlertPath generates the URI path for an alert
-func alertPath(zone, typ, name string) string {
+func AlertPath(zone, typ, name string) string {
 	return fmt.Sprintf("zones/%s/rrsets/%s/%s/alerts", zone, typ, name)
 }
 
 func probeQueryPath(zone, typ, name, query string) string {
-	uri := probePath(zone, typ, name, "")
+	uri := ProbePath(zone, typ, name, "")
 	if query != "" {
 		uri = fmt.Sprintf("%s?sort=NAME&query=%s", uri, query)
 	}
@@ -234,7 +233,7 @@ func probeQueryPath(zone, typ, name, query string) string {
 }
 
 func probeAlertQueryPath(zone, typ, name string, offset int) string {
-	baseURI := alertPath(zone, typ, name)
+	baseURI := AlertPath(zone, typ, name)
 	return fmt.Sprintf("%s?offset=%d", baseURI, offset)
 }
 
@@ -291,23 +290,21 @@ func (s *SBTCService) ListProbeAlerts(name, typ, zone string, offset int) ([]Pro
 // GetProbe returns a probe with name, type, zone & guid
 func (s *SBTCService) GetProbe(name, typ, zone, guid string) (ProbeInfoDTO, *Response, error) {
 	var t ProbeInfoDTO
-	uri := probePath(zone, typ, name, guid)
+	uri := ProbePath(zone, typ, name, guid)
 	res, err := s.client.get(uri, &t)
 	return t, res, err
 }
 
 // CreateProbe creates a probe with name, type & zone using the ProbeInfoDTO dp
-func (s *SBTCService) CreateProbe(name, typ, zone string, dp ProbeInfoDTO) (string, string, *Response, error) {
-	uri := probePath(zone, typ, name, "")
-	var returnbuffer bytes.Buffer
-	r, e := s.client.post(uri, dp, &returnbuffer)
-	probeuri := r.Header.Get("Location")
-	return probeuri, returnbuffer.String(), r, e
+func (s *SBTCService) CreateProbe(name, typ, zone string, dp ProbeInfoDTO) (*Response, error) {
+	uri := ProbePath(zone, typ, name, "")
+	var ignored interface{}
+	return s.client.post(uri, dp, &ignored)
 }
 
 // UpdateProbe updates a probe given a name, type, zone & guid with the ProbeInfoDTO dp
 func (s *SBTCService) UpdateProbe(name, typ, zone, guid string, dp ProbeInfoDTO) (*Response, error) {
-	uri := probePath(zone, typ, name, guid)
+	uri := ProbePath(zone, typ, name, guid)
 	var ignored interface{}
 	return s.client.put(uri, dp, &ignored)
 }
@@ -331,6 +328,6 @@ func (s *SBTCService) ListProbes(query, name, typ, zone string) ([]ProbeInfoDTO,
 
 // DeleteProbe deletes a probe by its name, type, zone & guid
 func (s *SBTCService) DeleteProbe(name, typ, zone, guid string) (*Response, error) {
-	uri := probePath(zone, typ, name, guid)
+	uri := ProbePath(zone, typ, name, guid)
 	return s.client.delete(uri, nil)
 }
