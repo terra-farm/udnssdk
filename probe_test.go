@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func Test_ListProbes(t *testing.T) {
+func Test_ProbesSelectProbes(t *testing.T) {
 	if !enableIntegrationTests {
 		t.SkipNow()
 	}
@@ -17,7 +17,12 @@ func Test_ListProbes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	probes, resp, err := testClient.SBTCService.ListProbes("", testProbeName, testProbeType, testProbeDomain)
+	r := RRSetKey{
+		Zone: testProbeDomain,
+		Type: testProbeType,
+		Name: testProbeName,
+	}
+	probes, resp, err := testClient.Probes.Select(r, "")
 
 	if err != nil {
 		if resp.Response.StatusCode == 404 {
@@ -51,12 +56,17 @@ func Test_GetProbeAlerts(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	probes, err := testClient.SBTCService.ListAllProbeAlerts(testProbeName, testProbeType, testProbeDomain)
+	r := RRSetKey{
+		Zone: testProbeDomain,
+		Type: testProbeType,
+		Name: testProbeName,
+	}
+	alerts, err := testClient.Alerts.Select(r)
 
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("Probe Alerts: %+v \n", probes)
+	t.Logf("Probe Alerts: %+v \n", alerts)
 }
 
 /* TODO: A full probe test suite.  I'm not really even sure I understand how this
