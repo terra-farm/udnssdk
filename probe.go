@@ -400,10 +400,10 @@ func (s *AlertsService) Select(z RRSetKey) ([]ProbeAlertDataDTO, error) {
 }
 
 // SelectWithOffset returns the probe alerts with a RRSetKey, accepting an offset
-func (s *AlertsService) SelectWithOffset(z RRSetKey, offset int) ([]ProbeAlertDataDTO, ResultInfo, *Response, error) {
+func (s *AlertsService) SelectWithOffset(r RRSetKey, offset int) ([]ProbeAlertDataDTO, ResultInfo, *Response, error) {
 	var ald ProbeAlertDataListDTO
 
-	uri := z.AlertsQueryURI(offset)
+	uri := r.AlertsQueryURI(offset)
 	res, err := s.client.get(uri, &ald)
 
 	as := []ProbeAlertDataDTO{}
