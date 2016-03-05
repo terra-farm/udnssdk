@@ -29,6 +29,58 @@ type EventInfoListDTO struct {
 	Resultinfo ResultInfo     `json:"resultInfo"`
 }
 
+// EventPath generates a URI by zone, type, name & guid
+func EventPath(zone, typ, name, guid string) string {
+	e := &EventKey{Zone: zone, Type: typ, Name: name, GUID: guid}
+	if guid == "" {
+		return e.RRSetKey().EventsURI()
+	}
+	return e.URI()
+}
+
+// ListAllEvents requests all events, using pagination and error handling
+func (s *SBTCService) ListAllEvents(query, name, typ, zone string) ([]EventInfoDTO, error) {
+	r := RRSetKey{Zone: zone, Type: typ, Name: name}
+	return s.Events().Select(r, query)
+}
+
+func eventQueryPath(zone, typ, name, query string, offset int) string {
+	r := RRSetKey{Zone: zone, Type: typ, Name: name}
+	return r.EventsQueryURI(query, offset)
+}
+
+// ListEvents requests list of events by query, name, type & zone, and offset, also returning list metadata, the actual response, or an error
+func (s *SBTCService) ListEvents(query, name, typ, zone string, offset int) ([]EventInfoDTO, ResultInfo, *Response, error) {
+	r := RRSetKey{Zone: zone, Type: typ, Name: name}
+	return s.Events().SelectWithOffset(r, query, offset)
+}
+
+// GetEvent requests an event by name, type, zone & guid, also returning the actual response, or an error
+func (s *SBTCService) GetEvent(name, typ, zone, guid string) (EventInfoDTO, *Response, error) {
+	e := EventKey{Zone: zone, Type: typ, Name: name, GUID: guid}
+	return s.Events().Find(e)
+}
+
+// CreateEvent requests creation of an event by name, type, zone, with provided event-info, returning actual response or an error
+func (s *SBTCService) CreateEvent(name, typ, zone string, ev EventInfoDTO) (*Response, error) {
+	r := RRSetKey{Zone: zone, Type: typ, Name: name}
+	return s.Events().Create(r, ev)
+}
+
+// UpdateEvent requests update of an event by name, type, zone & guid, withprovided event-info, returning the actual response or an error
+func (s *SBTCService) UpdateEvent(name, typ, zone, guid string, ev EventInfoDTO) (*Response, error) {
+	e := EventKey{Zone: zone, Type: typ, Name: name, GUID: guid}
+	return s.Events().Update(e, ev)
+}
+
+// DeleteEvent requests deletion of an event by name, type, zone & guid, returning the actual response or an error
+func (s *SBTCService) DeleteEvent(name, typ, zone, guid string) (*Response, error) {
+	e := EventKey{Zone: zone, Type: typ, Name: name, GUID: guid}
+	return s.Events().Delete(e)
+}
+
+// ===== //
+
 // Events builds an EventService from an SBTCService
 func (s *SBTCService) Events() *EventsService {
 	return &EventsService{client: s.client}
