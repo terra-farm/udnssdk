@@ -62,16 +62,19 @@ type Client struct {
 	// UltraDNS has 'zones' and 'rrsets'.  We really only care about RR Sets for
 	// this implementation.
 	RRSets *RRSetsService
-	// UltraDNS Tasks API
-	Tasks *TasksService
 	// Accounts API
 	Accounts *AccountsService
-	// Directional Pools API
-	DirectionalPools *DirectionalPoolsService
-	// Probes API
-	Probes *ProbesService
 	// Probe Alerts API
 	Alerts *AlertsService
+	// Directional Pools API
+	DirectionalPools *DirectionalPoolsService
+	// Events API
+	Events *EventsService
+	// Probes API
+	Probes *ProbesService
+	// UltraDNS Tasks API
+	Tasks *TasksService
+
 	// SBTC API
 	SBTCService *SBTCService
 }
@@ -90,6 +93,8 @@ func NewClient(username, password, BaseURL string) (*Client, error) {
 	c.Probes = &ProbesService{client: c}
 	c.Alerts = &AlertsService{client: c}
 	c.SBTCService = &SBTCService{client: c}
+	c.Events = &EventsService{client: c}
+	c.Probes = &ProbesService{client: c}
 	return c, nil
 }
 

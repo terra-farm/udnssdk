@@ -49,6 +49,23 @@ func (r *RRSetKey) AlertsQueryURI(offset int) string {
 	return uri
 }
 
+// EventsURI generates the URI for an RRSet
+func (r *RRSetKey) EventsURI() string {
+	return fmt.Sprintf("%s/events", r.URI())
+}
+
+// EventsQueryURI generates the events query URI for an RRSet with query
+func (r *RRSetKey) EventsQueryURI(query string, offset int) string {
+	uri := r.EventsURI()
+	if query != "" {
+		return fmt.Sprintf("%s?sort=NAME&query=%s&offset=%d", uri, query, offset)
+	}
+	if offset != 0 {
+		return fmt.Sprintf("%s?offset=%d", uri, offset)
+	}
+	return uri
+}
+
 // ProbesURI generates the probes URI for an RRSet
 func (r *RRSetKey) ProbesURI() string {
 	return fmt.Sprintf("%s/probes", r.URI())
