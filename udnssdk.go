@@ -70,6 +70,8 @@ type Client struct {
 	DirectionalPools *DirectionalPoolsService
 	// Probes API
 	SBTCService *SBTCService
+	// Events API
+	Events *EventsService
 }
 
 // NewClient returns a new ultradns API client.
@@ -91,6 +93,7 @@ func NewClient(username, password, BaseURL string) (*Client, error) {
 	c.Tasks = &TasksService{client: c}
 	c.Accounts = &AccountsService{client: c}
 	c.DirectionalPools = &DirectionalPoolsService{client: c}
+	c.Events = &EventsService{client: c}
 	c.SBTCService = &SBTCService{client: c}
 	return c, nil
 }
@@ -110,6 +113,7 @@ func newStubClient(username, password, BaseURL, accesstoken, refreshtoken string
 	c.Tasks = &TasksService{client: c}
 	c.Accounts = &AccountsService{client: c}
 	c.DirectionalPools = &DirectionalPoolsService{client: c}
+	c.Events = &EventsService{client: c}
 	c.SBTCService = &SBTCService{client: c}
 	return c, nil
 }
