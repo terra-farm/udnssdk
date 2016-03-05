@@ -28,6 +28,9 @@ func Test_ListProbes(t *testing.T) {
 	}
 }
 
+/* TODO: A full probe test suite.  I'm not really even sure I understand how this
+ * works well enough to write one yet.  What is the correct order of operations?
+ */
 
 
 func Test_GetProbeAlerts(t *testing.T) {
