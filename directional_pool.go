@@ -69,7 +69,7 @@ func DirectionalPoolPath(acct, typ, slugID string) string {
 	p := DirectionalPoolKey{
 		Account: AccountKey(acct),
 		Type:    typ,
-		ID:      slugID,
+		Name:    slugID,
 	}
 	return p.URI()
 }
@@ -99,7 +99,7 @@ func DirectionalGeoPoolQueryPath(account, query string, offset int) string {
 func (s *DirectionalPoolsService) GetDirectionalGeoPool(name, acct string) (AccountLevelGeoDirectionalGroupDTO, *Response, error) {
 	p := GeoDirectionalPoolKey{
 		Account: AccountKey(acct),
-		ID:      name,
+		Name:    name,
 	}
 	return s.Geos().Find(p)
 }
@@ -108,7 +108,7 @@ func (s *DirectionalPoolsService) GetDirectionalGeoPool(name, acct string) (Acco
 func (s *DirectionalPoolsService) GetDirectionalIPPool(name, acct string) (AccountLevelIPDirectionalGroupDTO, *Response, error) {
 	p := IPDirectionalPoolKey{
 		Account: AccountKey(acct),
-		ID:      name,
+		Name:    name,
 	}
 	return s.IPs().Find(p)
 }
@@ -117,7 +117,7 @@ func (s *DirectionalPoolsService) GetDirectionalIPPool(name, acct string) (Accou
 func (s *DirectionalPoolsService) CreateDirectionalGeoPool(name, acct string, dp AccountLevelGeoDirectionalGroupDTO) (*Response, error) {
 	p := GeoDirectionalPoolKey{
 		Account: AccountKey(acct),
-		ID:      name,
+		Name:    name,
 	}
 	return s.Geos().Create(p, dp)
 }
@@ -126,7 +126,7 @@ func (s *DirectionalPoolsService) CreateDirectionalGeoPool(name, acct string, dp
 func (s *DirectionalPoolsService) CreateDirectionalIPPool(name, acct string, dp AccountLevelIPDirectionalGroupDTO) (*Response, error) {
 	p := IPDirectionalPoolKey{
 		Account: AccountKey(acct),
-		ID:      name,
+		Name:    name,
 	}
 	return s.IPs().Create(p, dp)
 }
@@ -135,7 +135,7 @@ func (s *DirectionalPoolsService) CreateDirectionalIPPool(name, acct string, dp 
 func (s *DirectionalPoolsService) UpdateDirectionalGeoPool(name, acct string, dp AccountLevelGeoDirectionalGroupDTO) (*Response, error) {
 	p := GeoDirectionalPoolKey{
 		Account: AccountKey(acct),
-		ID:      name,
+		Name:    name,
 	}
 	return s.Geos().Update(p, dp)
 }
@@ -144,7 +144,7 @@ func (s *DirectionalPoolsService) UpdateDirectionalGeoPool(name, acct string, dp
 func (s *DirectionalPoolsService) UpdateDirectionalIPPool(name, acct string, dp AccountLevelIPDirectionalGroupDTO) (*Response, error) {
 	p := IPDirectionalPoolKey{
 		Account: AccountKey(acct),
-		ID:      name,
+		Name:    name,
 	}
 	return s.IPs().Update(p, dp)
 }
@@ -177,7 +177,7 @@ func (s *DirectionalPoolsService) ListDirectionalIPPools(query, account string, 
 func (s *DirectionalPoolsService) DeleteDirectionalGeoPool(dp, acct string) (*Response, error) {
 	p := GeoDirectionalPoolKey{
 		Account: AccountKey(acct),
-		ID:      dp,
+		Name:    dp,
 	}
 	return s.Geos().Delete(p)
 }
@@ -186,7 +186,7 @@ func (s *DirectionalPoolsService) DeleteDirectionalGeoPool(dp, acct string) (*Re
 func (s *DirectionalPoolsService) DeleteDirectionalIPPool(dp, acct string) (*Response, error) {
 	p := IPDirectionalPoolKey{
 		Account: AccountKey(acct),
-		ID:      dp,
+		Name:    dp,
 	}
 	return s.IPs().Delete(p)
 }

@@ -59,19 +59,22 @@ type Client struct {
 	BaseURL      string
 	UserAgent    string
 
-	// UltraDNS has 'zones' and 'rrsets'.  We really only care about RR Sets for
-	// this implementation.
-	RRSets *RRSetsService
-	// UltraDNS Tasks API
-	Tasks *TasksService
 	// Accounts API
 	Accounts *AccountsService
+	// Probe Alerts API
+	Alerts *AlertsService
 	// Directional Pools API
 	DirectionalPools *DirectionalPoolsService
-	// Probes API
-	SBTCService *SBTCService
 	// Events API
 	Events *EventsService
+	// Probes API
+	Probes *ProbesService
+	// Resource Record Sets API
+	RRSets *RRSetsService
+	// SBTC API
+	SBTCService *SBTCService
+	// Tasks API
+	Tasks *TasksService
 }
 
 // NewClient returns a new ultradns API client.
@@ -89,12 +92,14 @@ func NewClient(username, password, BaseURL string) (*Client, error) {
 		BaseURL:      BaseURL,
 		UserAgent:    userAgent,
 	}
-	c.RRSets = &RRSetsService{client: c}
-	c.Tasks = &TasksService{client: c}
 	c.Accounts = &AccountsService{client: c}
+	c.Alerts = &AlertsService{client: c}
 	c.DirectionalPools = &DirectionalPoolsService{client: c}
 	c.Events = &EventsService{client: c}
+	c.Probes = &ProbesService{client: c}
+	c.RRSets = &RRSetsService{client: c}
 	c.SBTCService = &SBTCService{client: c}
+	c.Tasks = &TasksService{client: c}
 	return c, nil
 }
 
@@ -109,12 +114,14 @@ func newStubClient(username, password, BaseURL, accesstoken, refreshtoken string
 		BaseURL:      BaseURL,
 		UserAgent:    userAgent,
 	}
-	c.RRSets = &RRSetsService{client: c}
-	c.Tasks = &TasksService{client: c}
 	c.Accounts = &AccountsService{client: c}
+	c.Alerts = &AlertsService{client: c}
 	c.DirectionalPools = &DirectionalPoolsService{client: c}
 	c.Events = &EventsService{client: c}
+	c.Probes = &ProbesService{client: c}
+	c.RRSets = &RRSetsService{client: c}
 	c.SBTCService = &SBTCService{client: c}
+	c.Tasks = &TasksService{client: c}
 	return c, nil
 }
 
