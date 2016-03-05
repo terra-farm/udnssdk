@@ -12,6 +12,11 @@ func Test_ListProbes(t *testing.T) {
 		t.SkipNow()
 	}
 
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	probes, resp, err := testClient.SBTCService.ListProbes("", testProbeName, testProbeType, testProbeDomain)
 
 	if err != nil {
@@ -41,6 +46,11 @@ func Test_GetProbeAlerts(t *testing.T) {
 		t.SkipNow()
 	}
 
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	probes, err := testClient.SBTCService.ListAllProbeAlerts(testProbeName, testProbeType, testProbeDomain)
 
 	if err != nil {
@@ -61,6 +71,11 @@ func Test_ListEvents(t *testing.T) {
 		t.SkipNow()
 	}
 
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	events, err := testClient.SBTCService.ListAllEvents("", testProbeName, testProbeType, testProbeDomain)
 
 	if err != nil {
@@ -77,6 +92,11 @@ func Test_ListNotifications(t *testing.T) {
 	}
 	if !enableProbeTests {
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	events, resp, err := testClient.SBTCService.ListAllNotifications("", testProbeName, testProbeType, testProbeDomain)

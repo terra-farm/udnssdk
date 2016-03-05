@@ -18,6 +18,11 @@ func Test_ListAllRRSetsPre(t *testing.T) {
 		t.SkipNow()
 	}
 
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	t.Logf("ListAllRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
 	rrsets, err := testClient.RRSets.ListAllRRSets(testDomain, testHostname, "ANY")
 
@@ -33,6 +38,11 @@ func Test_ListRRSets(t *testing.T) {
 	}
 	if !enableRRSetTests {
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	t.Logf("ListAllRRSets(%s, \"\", \"\")", testDomain)
@@ -57,7 +67,6 @@ func Test_ListRRSets(t *testing.T) {
 	}
 }
 
-// Create Test
 func Test_Create_RRSets(t *testing.T) {
 	if !enableIntegrationTests {
 		t.SkipNow()
@@ -67,6 +76,11 @@ func Test_Create_RRSets(t *testing.T) {
 	}
 	if !enableChanges {
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	t.Logf("Creating %s with %s\n", testHostname, testIP1)
@@ -79,13 +93,18 @@ func Test_Create_RRSets(t *testing.T) {
 	t.Logf("Response: %+v\n", resp.Response)
 }
 
-// Another Get  Test if it matchs the Ip in IP1
+// Another Get Test if it matchs the Ip in IP1
 func Test_ListAllRRSetsMid1(t *testing.T) {
 	if !enableIntegrationTests {
 		t.SkipNow()
 	}
 	if !enableRRSetTests {
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	t.Logf("ListAllRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
@@ -101,7 +120,6 @@ func Test_ListAllRRSetsMid1(t *testing.T) {
 	}
 }
 
-// Update Test
 func Test_Update_RRSets(t *testing.T) {
 	if !enableIntegrationTests {
 		t.SkipNow()
@@ -111,6 +129,11 @@ func Test_Update_RRSets(t *testing.T) {
 	}
 	if !enableChanges {
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	t.Logf("Updating %s to %s\n", testHostname, testIP2)
@@ -132,6 +155,11 @@ func Test_ListAllRRSetsMid(t *testing.T) {
 		t.SkipNow()
 	}
 
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	t.Logf("ListAllRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
 	rrsets, err := testClient.RRSets.ListAllRRSets(testDomain, testHostname, "ANY")
 
@@ -146,7 +174,6 @@ func Test_ListAllRRSetsMid(t *testing.T) {
 	t.Logf("Profile Check: %+v", rrsets[0].Profile.GetProfileObject())
 }
 
-// Delete Test
 func Test_Delete_RRSets(t *testing.T) {
 	if !enableIntegrationTests {
 		t.SkipNow()
@@ -162,8 +189,14 @@ func Test_Delete_RRSets(t *testing.T) {
 		os.Exit(1)
 	}
 
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	t.Logf("ListAllRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
 	rrsets, err := testClient.RRSets.ListAllRRSets(testDomain, testHostname, "ANY")
+
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -189,6 +222,11 @@ func Test_ListAllRRSetsPost(t *testing.T) {
 	}
 	if !enableRRSetTests {
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	t.Logf("ListAllRRSets(%s, %s, \"ANY\")", testDomain, testHostname)

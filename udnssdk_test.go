@@ -59,6 +59,7 @@ func TestMain(m *testing.M) {
 	} else if envEnableIntegrationTests == "true" || envEnableIntegrationTests == "1" {
 		enableIntegrationTests = true
 	}
+
 	if enableIntegrationTests {
 		if testUsername == "" {
 			log.Printf("Please configure ULTRADNS_USERNAME.\n")
@@ -76,9 +77,10 @@ func TestMain(m *testing.M) {
 			log.Printf("Please configure ULTRADNS_TEST_HOSTNAME.\n")
 			os.Exit(1)
 		}
-		if testBaseURL == "" {
-			testBaseURL = DefaultTestBaseURL
-		}
+	}
+
+	if testBaseURL == "" {
+		testBaseURL = DefaultTestBaseURL
 	}
 
 	if testIP1 == "" {
@@ -136,7 +138,6 @@ func TestMain(m *testing.M) {
 	} else if envenableDirectionalPoolTests == "true" || envenableDirectionalPoolTests == "1" {
 		enableDirectionalPoolTests = true
 	}
-
 
 	testAccounts = nil
 	os.Exit(m.Run())

@@ -17,6 +17,11 @@ func Test_ListAllDirectionPoolsGeoNoQuery(t *testing.T) {
 		t.SkipNow()
 	}
 
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	accountName := testAccounts[0].AccountName
 	dpools, err := testClient.DirectionalPools.ListAllDirectionalGeoPools("", accountName)
 
@@ -36,6 +41,11 @@ func Test_ListAllDirectionPoolsGeoQuery(t *testing.T) {
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	accountName := testAccounts[0].AccountName
@@ -59,6 +69,11 @@ func Test_ListAllDirectionalPoolsIPNoQuery(t *testing.T) {
 		t.SkipNow()
 	}
 
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	accountName := testAccounts[0].AccountName
 	dpools, err := testClient.DirectionalPools.ListAllDirectionalIPPools("", accountName)
 
@@ -78,6 +93,11 @@ func Test_ListAllDirectionalPoolsIPQuery(t *testing.T) {
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	accountName := testAccounts[0].AccountName
@@ -104,6 +124,11 @@ func Test_Create_DirectionalPoolIP(t *testing.T) {
 		t.SkipNow()
 	}
 
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	accountName := testAccounts[0].AccountName
 	t.Logf("Creating %s with %+v\n", testIPDPool.Name, testIPDPool)
 	resp, err := testClient.DirectionalPools.CreateDirectionalIPPool(testIPDPool.Name, accountName, testIPDPool)
@@ -127,6 +152,11 @@ func Test_Get_DirectionalPoolIP(t *testing.T) {
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	accountName := testAccounts[0].AccountName
@@ -160,6 +190,11 @@ func Test_Delete_DirectionalPoolIP(t *testing.T) {
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	accountName := testAccounts[0].AccountName
