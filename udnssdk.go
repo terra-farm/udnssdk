@@ -69,6 +69,10 @@ type Client struct {
 	// Directional Pools API
 	DirectionalPools *DirectionalPoolsService
 	// Probes API
+	Probes *ProbesService
+	// Probe Alerts API
+	Alerts *AlertsService
+	// SBTC API
 	SBTCService *SBTCService
 }
 
@@ -83,6 +87,8 @@ func NewClient(username, password, BaseURL string) (*Client, error) {
 	c.Tasks = &TasksService{client: c}
 	c.Accounts = &AccountsService{client: c}
 	c.DirectionalPools = &DirectionalPoolsService{client: c}
+	c.Probes = &ProbesService{client: c}
+	c.Alerts = &AlertsService{client: c}
 	c.SBTCService = &SBTCService{client: c}
 	return c, nil
 }
