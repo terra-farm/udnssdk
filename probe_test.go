@@ -63,29 +63,6 @@ func Test_GetProbeAlerts(t *testing.T) {
  * works well enough to write one yet.  What is the correct order of operations?
  */
 
-func Test_ListEvents(t *testing.T) {
-	if !enableIntegrationTests {
-		t.SkipNow()
-	}
-	if !enableProbeTests {
-		t.SkipNow()
-	}
-
-	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	events, err := testClient.SBTCService.ListAllEvents("", testProbeName, testProbeType, testProbeDomain)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Logf("Events: %+v \n", events)
-}
-
-// TODO: Write a full Event test suite.  We do not use these at my firm.
-
 func Test_ListNotifications(t *testing.T) {
 	if !enableIntegrationTests {
 		t.SkipNow()

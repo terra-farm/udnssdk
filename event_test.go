@@ -5,9 +5,18 @@ import (
 )
 
 func Test_ListEvents(t *testing.T) {
+	if !enableIntegrationTests {
+		t.SkipNow()
+	}
 	if !enableProbeTests {
 		t.SkipNow()
 	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	r := RRSetKey{
 		Zone: testProbeDomain,
 		Type: testProbeType,
