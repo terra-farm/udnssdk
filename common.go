@@ -4,6 +4,11 @@ import (
 	"fmt"
 )
 
+// SBTCService manages Probes
+type SBTCService struct {
+	client *Client
+}
+
 // GetResultByURI just requests a URI
 func (c *Client) GetResultByURI(uri string) (*Response, error) {
 	req, err := c.NewRequest("GET", uri, nil)

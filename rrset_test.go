@@ -49,7 +49,6 @@ func Test_ListRRSets(t *testing.T) {
 	}
 }
 
-
 // Create Test
 func Test_Create_RRSets(t *testing.T) {
 
@@ -176,7 +175,6 @@ func Test_Delete_RRSets(t *testing.T) {
 		}
 	}
 }
-
 
 func Test_ListAllRRSetsPost(t *testing.T) {
 

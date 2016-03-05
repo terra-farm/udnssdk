@@ -38,27 +38,6 @@ func Test_ProbesSelectProbes(t *testing.T) {
  * works well enough to write one yet.  What is the correct order of operations?
  */
 
-func Test_GetProbeAlerts(t *testing.T) {
-	if !enableProbeTests {
-		t.SkipNow()
-	}
-	r := RRSetKey{
-		Zone: testProbeDomain,
-		Type: testProbeType,
-		Name: testProbeName,
-	}
-	alerts, err := testClient.Alerts.Select(r)
-	t.Logf("Probe Alerts: %+v \n", alerts)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-}
-
-/* TODO: A full probe test suite.  I'm not really even sure I understand how this
- * works well enough to write one yet.  What is the correct order of operations?
- */
-
 func Test_ListEvents(t *testing.T) {
 	if !enableProbeTests {
 		t.SkipNow()
@@ -71,7 +50,6 @@ func Test_ListEvents(t *testing.T) {
 }
 
 // TODO: Write a full Event test suite.  We do not use these at my firm.
-
 func Test_ListNotifications(t *testing.T) {
 	if !enableProbeTests {
 		t.SkipNow()
