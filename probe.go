@@ -193,6 +193,86 @@ type ProbeListDTO struct {
 	Resultinfo ResultInfo     `json:"resultInfo"`
 }
 
+// ProbesService manages Probes
+type ProbesService struct {
+	client *Client
+}
+
+// Probes allows access to the Probes API
+func (s *SBTCService) Probes() *ProbesService {
+	return &ProbesService{client: s.client}
+}
+
+// ProbePath generates the URI path for a probe
+func ProbePath(zone, typ, name, guid string) string {
+	if guid == "" {
+		r := RRSetKey{Zone: zone, Type: typ, Name: name}
+		return r.ProbesURI()
+	}
+	p := ProbeKey{Zone: zone, Type: typ, Name: name, GUID: guid}
+	return p.URI()
+}
+
+// AlertPath generates the URI path for an alert
+func AlertPath(zone, typ, name string) string {
+	r := RRSetKey{Zone: zone, Type: typ, Name: name}
+	return r.AlertsURI()
+}
+
+func probeQueryPath(zone, typ, name, query string) string {
+	r := RRSetKey{Zone: zone, Type: typ, Name: name}
+	return r.ProbesQueryURI(query)
+}
+
+func probeAlertQueryPath(zone, typ, name string, offset int) string {
+	r := RRSetKey{Name: name, Type: typ, Zone: zone}
+	return r.AlertsQueryURI(offset)
+}
+
+// ListAllProbeAlerts returns all probe alerts with name, type & zone
+func (s *SBTCService) ListAllProbeAlerts(name, typ, zone string) ([]ProbeAlertDataDTO, error) {
+	r := RRSetKey{Name: name, Type: typ, Zone: zone}
+	return s.Alerts().Select(r)
+}
+
+// ListProbeAlerts returns the probe alerts with name, type & zone, accepting an offset
+func (s *SBTCService) ListProbeAlerts(name, typ, zone string, offset int) ([]ProbeAlertDataDTO, ResultInfo, *Response, error) {
+	r := RRSetKey{Name: name, Type: typ, Zone: zone}
+	return s.Alerts().SelectWithOffset(r, offset)
+}
+
+// GetProbe returns a probe with name, type, zone & guid
+func (s *SBTCService) GetProbe(name, typ, zone, guid string) (ProbeInfoDTO, *Response, error) {
+	p := ProbeKey{Name: name, Type: typ, Zone: zone, GUID: guid}
+	return s.Probes().Find(p)
+}
+
+// CreateProbe creates a probe with name, type & zone using the ProbeInfoDTO dp
+func (s *SBTCService) CreateProbe(name, typ, zone string, dp ProbeInfoDTO) (*Response, error) {
+	r := RRSetKey{Name: name, Type: typ, Zone: zone}
+	return s.Probes().Create(r, dp)
+}
+
+// UpdateProbe updates a probe given a name, type, zone & guid with the ProbeInfoDTO dp
+func (s *SBTCService) UpdateProbe(name, typ, zone, guid string, dp ProbeInfoDTO) (*Response, error) {
+	p := ProbeKey{Name: name, Type: typ, Zone: zone, GUID: guid}
+	return s.Probes().Update(p, dp)
+}
+
+// ListProbes returns all probes by name, type & zone, with an optional query
+func (s *SBTCService) ListProbes(query, name, typ, zone string) ([]ProbeInfoDTO, *Response, error) {
+	r := RRSetKey{Zone: zone, Type: typ, Name: name}
+	return s.Probes().Select(r, query)
+}
+
+// DeleteProbe deletes a probe by its name, type, zone & guid
+func (s *SBTCService) DeleteProbe(name, typ, zone, guid string) (*Response, error) {
+	p := ProbeKey{Name: name, Type: typ, Zone: zone, GUID: guid}
+	return s.Probes().Delete(p)
+}
+
+// ===== //
+
 // ProbeKey collects the identifiers of a Probe
 type ProbeKey struct {
 	Zone string
@@ -213,16 +293,6 @@ func (p *ProbeKey) RRSetKey() *RRSetKey {
 // URI generates the URI for a probe
 func (p *ProbeKey) URI() string {
 	return fmt.Sprintf("%s/%s", p.RRSetKey().ProbesURI(), p.GUID)
-}
-
-// ProbesService manages Probes
-type ProbesService struct {
-	client *Client
-}
-
-// Probes allows access to the Probes API
-func (s *SBTCService) Probes() *ProbesService {
-	return &ProbesService{client: s.client}
 }
 
 // Select returns all probes by a RRSetKey, with an optional query
@@ -251,8 +321,7 @@ func (s *ProbesService) Find(p ProbeKey) (ProbeInfoDTO, *Response, error) {
 
 // Create creates a probe with a RRSetKey using the ProbeInfoDTO dp
 func (s *ProbesService) Create(r RRSetKey, dp ProbeInfoDTO) (*Response, error) {
-	var ignored interface{}
-	return s.client.post(r.ProbesURI(), dp, &ignored)
+	return s.client.post(r.ProbesURI(), dp, nil)
 }
 
 // Update updates a probe given a ProbeKey with the ProbeInfoDTO dp
