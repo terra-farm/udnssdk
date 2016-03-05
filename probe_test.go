@@ -4,11 +4,17 @@ import (
 	"testing"
 )
 
-func Test_ListProbes(t *testing.T) {
+func Test_ProbesSelectProbes(t *testing.T) {
 	if !enableProbeTests {
 		t.SkipNow()
 	}
-	probes, resp, err := testClient.SBTCService.ListProbes("", testProbeName, testProbeType, testProbeDomain)
+	r := RRSetKey{
+		Zone: testProbeDomain,
+		Type: testProbeType,
+		Name: testProbeName,
+	}
+	probes, resp, err := testClient.Probes.Select(r, "")
+
 	t.Logf("Probes: %+v \n", probes)
 	t.Logf("Response: %+v\n", resp.Response)
 	if err != nil {
@@ -32,29 +38,26 @@ func Test_ListProbes(t *testing.T) {
  * works well enough to write one yet.  What is the correct order of operations?
  */
 
-
 func Test_GetProbeAlerts(t *testing.T) {
 	if !enableProbeTests {
 		t.SkipNow()
 	}
-	probes, err := testClient.SBTCService.ListAllProbeAlerts(testProbeName, testProbeType, testProbeDomain)
-	t.Logf("Probe Alertss: %+v \n", probes)
+	r := RRSetKey{
+		Zone: testProbeDomain,
+		Type: testProbeType,
+		Name: testProbeName,
+	}
+	alerts, err := testClient.Alerts.Select(r)
+	t.Logf("Probe Alerts: %+v \n", alerts)
 	if err != nil {
 		t.Fatal(err)
 	}
-	/*
-		for i, e := range probes {
-			t.Logf("DEBUG - Probe Alert %d Data - %+v\n", i, e)
-		}
-	*/
 
 }
 
 /* TODO: A full probe test suite.  I'm not really even sure I understand how this
  * works well enough to write one yet.  What is the correct order of operations?
  */
-
-
 
 func Test_ListEvents(t *testing.T) {
 	if !enableProbeTests {
