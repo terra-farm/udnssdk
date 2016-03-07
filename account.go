@@ -25,33 +25,6 @@ type AccountListDTO struct {
 	Resultinfo ResultInfo `json:"resultInfo"`
 }
 
-// accountPath links to the account url.
-func accountPath(accountName string) string {
-	return AccountKey(accountName).URI()
-}
-
-// GetAccountsOfUser gets all the accounts of user
-func (s *AccountsService) GetAccountsOfUser() ([]Account, *Response, error) {
-	return s.Select()
-}
-
-// GetAccountStatus Get the status of a account.
-func (s *AccountsService) GetAccountStatus(tid string) (Account, *Response, error) {
-	return s.Find(AccountKey(tid))
-}
-
-// ListAccounts lists accounts
-func (s *AccountsService) ListAccounts(query string, offset, limit int) ([]Account, *Response, error) {
-	return s.Select()
-}
-
-// DeleteAccount deletes a account.
-func (s *AccountsService) DeleteAccount(tid string) (*Response, error) {
-	return s.Delete(AccountKey(tid))
-}
-
-// ======== //
-
 // AccountKey represents the string identifier of an Account
 type AccountKey string
 
