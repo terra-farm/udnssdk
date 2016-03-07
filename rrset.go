@@ -129,11 +129,6 @@ func (sp *StringProfile) MarshalJSON() ([]byte, error) {
 	return json.Marshal(nil)
 }
 
-// GetType extracts the schema context from a StringProfile
-func (sp *StringProfile) GetType() string {
-	return string(sp.Context())
-}
-
 // Metaprofile converts a StringProfile to a Metaprofile to extract the context
 func (sp *StringProfile) Metaprofile() (Metaprofile, error) {
 	var mp Metaprofile
@@ -225,77 +220,6 @@ type RRSetListDTO struct {
 	Queryinfo  QueryInfo  `json:"queryInfo"`
 	Resultinfo ResultInfo `json:"resultInfo"`
 }
-
-// rrsetPath generates the resource path for given rrset that belongs to a zone.
-func rrsetPath(zone string, rrtype interface{}, rrset interface{}) string {
-	r := RRSetKey{
-		Zone: zone,
-		Type: rrtype.(string),
-		Name: rrset.(string),
-	}
-	return r.URI()
-}
-
-func rrsetQueryPath(zone, rrsetName, rrsetType string, offset int) string {
-	r := RRSetKey{
-		Zone: zone,
-		Type: rrsetType,
-		Name: rrsetType,
-	}
-	return r.QueryURI(offset)
-}
-
-// ListAllRRSets will list the zone rrsets, paginating through all available results
-func (s *RRSetsService) ListAllRRSets(zone string, rrsetName, rrsetType string) ([]RRSet, error) {
-	r := RRSetKey{
-		Zone: zone,
-		Type: rrsetType,
-		Name: rrsetType,
-	}
-	return s.Select(r)
-}
-
-// ListRRSets requests zone rrsets by zone, rrsetName, rrsetType & optional offset
-func (s *RRSetsService) ListRRSets(zone, rrsetName, rrsetType string, offset int) ([]RRSet, ResultInfo, *Response, error) {
-	r := RRSetKey{
-		Zone: zone,
-		Type: rrsetType,
-		Name: rrsetType,
-	}
-	return s.SelectWithOffset(r, offset)
-}
-
-// CreateRRSet creates a zone rrset.
-func (s *RRSetsService) CreateRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
-	r := RRSetKey{
-		Zone: zone,
-		Type: rrsetAttributes.RRType,
-		Name: rrsetAttributes.OwnerName,
-	}
-	return s.Create(r, rrsetAttributes)
-}
-
-// UpdateRRSet updates a zone rrset.
-func (s *RRSetsService) UpdateRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
-	r := RRSetKey{
-		Zone: zone,
-		Type: rrsetAttributes.RRType,
-		Name: rrsetAttributes.OwnerName,
-	}
-	return s.Update(r, rrsetAttributes)
-}
-
-// DeleteRRSet deletes a zone rrset.
-func (s *RRSetsService) DeleteRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
-	r := RRSetKey{
-		Zone: zone,
-		Type: rrsetAttributes.RRType,
-		Name: rrsetAttributes.OwnerName,
-	}
-	return s.Delete(r)
-}
-
-// ===== //
 
 // RRSetKey collects the identifiers of a Zone
 type RRSetKey struct {
