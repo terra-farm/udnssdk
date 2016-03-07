@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 )
 
@@ -15,9 +14,105 @@ type RRSetsService struct {
 
 // Here is the big 'Profile' mess that should get refactored to a more managable place
 
-//type stringProfile StringProfile
+// StringProfile wraps a Profile string
+type StringProfile struct {
+	Profile string `json:"profile,omitempty"`
+}
+
+// Metaprofile is a helper struct for extracting a Context from a StringProfile
 type Metaprofile struct {
-	Context string `json:"@context"`
+	Context ProfileSchema `json:"@context"`
+}
+
+// ProfileSchema are the schema URIs for RRSet Profiles
+type ProfileSchema string
+
+const (
+	// DirPoolSchema is the schema URI for a Directional pool profile
+	DirPoolSchema ProfileSchema = "http://schemas.ultradns.com/DirPool.jsonschema"
+	// RDPoolSchema is the schema URI for a Resource Distribution pool profile
+	RDPoolSchema = "http://schemas.ultradns.com/RDPool.jsonschema"
+	// SBPoolSchema is the schema URI for a SiteBacker pool profile
+	SBPoolSchema = "http://schemas.ultradns.com/SBPool.jsonschema"
+	// TCPoolSchema is the schema URI for a Traffic Controller pool profile
+	TCPoolSchema = "http://schemas.ultradns.com/TCPool.jsonschema"
+)
+
+// DirPoolProfile wraps a Profile for a Directional Pool
+type DirPoolProfile struct {
+	Context         ProfileSchema `json:"@context"`
+	Description     string        `json:"description"`
+	ConflictResolve string        `json:"conflictResolve,omitempty"`
+	RDataInfo       []DPRDataInfo `json:"rdataInfo"`
+	NoResponse      DPRDataInfo   `json:"noResponse"`
+}
+
+// DPRDataInfo wraps the rdataInfo object of a DirPoolProfile response
+type DPRDataInfo struct {
+	AllNonConfigured bool    `json:"allNonConfigured,omitempty"`
+	IPInfo           IPInfo  `json:"ipInfo,omitempty"`
+	GeoInfo          GeoInfo `json:"geoInfo,omitempty"`
+}
+
+// IPInfo wraps the ipInfo object of a DPRDataInfo
+type IPInfo struct {
+	Name           string      `json:"name"`
+	IsAccountLevel bool        `json:"isAccountLevel,omitempty"`
+	Ips            []IPAddrDTO `json:"ips"`
+}
+
+// GeoInfo wraps the geoInfo object of a DPRDataInfo
+type GeoInfo struct {
+	Name           string   `json:"name"`
+	IsAccountLevel bool     `json:"isAccountLevel,omitempty"`
+	Codes          []string `json:"codes"`
+}
+
+// RDPoolProfile wraps a Profile for a Resource Distribution pool
+type RDPoolProfile struct {
+	Context     ProfileSchema `json:"@context"`
+	Order       string        `json:"order"`
+	Description string        `json:"description"`
+}
+
+// SBPoolProfile wraps a Profile for a SiteBacker pool
+type SBPoolProfile struct {
+	Context       ProfileSchema  `json:"@context"`
+	Description   string         `json:"description"`
+	RunProbes     bool           `json:"runProbes,omitempty"`
+	ActOnProbes   bool           `json:"actOnProbes,omitempty"`
+	Order         string         `json:"order,omitempty"`
+	MaxActive     int            `json:"maxActive,omitempty"`
+	MaxServed     int            `json:"maxServed,omitempty"`
+	RDataInfo     []SBRDataInfo  `json:"rdataInfo"`
+	BackupRecords []BackupRecord `json:"backupRecords"`
+}
+
+// SBRDataInfo wraps the rdataInfo object of a SBPoolProfile
+type SBRDataInfo struct {
+	State         string `json:"state"`
+	RunProbes     bool   `json:"runProbes,omitempty"`
+	Priority      int    `json:"priority"`
+	FailoverDelay int    `json:"failoverDelay,omitempty"`
+	Threshold     int    `json:"threshold"`
+	Weight        int    `json:"weight"`
+}
+
+// BackupRecord wraps the backupRecord objects of an SBPoolProfile response
+type BackupRecord struct {
+	RData         string `json:"rdata"`
+	FailoverDelay int    `json:"failoverDelay,omitempty"`
+}
+
+// TCPoolProfile wraps a Profile for a Traffic Controller pool
+type TCPoolProfile struct {
+	Context      ProfileSchema `json:"@context"`
+	Description  string        `json:"description"`
+	RunProbes    bool          `json:"runProbes,omitempty"`
+	ActOnProbes  bool          `json:"actOnProbes,omitempty"`
+	MaxToLB      int           `json:"maxToLB,omitempty"`
+	RDataInfo    []SBRDataInfo `json:"rdataInfo"`
+	BackupRecord BackupRecord  `json:"backupRecord"`
 }
 
 // UnmarshalJSON does what it says on the tin
@@ -34,15 +129,29 @@ func (sp *StringProfile) MarshalJSON() ([]byte, error) {
 	return json.Marshal(nil)
 }
 
-// GetType does unknown things
+// GetType extracts the schema context from a StringProfile
 func (sp *StringProfile) GetType() string {
-	if sp.Profile == "" {
-		return ""
-	}
+	return string(sp.Context())
+}
+
+// Metaprofile converts a StringProfile to a Metaprofile to extract the context
+func (sp *StringProfile) Metaprofile() (Metaprofile, error) {
 	var mp Metaprofile
+	if sp.Profile == "" {
+		return mp, fmt.Errorf("Empty Profile cannot be converted to a Metaprofile")
+	}
 	err := json.Unmarshal([]byte(sp.Profile), &mp)
 	if err != nil {
-		log.Printf("Error getting profile type: %+v\n", err)
+		return mp, fmt.Errorf("Error getting profile type: %+v\n", err)
+	}
+	return mp, nil
+}
+
+// Context extracts the schema context from a StringProfile
+func (sp *StringProfile) Context() ProfileSchema {
+	mp, err := sp.Metaprofile()
+	if err != nil {
+		log.Printf("[ERROR] %+s\n", err)
 		return ""
 	}
 	return mp.Context
@@ -58,80 +167,11 @@ func (sp *StringProfile) String() string {
 	return sp.Profile
 }
 
-// StringProfile wraps a Profile string
-type StringProfile struct {
-	Profile string `json:"profile,omitempty"`
-}
-type RDPoolProfile struct {
-	Context     string `json:"@context"`
-	Order       string `json:"order"`
-	Description string `json:"description"`
-}
-
-type GeoInfo struct {
-	Name           string   `json:"name"`
-	IsAccountLevel bool     `json:"isAccountLevel,omitempty"`
-	Codes          []string `json:"codes"`
-}
-type IpInfo struct {
-	Name           string      `json:"name"`
-	IsAccountLevel bool        `json:"isAccountLevel,omitempty"`
-	Ips            []IPAddrDTO `json:"ips"`
-}
-type DPRDataInfo struct {
-	AllNonConfigured bool    `json:"allNonConfigured,omitempty"`
-	IpInfo           IpInfo  `json:"ipInfo,omitempty"`
-	GeoInfo          GeoInfo `json:"geoInfo,omitempty"`
-}
-type DirPoolProfile struct {
-	Context         string        `json:"@context"`
-	Description     string        `json:"description"`
-	ConflictResolve string        `json:"conflictResolve,omitempty"`
-	RDataInfo       []DPRDataInfo `json:"rdataInfo"`
-	NoResponse      DPRDataInfo   `json:"noResponse"`
-}
-type SBRDataInfo struct {
-	State         string `json:"state"`
-	RunProbes     bool   `json:"runProbes,omitempty"`
-	Priority      int    `json:"priority"`
-	FailoverDelay int    `json:"failoverDelay,omitempty"`
-	Threshold     int    `json:"threshold"`
-	Weight        int    `json:"weight"`
-}
-type BackupRecord struct {
-	RData         string `json:"rdata"`
-	FailoverDelay int    `json:"failoverDelay,omitempty"`
-}
-type SBPoolProfile struct {
-	Context       string         `json:"@context"`
-	Description   string         `json:"description"`
-	RunProbes     bool           `json:"runProbes,omitempty"`
-	ActOnProbes   bool           `json:"actOnProbes,omitempty"`
-	Order         string         `json:"order,omitempty"`
-	MaxActive     int            `json:"maxActive,omitempty"`
-	MaxServed     int            `json:"maxServed,omitempty"`
-	RDataInfo     []SBRDataInfo  `json:"rdataInfo"`
-	BackupRecords []BackupRecord `json:"backupRecords"`
-}
-type TCPoolProfile struct {
-	Context      string        `json:"@context"`
-	Description  string        `json:"description"`
-	RunProbes    bool          `json:"runProbes,omitempty"`
-	ActOnProbes  bool          `json:"actOnProbes,omitempty"`
-	MaxToLB      int           `json:"maxToLB,omitempty"`
-	RDataInfo    []SBRDataInfo `json:"rdataInfo"`
-	BackupRecord BackupRecord  `json:"backupRecord"`
-}
-
+// GetProfileObject extracts the full Profile by its schema type
 func (sp *StringProfile) GetProfileObject() interface{} {
-	typ := sp.GetType()
-	if typ == "" {
-		return nil
-	}
-	tmp := strings.Split(typ, "/")
-	x := tmp[len(tmp)-1]
-	switch x {
-	case "DirPool.jsonschema":
+	c := sp.Context()
+	switch c {
+	case DirPoolSchema:
 		var dpp DirPoolProfile
 		err := json.Unmarshal([]byte(sp.Profile), &dpp)
 		if err != nil {
@@ -139,7 +179,7 @@ func (sp *StringProfile) GetProfileObject() interface{} {
 			return nil
 		}
 		return dpp
-	case "RDPool.jsonschema":
+	case RDPoolSchema:
 		var rdp RDPoolProfile
 		err := json.Unmarshal([]byte(sp.Profile), &rdp)
 		if err != nil {
@@ -147,7 +187,7 @@ func (sp *StringProfile) GetProfileObject() interface{} {
 			return nil
 		}
 		return rdp
-	case "SBPool.jsonschema":
+	case SBPoolSchema:
 		var sbp SBPoolProfile
 		err := json.Unmarshal([]byte(sp.Profile), &sbp)
 		if err != nil {
@@ -155,7 +195,7 @@ func (sp *StringProfile) GetProfileObject() interface{} {
 			return nil
 		}
 		return sbp
-	case "TCPool.jsonschema":
+	case TCPoolSchema:
 		var tcp TCPoolProfile
 		err := json.Unmarshal([]byte(sp.Profile), &tcp)
 		if err != nil {
@@ -164,10 +204,9 @@ func (sp *StringProfile) GetProfileObject() interface{} {
 		}
 		return tcp
 	default:
-		log.Printf("ERROR - Fall through on GetProfileObject - %s.\n", x)
-		return fmt.Errorf("Fallthrough on GetProfileObject type %s\n", x)
+		log.Printf("ERROR - Fall through on GetProfileObject - %s.\n", c)
+		return fmt.Errorf("Fallthrough on GetProfileObject type %s\n", c)
 	}
-
 }
 
 // RRSet wraps an RRSet resource
@@ -189,26 +228,105 @@ type RRSetListDTO struct {
 
 // rrsetPath generates the resource path for given rrset that belongs to a zone.
 func rrsetPath(zone string, rrtype interface{}, rrset interface{}) string {
-	path := fmt.Sprintf("zones/%s/rrsets", zone)
-	if rrtype != nil {
-		path += fmt.Sprintf("/%v", rrtype)
-		if rrset != nil {
-			path += fmt.Sprintf("/%v", rrset)
-		}
+	r := RRSetKey{
+		Zone: zone,
+		Type: rrtype.(string),
+		Name: rrset.(string),
 	}
-	return path
+	return r.URI()
 }
 
 func rrsetQueryPath(zone, rrsetName, rrsetType string, offset int) string {
-	if rrsetType == "" {
-		rrsetType = "ANY"
+	r := RRSetKey{
+		Zone: zone,
+		Type: rrsetType,
+		Name: rrsetType,
 	}
-	reqStr := rrsetPath(zone, rrsetType, rrsetName)
-	return fmt.Sprintf("%s?offset=%d", reqStr, offset)
+	return r.QueryURI(offset)
 }
 
 // ListAllRRSets will list the zone rrsets, paginating through all available results
 func (s *RRSetsService) ListAllRRSets(zone string, rrsetName, rrsetType string) ([]RRSet, error) {
+	r := RRSetKey{
+		Zone: zone,
+		Type: rrsetType,
+		Name: rrsetType,
+	}
+	return s.Select(r)
+}
+
+// ListRRSets requests zone rrsets by zone, rrsetName, rrsetType & optional offset
+func (s *RRSetsService) ListRRSets(zone, rrsetName, rrsetType string, offset int) ([]RRSet, ResultInfo, *Response, error) {
+	r := RRSetKey{
+		Zone: zone,
+		Type: rrsetType,
+		Name: rrsetType,
+	}
+	return s.SelectWithOffset(r, offset)
+}
+
+// CreateRRSet creates a zone rrset.
+func (s *RRSetsService) CreateRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
+	r := RRSetKey{
+		Zone: zone,
+		Type: rrsetAttributes.RRType,
+		Name: rrsetAttributes.OwnerName,
+	}
+	return s.Create(r, rrsetAttributes)
+}
+
+// UpdateRRSet updates a zone rrset.
+func (s *RRSetsService) UpdateRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
+	r := RRSetKey{
+		Zone: zone,
+		Type: rrsetAttributes.RRType,
+		Name: rrsetAttributes.OwnerName,
+	}
+	return s.Update(r, rrsetAttributes)
+}
+
+// DeleteRRSet deletes a zone rrset.
+func (s *RRSetsService) DeleteRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
+	r := RRSetKey{
+		Zone: zone,
+		Type: rrsetAttributes.RRType,
+		Name: rrsetAttributes.OwnerName,
+	}
+	return s.Delete(r)
+}
+
+// ===== //
+
+// RRSetKey collects the identifiers of a Zone
+type RRSetKey struct {
+	Zone string
+	Type string
+	Name string
+}
+
+// URI generates the URI for an RRSet
+func (r *RRSetKey) URI() string {
+	uri := fmt.Sprintf("zones/%s/rrsets", r.Zone)
+	if r.Type != "" {
+		uri += fmt.Sprintf("/%v", r.Type)
+		if r.Name != "" {
+			uri += fmt.Sprintf("/%v", r.Name)
+		}
+	}
+	return uri
+}
+
+// QueryURI generates the query URI for an RRSet and offset
+func (r *RRSetKey) QueryURI(offset int) string {
+	// TODO: find a more appropriate place to set "" to "ANY"
+	if r.Type == "" {
+		r.Type = "ANY"
+	}
+	return fmt.Sprintf("%s?offset=%d", r.URI(), offset)
+}
+
+// Select will list the zone rrsets, paginating through all available results
+func (s *RRSetsService) Select(r RRSetKey) ([]RRSet, error) {
 	// TODO: Sane Configuration for timeouts / retries
 	maxerrs := 5
 	waittime := 5 * time.Second
@@ -218,7 +336,7 @@ func (s *RRSetsService) ListAllRRSets(zone string, rrsetName, rrsetType string) 
 	offset := 0
 
 	for {
-		reqRrsets, ri, res, err := s.ListRRSets(zone, rrsetName, rrsetType, offset)
+		reqRrsets, ri, res, err := s.SelectWithOffset(r, offset)
 		if err != nil {
 			if res.StatusCode >= 500 {
 				errcnt = errcnt + 1
@@ -242,11 +360,11 @@ func (s *RRSetsService) ListAllRRSets(zone string, rrsetName, rrsetType string) 
 	}
 }
 
-// ListRRSets requests zone rrsets by zone, rrsetName, rrsetType & optional offset
-func (s *RRSetsService) ListRRSets(zone, rrsetName, rrsetType string, offset int) ([]RRSet, ResultInfo, *Response, error) {
+// SelectWithOffset requests zone rrsets by RRSetKey & optional offset
+func (s *RRSetsService) SelectWithOffset(r RRSetKey, offset int) ([]RRSet, ResultInfo, *Response, error) {
 	var rrsld RRSetListDTO
 
-	uri := rrsetQueryPath(zone, rrsetName, rrsetType, offset)
+	uri := r.QueryURI(offset)
 	res, err := s.client.get(uri, &rrsld)
 
 	rrsets := []RRSet{}
@@ -256,20 +374,19 @@ func (s *RRSetsService) ListRRSets(zone, rrsetName, rrsetType string, offset int
 	return rrsets, rrsld.Resultinfo, res, err
 }
 
-// CreateRRSet creates a zone rrset.
-func (s *RRSetsService) CreateRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
-	uri := rrsetPath(zone, rrsetAttributes.RRType, rrsetAttributes.OwnerName)
-	return s.client.post(uri, rrsetAttributes, nil)
+// Create creates an rrset with val
+func (s *RRSetsService) Create(r RRSetKey, rrset RRSet) (*Response, error) {
+	var ignored interface{}
+	return s.client.post(r.URI(), rrset, &ignored)
 }
 
-// UpdateRRSet updates a zone rrset.
-func (s *RRSetsService) UpdateRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
-	uri := rrsetPath(zone, rrsetAttributes.RRType, rrsetAttributes.OwnerName)
-	return s.client.put(uri, rrsetAttributes, nil)
+// Update updates a RRSet with the provided val
+func (s *RRSetsService) Update(r RRSetKey, val RRSet) (*Response, error) {
+	var ignored interface{}
+	return s.client.put(r.URI(), val, &ignored)
 }
 
-// DeleteRRSet deletes a zone rrset.
-func (s *RRSetsService) DeleteRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
-	uri := rrsetPath(zone, rrsetAttributes.RRType, rrsetAttributes.OwnerName)
-	return s.client.delete(uri, nil)
+// Delete deletes an RRSet
+func (s *RRSetsService) Delete(r RRSetKey) (*Response, error) {
+	return s.client.delete(r.URI(), nil)
 }
