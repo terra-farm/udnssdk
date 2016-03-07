@@ -189,26 +189,76 @@ type RRSetListDTO struct {
 
 // rrsetPath generates the resource path for given rrset that belongs to a zone.
 func rrsetPath(zone string, rrtype interface{}, rrset interface{}) string {
-	path := fmt.Sprintf("zones/%s/rrsets", zone)
-	if rrtype != nil {
-		path += fmt.Sprintf("/%v", rrtype)
-		if rrset != nil {
-			path += fmt.Sprintf("/%v", rrset)
-		}
+	r := RRSetKey{
+		Zone: zone,
+		Type: rrtype.(string),
+		Name: rrset.(string),
 	}
-	return path
+	return r.URI()
 }
 
 func rrsetQueryPath(zone, rrsetName, rrsetType string, offset int) string {
-	if rrsetType == "" {
-		rrsetType = "ANY"
+	r := RRSetKey{
+		Zone: zone,
+		Type: rrsetType,
+		Name: rrsetType,
 	}
-	reqStr := rrsetPath(zone, rrsetType, rrsetName)
-	return fmt.Sprintf("%s?offset=%d", reqStr, offset)
+	return r.QueryURI(offset)
 }
 
 // ListAllRRSets will list the zone rrsets, paginating through all available results
 func (s *RRSetsService) ListAllRRSets(zone string, rrsetName, rrsetType string) ([]RRSet, error) {
+	r := RRSetKey{
+		Zone: zone,
+		Type: rrsetType,
+		Name: rrsetType,
+	}
+	return s.Select(r)
+}
+
+// ListRRSets requests zone rrsets by zone, rrsetName, rrsetType & optional offset
+func (s *RRSetsService) ListRRSets(zone, rrsetName, rrsetType string, offset int) ([]RRSet, ResultInfo, *Response, error) {
+	r := RRSetKey{
+		Zone: zone,
+		Type: rrsetType,
+		Name: rrsetType,
+	}
+	return s.SelectWithOffset(r, offset)
+}
+
+// CreateRRSet creates a zone rrset.
+func (s *RRSetsService) CreateRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
+	r := RRSetKey{
+		Zone: zone,
+		Type: rrsetAttributes.RRType,
+		Name: rrsetAttributes.OwnerName,
+	}
+	return s.Create(r, rrsetAttributes)
+}
+
+// UpdateRRSet updates a zone rrset.
+func (s *RRSetsService) UpdateRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
+	r := RRSetKey{
+		Zone: zone,
+		Type: rrsetAttributes.RRType,
+		Name: rrsetAttributes.OwnerName,
+	}
+	return s.Update(r, rrsetAttributes)
+}
+
+// DeleteRRSet deletes a zone rrset.
+func (s *RRSetsService) DeleteRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
+	r := RRSetKey{
+		Zone: zone,
+		Type: rrsetAttributes.RRType,
+		Name: rrsetAttributes.OwnerName,
+	}
+	return s.Delete(r)
+}
+
+
+// Select will list the zone rrsets, paginating through all available results
+func (s *RRSetsService) Select(r RRSetKey) ([]RRSet, error) {
 	// TODO: Sane Configuration for timeouts / retries
 	maxerrs := 5
 	waittime := 5 * time.Second
@@ -218,7 +268,7 @@ func (s *RRSetsService) ListAllRRSets(zone string, rrsetName, rrsetType string) 
 	offset := 0
 
 	for {
-		reqRrsets, ri, res, err := s.ListRRSets(zone, rrsetName, rrsetType, offset)
+		reqRrsets, ri, res, err := s.SelectWithOffset(r, offset)
 		if err != nil {
 			if res.StatusCode >= 500 {
 				errcnt = errcnt + 1
@@ -242,11 +292,11 @@ func (s *RRSetsService) ListAllRRSets(zone string, rrsetName, rrsetType string) 
 	}
 }
 
-// ListRRSets requests zone rrsets by zone, rrsetName, rrsetType & optional offset
-func (s *RRSetsService) ListRRSets(zone, rrsetName, rrsetType string, offset int) ([]RRSet, ResultInfo, *Response, error) {
+// SelectWithOffset requests zone rrsets by RRSetKey & optional offset
+func (s *RRSetsService) SelectWithOffset(r RRSetKey, offset int) ([]RRSet, ResultInfo, *Response, error) {
 	var rrsld RRSetListDTO
 
-	uri := rrsetQueryPath(zone, rrsetName, rrsetType, offset)
+	uri := r.QueryURI(offset)
 	res, err := s.client.get(uri, &rrsld)
 
 	rrsets := []RRSet{}
@@ -256,22 +306,19 @@ func (s *RRSetsService) ListRRSets(zone, rrsetName, rrsetType string, offset int
 	return rrsets, rrsld.Resultinfo, res, err
 }
 
-// CreateRRSet creates a zone rrset.
-func (s *RRSetsService) CreateRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
-	uri := rrsetPath(zone, rrsetAttributes.RRType, rrsetAttributes.OwnerName)
+// Create creates an rrset with val
+func (s *RRSetsService) Create(r RRSetKey, rrset RRSet) (*Response, error) {
 	var ignored interface{}
-	return s.client.post(uri, rrsetAttributes, &ignored)
+	return s.client.post(r.URI(), rrset, &ignored)
 }
 
-// UpdateRRSet updates a zone rrset.
-func (s *RRSetsService) UpdateRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
-	uri := rrsetPath(zone, rrsetAttributes.RRType, rrsetAttributes.OwnerName)
+// Update updates a RRSet with the provided val
+func (s *RRSetsService) Update(r RRSetKey, val RRSet) (*Response, error) {
 	var ignored interface{}
-	return s.client.put(uri, rrsetAttributes, &ignored)
+	return s.client.put(r.URI(), val, &ignored)
 }
 
-// DeleteRRSet deletes a zone rrset.
-func (s *RRSetsService) DeleteRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
-	uri := rrsetPath(zone, rrsetAttributes.RRType, rrsetAttributes.OwnerName)
-	return s.client.delete(uri, nil)
+// Delete deletes an RRSet
+func (s *RRSetsService) Delete(r RRSetKey) (*Response, error) {
+	return s.client.delete(r.URI(), nil)
 }

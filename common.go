@@ -33,6 +33,15 @@ type RRSetKey struct {
 // URI generates the URI for an RRSet
 func (r *RRSetKey) URI() string {
 	return fmt.Sprintf("zones/%s/rrsets/%s/%s", r.Zone, r.Type, r.Name)
+
+	uri := fmt.Sprintf("zones/%s/rrsets", r.Zone)
+	if r.Type != "" {
+		uri += fmt.Sprintf("/%v", r.Type)
+		if r.Name != "" {
+			uri += fmt.Sprintf("/%v", r.Name)
+		}
+	}
+	return uri
 }
 
 // AlertsURI generates the URI for an RRSet
@@ -78,4 +87,12 @@ func (r *RRSetKey) ProbesQueryURI(query string) string {
 		uri = fmt.Sprintf("%s?sort=NAME&query=%s", uri, query)
 	}
 	return uri
+}
+
+func (r *RRSetKey) QueryURI(offset int) string {
+	// TODO: find a more appropriate place to set "" to "ANY"
+	if r.Type == "" {
+		r.Type = "ANY"
+	}
+	return fmt.Sprintf("%s?offset=%d", r.URI(), offset)
 }
