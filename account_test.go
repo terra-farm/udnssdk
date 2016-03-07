@@ -9,7 +9,7 @@ func Test_ListAccountsOfUser(t *testing.T) {
 	if !enableAccountTests {
 		t.SkipNow()
 	}
-	accounts, resp, err := testClient.Accounts.GetAccountsOfUser()
+	accounts, resp, err := testClient.Accounts.Select()
 	t.Logf("Accounts: %+v \n", accounts)
 	t.Logf("Response: %+v\n", resp.Response)
 	testAccounts = accounts
