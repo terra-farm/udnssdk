@@ -15,7 +15,7 @@ func Test_ListAccountsOfUser(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	accounts, resp, err := testClient.Accounts.GetAccountsOfUser()
+	accounts, resp, err := testClient.Accounts.Select()
 
 	if err != nil {
 		if resp.Response.StatusCode == 404 {
