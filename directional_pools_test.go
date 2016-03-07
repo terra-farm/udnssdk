@@ -9,18 +9,24 @@ func Test_ListAllDirectionPoolsGeoNoQuery(t *testing.T) {
 	if !enableDirectionalPoolTests {
 		t.SkipNow()
 	}
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+
+	if testClient == nil || err != nil {
+		t.Fatalf("Could not create client - %+v\n", err)
+	}
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
 	}
+
 	accountName := testAccounts[0].AccountName
-	dpools, err := testClient.DirectionalPools.ListAllDirectionalGeoPools("", accountName)
+	p := GeoDirectionalPoolKey{Account: AccountKey(accountName)}
+	dpools, err := testClient.DirectionalPools.Geos().Select(p, "")
 	t.Logf("Geo Pools: %v \n", dpools)
+
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	t.SkipNow()
 }
 
 func Test_ListAllDirectionPoolsGeoQuery(t *testing.T) {
@@ -31,14 +37,15 @@ func Test_ListAllDirectionPoolsGeoQuery(t *testing.T) {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
 	}
+
 	accountName := testAccounts[0].AccountName
-	dpools, err := testClient.DirectionalPools.ListAllDirectionalGeoPools(testQuery, accountName)
+	p := GeoDirectionalPoolKey{Account: AccountKey(accountName)}
+	dpools, err := testClient.DirectionalPools.Geos().Select(p, testQuery)
 	t.Logf("Geo Pools: %v \n", dpools)
+
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	t.SkipNow()
 }
 
 func Test_ListAllDirectionalPoolsIPNoQuery(t *testing.T) {
@@ -49,14 +56,15 @@ func Test_ListAllDirectionalPoolsIPNoQuery(t *testing.T) {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
 	}
+
 	accountName := testAccounts[0].AccountName
-	dpools, err := testClient.DirectionalPools.ListAllDirectionalIPPools("", accountName)
+	p := IPDirectionalPoolKey{Account: AccountKey(accountName)}
+	dpools, err := testClient.DirectionalPools.IPs().Select(p, "")
 	t.Logf("IP Pools: %v \n", dpools)
+
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	t.SkipNow()
 }
 
 func Test_ListAllDirectionalPoolsIPQuery(t *testing.T) {
@@ -67,25 +75,23 @@ func Test_ListAllDirectionalPoolsIPQuery(t *testing.T) {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
 	}
+
 	accountName := testAccounts[0].AccountName
-	dpools, err := testClient.DirectionalPools.ListAllDirectionalIPPools(testQuery, accountName)
+	p := IPDirectionalPoolKey{Account: AccountKey(accountName)}
+	dpools, err := testClient.DirectionalPools.IPs().Select(p, testQuery)
 	t.Logf("IP Pools: %v \n", dpools)
+
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	t.SkipNow()
 }
 
 func Test_Create_DirectionalPoolIP(t *testing.T) {
-
 	if !enableDirectionalPoolTests {
 		t.SkipNow()
-
 	}
 	if !enableChanges {
 		t.SkipNow()
-
 	}
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
@@ -94,8 +100,13 @@ func Test_Create_DirectionalPoolIP(t *testing.T) {
 
 	accountName := testAccounts[0].AccountName
 	t.Logf("Creating %s with %+v\n", testIPDPool.Name, testIPDPool)
-	resp, err := testClient.DirectionalPools.CreateDirectionalIPPool(testIPDPool.Name, accountName, testIPDPool)
+	p := IPDirectionalPoolKey{
+		Account: AccountKey(accountName),
+		ID:      testIPDPool.Name,
+	}
+	resp, err := testClient.DirectionalPools.IPs().Create(p, testIPDPool)
 	t.Logf("Response: %+v\n", resp.Response)
+
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -116,8 +127,11 @@ func Test_Get_DirectionalPoolIP(t *testing.T) {
 	}
 
 	accountName := testAccounts[0].AccountName
-
-	dp, resp, err := testClient.DirectionalPools.GetDirectionalIPPool(testIPDPool.Name, accountName)
+	p := GeoDirectionalPoolKey{
+		Account: AccountKey(accountName),
+		ID:      testIPDPool.Name,
+	}
+	dp, resp, err := testClient.DirectionalPools.Geos().Find(p)
 
 	t.Logf("Test Get IP DPool Group (%s, %s)\n", testIPDPool.Name, testIPDPool)
 	t.Logf("Response: %+v\n", resp.Response)
@@ -149,7 +163,11 @@ func Test_Delete_DirectionalPoolIP(t *testing.T) {
 	}
 
 	accountName := testAccounts[0].AccountName
-	resp, err := testClient.DirectionalPools.DeleteDirectionalIPPool(testIPDPool.Name, accountName)
+	p := GeoDirectionalPoolKey{
+		Account: AccountKey(accountName),
+		ID:      testIPDPool.Name,
+	}
+	resp, err := testClient.DirectionalPools.Geos().Delete(p)
 
 	t.Logf("Delete IP DPool Group (%s, %s)\n", testIPDPool.Name, testIPDPool)
 	t.Logf("Response: %+v\n", resp.Response)
