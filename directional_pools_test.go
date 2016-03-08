@@ -6,17 +6,18 @@ import (
 )
 
 func Test_ListAllDirectionPoolsGeoNoQuery(t *testing.T) {
-	if !enableDirectionalPoolTests {
+	if !enableIntegrationTests {
 		t.SkipNow()
-	}
-	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
-
-	if testClient == nil || err != nil {
-		t.Fatalf("Could not create client - %+v\n", err)
 	}
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
+	}
+
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	accountName := testAccounts[0].AccountName
@@ -30,50 +31,65 @@ func Test_ListAllDirectionPoolsGeoNoQuery(t *testing.T) {
 }
 
 func Test_ListAllDirectionPoolsGeoQuery(t *testing.T) {
-	if !enableDirectionalPoolTests {
+	if !enableIntegrationTests {
 		t.SkipNow()
 	}
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	accountName := testAccounts[0].AccountName
 	p := GeoDirectionalPoolKey{Account: AccountKey(accountName)}
 	dpools, err := testClient.DirectionalPools.Geos().Select(p, testQuery)
-	t.Logf("Geo Pools: %v \n", dpools)
 
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Logf("Geo Pools: %v \n", dpools)
 }
 
 func Test_ListAllDirectionalPoolsIPNoQuery(t *testing.T) {
-	if !enableDirectionalPoolTests {
+	if !enableIntegrationTests {
 		t.SkipNow()
 	}
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	accountName := testAccounts[0].AccountName
 	p := IPDirectionalPoolKey{Account: AccountKey(accountName)}
 	dpools, err := testClient.DirectionalPools.IPs().Select(p, "")
-	t.Logf("IP Pools: %v \n", dpools)
 
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Logf("IP Pools: %v \n", dpools)
 }
 
 func Test_ListAllDirectionalPoolsIPQuery(t *testing.T) {
-	if !enableDirectionalPoolTests {
+	if !enableIntegrationTests {
 		t.SkipNow()
 	}
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	accountName := testAccounts[0].AccountName
@@ -87,15 +103,17 @@ func Test_ListAllDirectionalPoolsIPQuery(t *testing.T) {
 }
 
 func Test_Create_DirectionalPoolIP(t *testing.T) {
-	if !enableDirectionalPoolTests {
-		t.SkipNow()
-	}
-	if !enableChanges {
+	if !enableIntegrationTests {
 		t.SkipNow()
 	}
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	accountName := testAccounts[0].AccountName
@@ -113,17 +131,17 @@ func Test_Create_DirectionalPoolIP(t *testing.T) {
 }
 
 func Test_Get_DirectionalPoolIP(t *testing.T) {
-	if !enableDirectionalPoolTests {
+	if !enableIntegrationTests {
 		t.SkipNow()
-
-	}
-	if !enableChanges {
-		t.SkipNow()
-
 	}
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	accountName := testAccounts[0].AccountName
@@ -145,21 +163,20 @@ func Test_Get_DirectionalPoolIP(t *testing.T) {
 	}
 	dp2, er := json.Marshal(dp)
 	t.Logf("DPool Marshalled back: %s - %+v\n", string(dp2), er)
-
 }
 
 func Test_Delete_DirectionalPoolIP(t *testing.T) {
-	if !enableDirectionalPoolTests {
+	if !enableIntegrationTests {
 		t.SkipNow()
-
-	}
-	if !enableChanges {
-		t.SkipNow()
-
 	}
 	if testAccounts == nil {
 		t.Logf("No Accounts Present, skipping...")
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	accountName := testAccounts[0].AccountName

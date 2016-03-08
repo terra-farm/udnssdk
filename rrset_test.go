@@ -8,11 +8,13 @@ import (
 )
 
 func Test_RRSets_SelectPre(t *testing.T) {
-	if testClient == nil {
-		t.Fatalf("TestClient Not Defined?\n")
-	}
-	if !enableRRSetTests {
+	if !enableIntegrationTests {
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	r := RRSetKey{
@@ -30,8 +32,13 @@ func Test_RRSets_SelectPre(t *testing.T) {
 }
 
 func Test_RRSets_Select(t *testing.T) {
-	if !enableRRSetTests {
+	if !enableIntegrationTests {
 		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	r := RRSetKey{
@@ -63,14 +70,13 @@ func Test_RRSets_Select(t *testing.T) {
 
 // Create Test
 func Test_RRSets_Create(t *testing.T) {
-
-	if !enableRRSetTests {
+	if !enableIntegrationTests {
 		t.SkipNow()
-
 	}
-	if !enableChanges {
-		t.SkipNow()
 
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	r := RRSetKey{
@@ -96,10 +102,13 @@ func Test_RRSets_Create(t *testing.T) {
 
 // Another Get  Test if it matchs the Ip in IP1
 func Test_RRSets_SelectMid1(t *testing.T) {
-
-	if !enableRRSetTests {
+	if !enableIntegrationTests {
 		t.SkipNow()
+	}
 
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	r := RRSetKey{
@@ -125,14 +134,13 @@ func Test_RRSets_SelectMid1(t *testing.T) {
 
 // Update Test
 func Test_RRSets_Update(t *testing.T) {
-
-	if !enableRRSetTests {
+	if !enableIntegrationTests {
 		t.SkipNow()
-
 	}
-	if !enableChanges {
-		t.SkipNow()
 
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	r := RRSetKey{
@@ -158,10 +166,13 @@ func Test_RRSets_Update(t *testing.T) {
 
 // Another Get Test if it matches the Ip in IP2
 func Test_RRSets_SelectMid(t *testing.T) {
-
-	if !enableRRSetTests {
+	if !enableIntegrationTests {
 		t.SkipNow()
+	}
 
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	r := RRSetKey{
@@ -186,14 +197,8 @@ func Test_RRSets_SelectMid(t *testing.T) {
 
 // Delete Test
 func Test_RRSet_Delete(t *testing.T) {
-
-	if !enableRRSetTests {
+	if !enableIntegrationTests {
 		t.SkipNow()
-
-	}
-	if !enableChanges {
-		t.SkipNow()
-
 	}
 	if testHostname == "" ||
 		testHostname[0] == '*' ||
@@ -203,6 +208,12 @@ func Test_RRSet_Delete(t *testing.T) {
 		t.Fatalf("Invalid testHostname defined: %v", testHostname)
 		os.Exit(1)
 	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	t.Logf("Deleting %s\n", testHostname)
 	t.Logf("Get RRSet for %s\n", testHostname)
 
@@ -238,10 +249,13 @@ func Test_RRSet_Delete(t *testing.T) {
 }
 
 func Test_RRSet_SelectPost(t *testing.T) {
-
-	if !enableRRSetTests {
+	if !enableIntegrationTests {
 		t.SkipNow()
+	}
 
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	r := RRSetKey{

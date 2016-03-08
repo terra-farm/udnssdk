@@ -5,9 +5,15 @@ import (
 )
 
 func Test_GetProbeAlerts(t *testing.T) {
-	if !enableProbeTests {
+	if !enableIntegrationTests {
 		t.SkipNow()
 	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	r := RRSetKey{
 		Zone: testProbeDomain,
 		Type: testProbeType,

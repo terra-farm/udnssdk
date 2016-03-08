@@ -4,11 +4,16 @@ import (
 	"testing"
 )
 
-func Test_ListAccountsOfUser(t *testing.T) {
-
-	if !enableAccountTests {
+func Test_Online_ListAccountsOfUser(t *testing.T) {
+	if !enableIntegrationTests {
 		t.SkipNow()
 	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	accounts, resp, err := testClient.Accounts.Select()
 	t.Logf("Accounts: %+v \n", accounts)
 	t.Logf("Response: %+v\n", resp.Response)

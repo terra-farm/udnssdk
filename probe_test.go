@@ -5,9 +5,15 @@ import (
 )
 
 func Test_ProbesSelectProbes(t *testing.T) {
-	if !enableProbeTests {
+	if !enableIntegrationTests {
 		t.SkipNow()
 	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	r := RRSetKey{
 		Zone: testProbeDomain,
 		Type: testProbeType,
@@ -40,9 +46,15 @@ func Test_ProbesSelectProbes(t *testing.T) {
 
 // TODO: Write a full Event test suite.  We do not use these at my firm.
 func Test_ListNotifications(t *testing.T) {
-	if !enableProbeTests {
+	if !enableIntegrationTests {
 		t.SkipNow()
 	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	events, resp, err := testClient.SBTCService.ListAllNotifications("", testProbeName, testProbeType, testProbeDomain)
 	t.Logf("Notifications: %+v \n", events)
 	t.Logf("Response: %+v\n", resp.Response)
