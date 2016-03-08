@@ -78,15 +78,15 @@ func (s *DirectionalPoolsService) IPs() *IPDirectionalPoolsService {
 type DirectionalPoolKey struct {
 	Account AccountKey
 	Type    string
-	ID      string
+	Name    string
 }
 
 // URI generates the URI for directional pools by account, type & slug ID
 func (p DirectionalPoolKey) URI() string {
-	if p.ID == "" {
+	if p.Name == "" {
 		return fmt.Sprintf("%s/dirgroups/%s", p.Account.URI(), p.Type)
 	}
-	return fmt.Sprintf("%s/dirgroups/%s/%s", p.Account.URI(), p.Type, p.ID)
+	return fmt.Sprintf("%s/dirgroups/%s/%s", p.Account.URI(), p.Type, p.Name)
 }
 
 // QueryURI generates the URI for directional pools by account, type, query & offset
@@ -105,7 +105,7 @@ func (p DirectionalPoolKey) QueryURI(query string, offset int) string {
 // GeoDirectionalPoolKey collects the identifiers of an DirectionalPool with type Geo
 type GeoDirectionalPoolKey struct {
 	Account AccountKey
-	ID      string
+	Name    string
 }
 
 // DirectionalPoolKey generates the DirectionalPoolKey for the GeoDirectionalPoolKey
@@ -113,7 +113,7 @@ func (p GeoDirectionalPoolKey) DirectionalPoolKey() DirectionalPoolKey {
 	return DirectionalPoolKey{
 		Account: p.Account,
 		Type:    "geo",
-		ID:      p.ID,
+		Name:    p.Name,
 	}
 }
 
@@ -206,7 +206,7 @@ func (s *GeoDirectionalPoolsService) Delete(p GeoDirectionalPoolKey) (*Response,
 // IPDirectionalPoolKey collects the identifiers of an DirectionalPool with type IP
 type IPDirectionalPoolKey struct {
 	Account AccountKey
-	ID      string
+	Name    string
 }
 
 // DirectionalPoolKey generates the DirectionalPoolKey for the IPDirectionalPoolKey
@@ -214,7 +214,7 @@ func (p IPDirectionalPoolKey) DirectionalPoolKey() DirectionalPoolKey {
 	return DirectionalPoolKey{
 		Account: p.Account,
 		Type:    "ip",
-		ID:      p.ID,
+		Name:    p.Name,
 	}
 }
 
