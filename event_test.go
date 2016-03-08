@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func Test_ListTasks(t *testing.T) {
+func Test_ListEvents(t *testing.T) {
 	if !enableIntegrationTests {
 		t.SkipNow()
 	}
@@ -14,8 +14,13 @@ func Test_ListTasks(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	tasks, err := testClient.Tasks.ListAllTasks("")
-	t.Logf("Tasks: %+v \n", tasks)
+	r := RRSetKey{
+		Zone: testProbeDomain,
+		Type: testProbeType,
+		Name: testProbeName,
+	}
+	events, err := testClient.Events.Select(r, "")
+	t.Logf("Events: %+v \n", events)
 	if err != nil {
 		t.Fatal(err)
 	}

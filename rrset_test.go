@@ -7,30 +7,49 @@ import (
 	"testing"
 )
 
-func Test_ListAllRRSetsPre(t *testing.T) {
-	if testClient == nil {
-		t.Fatalf("TestClient Not Defined?\n")
-	}
-	if !enableRRSetTests {
+func Test_RRSets_SelectPre(t *testing.T) {
+	if !enableIntegrationTests {
 		t.SkipNow()
 	}
 
-	rrsets, err := testClient.RRSets.ListAllRRSets(testDomain, testHostname, "ANY")
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	t.Logf("ListAllRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
+	r := RRSetKey{
+		Zone: testDomain,
+		Type: "ANY",
+		Name: testHostname,
+	}
+	t.Logf("Select(%v)", r)
+	rrsets, err := testClient.RRSets.Select(r)
 	t.Logf("RRSets: %+v\n", rrsets)
+
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-func Test_ListRRSets(t *testing.T) {
-	if !enableRRSetTests {
+func Test_RRSets_Select(t *testing.T) {
+	if !enableIntegrationTests {
 		t.SkipNow()
 	}
-	rrsets, err := testClient.RRSets.ListAllRRSets(testDomain, "", "")
-	t.Logf("ListAllRRSets(%s, \"\", \"\")", testDomain)
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	r := RRSetKey{
+		Zone: testDomain,
+		Type: "ANY",
+		Name: "",
+	}
+	t.Logf("Select(%v)", r)
+	rrsets, err := testClient.RRSets.Select(r)
 	t.Logf("RRSets: %+v\n", rrsets)
+
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,84 +68,126 @@ func Test_ListRRSets(t *testing.T) {
 	}
 }
 
-
 // Create Test
-func Test_Create_RRSets(t *testing.T) {
-
-	if !enableRRSetTests {
+func Test_RRSets_Create(t *testing.T) {
+	if !enableIntegrationTests {
 		t.SkipNow()
-
 	}
-	if !enableChanges {
-		t.SkipNow()
 
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
 	}
-	t.Logf("Creating %s with %s\n", testHostname, testIP1)
-	rr1 := &RRSet{OwnerName: testHostname, RRType: "A", TTL: 300, RData: []string{testIP1}, Profile: &StringProfile{Profile: testProfile}}
-	resp, err := testClient.RRSets.CreateRRSet(testDomain, *rr1)
+
+	r := RRSetKey{
+		Zone: testDomain,
+		Type: "A",
+		Name: testHostname,
+	}
+	val := RRSet{
+		OwnerName: r.Name,
+		RRType:    r.Type,
+		TTL:       300,
+		RData:     []string{testIP1},
+		Profile:   &StringProfile{Profile: testProfile},
+	}
+	t.Logf("Create(%v, %v)", r, val)
+	resp, err := testClient.RRSets.Create(r, val)
 	t.Logf("Response: %+v\n", resp.Response)
+
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Another Get  Test if it matchs the Ip in IP1
-func Test_ListAllRRSetsMid1(t *testing.T) {
-
-	if !enableRRSetTests {
+func Test_RRSets_SelectMid1(t *testing.T) {
+	if !enableIntegrationTests {
 		t.SkipNow()
-
 	}
 
-	rrsets, err := testClient.RRSets.ListAllRRSets(testDomain, testHostname, "ANY")
-
-	t.Logf("ListAllRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
-	t.Logf("RRSets: %+v\n", rrsets)
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	r := RRSetKey{
+		Zone: testDomain,
+		Type: "ANY",
+		Name: testHostname,
+	}
+	t.Logf("Select(%v)", r)
+	rrsets, err := testClient.RRSets.Select(r)
+	t.Logf("RRSets: %+v\n", rrsets)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	// Do the test v IP1 here
-	if rrsets[0].RData[0] != testIP1 {
-		t.Fatalf("RData[0]\"%s\" != testIP1\"%s\"", rrsets[0].RData[0], testIP1)
+	actual := rrsets[0].RData[0]
+	expected := testIP1
+	if actual != expected {
+		t.Fatalf("actual RData[0]\"%s\" != expected \"%s\"", actual, expected)
 	}
 }
 
 // Update Test
-func Test_Update_RRSets(t *testing.T) {
-
-	if !enableRRSetTests {
+func Test_RRSets_Update(t *testing.T) {
+	if !enableIntegrationTests {
 		t.SkipNow()
-
-	}
-	if !enableChanges {
-		t.SkipNow()
-
 	}
 
-	t.Logf("Updating %s to %s\n", testHostname, testIP2)
-	rr2 := &RRSet{OwnerName: testHostname, RRType: "A", TTL: 300, RData: []string{testIP2}, Profile: &StringProfile{Profile: testProfile2}}
-	resp, err := testClient.RRSets.UpdateRRSet(testDomain, *rr2)
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	r := RRSetKey{
+		Zone: testDomain,
+		Type: "A",
+		Name: testHostname,
+	}
+	val := RRSet{
+		OwnerName: r.Name,
+		RRType:    r.Type,
+		TTL:       300,
+		RData:     []string{testIP2},
+		Profile:   &StringProfile{Profile: testProfile2},
+	}
+	t.Logf("Update(%v, %v)", r, val)
+	resp, err := testClient.RRSets.Update(r, val)
 	t.Logf("Response: %+v\n", resp.Response)
+
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Another Get Test if it matches the Ip in IP2
-func Test_ListAllRRSetsMid(t *testing.T) {
-
-	if !enableRRSetTests {
+func Test_RRSets_SelectMid(t *testing.T) {
+	if !enableIntegrationTests {
 		t.SkipNow()
-
 	}
 
-	rrsets, err := testClient.RRSets.ListAllRRSets(testDomain, testHostname, "ANY")
-
-	t.Logf("ListAllRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
-	t.Logf("RRSets: %+v\n", rrsets)
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	r := RRSetKey{
+		Zone: testDomain,
+		Type: "ANY",
+		Name: testHostname,
+	}
+	t.Logf("Select(%v)", r)
+	rrsets, err := testClient.RRSets.Select(r)
+	t.Logf("RRSets: %+v\n", rrsets)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	// Do the test v IP2 here
 	if rrsets[0].RData[0] != testIP2 {
 		t.Fatalf("RData[0]\"%s\" != testIP2\"%s\"", rrsets[0].RData[0], testIP2)
@@ -135,41 +196,51 @@ func Test_ListAllRRSetsMid(t *testing.T) {
 }
 
 // Delete Test
-func Test_Delete_RRSets(t *testing.T) {
-
-	if !enableRRSetTests {
+func Test_RRSet_Delete(t *testing.T) {
+	if !enableIntegrationTests {
 		t.SkipNow()
-
 	}
-	if !enableChanges {
-		t.SkipNow()
-
-	}
-	if testHostname == "" || testHostname[0] == '*' || testHostname[0] == '@' || testHostname == "www" || testHostname[0] == '.' {
-		t.Fatalf("NO testHostname DEFINED!  DANGER")
+	if testHostname == "" ||
+		testHostname[0] == '*' ||
+		testHostname[0] == '@' ||
+		testHostname == "www" ||
+		testHostname[0] == '.' {
+		t.Fatalf("Invalid testHostname defined: %v", testHostname)
 		os.Exit(1)
 	}
-	t.Logf("Deleting %s\n", testHostname)
-	t.Logf("Get RRSet for %s\n", testHostname)
-	rrsets, err := testClient.RRSets.ListAllRRSets(testDomain, testHostname, "ANY")
-	t.Logf("ListAllRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
-	t.Logf("RRSets: %+v\n", rrsets)
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for i, e := range rrsets {
-		t.Logf("Deleting %s  - ( %d ) %+v \n", testHostname, i, e)
-		/*		if e.OwnerName != testHostname {
-				t.Logf("e.OwnerName(%s) != testHostname(%s).. Resetting..\n", e.OwnerName, testHostname)
-				e.OwnerName = testHostname
-				t.Logf("NewE: %+v\n", e)
-			} */
-		if strings.Index(e.RRType, " ") != -1 {
-			t.Logf("Stripping RRType\n")
-			x := strings.Fields(e.RRType)[0]
-			e.RRType = x
+
+	t.Logf("Deleting %s\n", testHostname)
+	t.Logf("Get RRSet for %s\n", testHostname)
+
+	r := RRSetKey{
+		Zone: testDomain,
+		Type: "ANY",
+		Name: testHostname,
+	}
+	t.Logf("Select(%v)", r)
+	rrsets, err := testClient.RRSets.Select(r)
+	t.Logf("RRSets: %+v\n", rrsets)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, e := range rrsets {
+		r := RRSetKey{
+			Zone: testDomain,
+			Type: e.RRType,
+			Name: e.OwnerName,
 		}
-		resp, err := testClient.RRSets.DeleteRRSet(testDomain, e)
+		if strings.Index(r.Type, " ") != -1 {
+			t.Logf("Stripping whitespace rom Type: %v\n", r.Type)
+			r.Type = strings.Fields(r.Type)[0]
+		}
+		t.Logf("Delete(%v)", r)
+		resp, err := testClient.RRSets.Delete(r)
 		t.Logf("Response: %+v\n", resp.Response)
 		if err != nil {
 			t.Fatal(err)
@@ -177,17 +248,25 @@ func Test_Delete_RRSets(t *testing.T) {
 	}
 }
 
-
-func Test_ListAllRRSetsPost(t *testing.T) {
-
-	if !enableRRSetTests {
+func Test_RRSet_SelectPost(t *testing.T) {
+	if !enableIntegrationTests {
 		t.SkipNow()
-
 	}
-	rrsets, err := testClient.RRSets.ListAllRRSets(testDomain, testHostname, "ANY")
 
-	t.Logf("ListAllRRSets(%s, %s, \"ANY\")", testDomain, testHostname)
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	r := RRSetKey{
+		Zone: testDomain,
+		Type: "ANY",
+		Name: testHostname,
+	}
+	t.Logf("Select(%v)", r)
+	rrsets, err := testClient.RRSets.Select(r)
 	t.Logf("RRSets: %+v\n", rrsets)
+
 	if err != nil {
 		t.Fatal(err)
 	}

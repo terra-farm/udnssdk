@@ -3,32 +3,17 @@ package udnssdk
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
-	"time"
 )
 
-// SBTCService manages Probes
-type SBTCService struct {
+// ProbesService manages Probes
+type ProbesService struct {
 	client *Client
 }
 
-// ProbeAlertDataDTO wraps a probe alert response
-type ProbeAlertDataDTO struct {
-	PoolRecord      string    `json:"poolRecord"`
-	ProbeType       string    `json:"probeType"`
-	ProbeStatus     string    `json:"probeStatus"`
-	AlertDate       time.Time `json:"alertDate"`
-	FailoverOccured bool      `json:"failoverOccured"`
-	OwnerName       string    `json:"ownerName"`
-	Status          string    `json:"status"`
-}
-
-// ProbeAlertDataListDTO wraps the response for an index of probe alerts
-type ProbeAlertDataListDTO struct {
-	Alerts     []ProbeAlertDataDTO `json:"alerts"`
-	Queryinfo  QueryInfo           `json:"queryInfo"`
-	Resultinfo ResultInfo          `json:"resultInfo"`
+// Probes allows access to the Probes API
+func (s *SBTCService) Probes() *ProbesService {
+	return &ProbesService{client: s.client}
 }
 
 // ProbeInfoDTO wraps a probe response
@@ -211,110 +196,17 @@ type ProbeListDTO struct {
 	Resultinfo ResultInfo     `json:"resultInfo"`
 }
 
-// ProbePath generates the URI path for a probe
-func ProbePath(zone, typ, name, guid string) string {
-	if guid == "" {
-		return fmt.Sprintf("zones/%s/rrsets/%s/%s/probes", zone, typ, name)
-	}
-	return fmt.Sprintf("zones/%s/rrsets/%s/%s/probes/%s", zone, typ, name, guid)
+// Create creates a probe with a RRSetKey using the ProbeInfoDTO dp
+func (s *ProbesService) Create(r RRSetKey, dp ProbeInfoDTO) (*Response, error) {
+	return s.client.post(r.ProbesURI(), dp, nil)
 }
 
-// AlertPath generates the URI path for an alert
-func AlertPath(zone, typ, name string) string {
-	return fmt.Sprintf("zones/%s/rrsets/%s/%s/alerts", zone, typ, name)
-}
-
-func probeQueryPath(zone, typ, name, query string) string {
-	uri := ProbePath(zone, typ, name, "")
-	if query != "" {
-		uri = fmt.Sprintf("%s?sort=NAME&query=%s", uri, query)
-	}
-	return uri
-}
-
-func probeAlertQueryPath(zone, typ, name string, offset int) string {
-	baseURI := AlertPath(zone, typ, name)
-	return fmt.Sprintf("%s?offset=%d", baseURI, offset)
-}
-
-// ListAllProbeAlerts returns all probe alerts with name, type & zone
-func (s *SBTCService) ListAllProbeAlerts(name, typ, zone string) ([]ProbeAlertDataDTO, error) {
-	// TODO: Sane Configuration for timeouts / retries
-	maxerrs := 5
-	waittime := 5 * time.Second
-
-	// init accumulators
-	as := []ProbeAlertDataDTO{}
-	offset := 0
-	errcnt := 0
-
-	for {
-		reqAlerts, ri, res, err := s.ListProbeAlerts(name, typ, zone, offset)
-		if err != nil {
-			if res.StatusCode >= 500 {
-				errcnt = errcnt + 1
-				if errcnt < maxerrs {
-					time.Sleep(waittime)
-					continue
-				}
-			}
-			return as, err
-		}
-
-		log.Printf("ResultInfo: %+v\n", ri)
-		for _, a := range reqAlerts {
-			as = append(as, a)
-		}
-		if ri.ReturnedCount+ri.Offset >= ri.TotalCount {
-			return as, nil
-		}
-		offset = ri.ReturnedCount + ri.Offset
-		continue
-	}
-}
-
-// ListProbeAlerts returns the probe alerts with name, type & zone, accepting an offset
-func (s *SBTCService) ListProbeAlerts(name, typ, zone string, offset int) ([]ProbeAlertDataDTO, ResultInfo, *Response, error) {
-	var ald ProbeAlertDataListDTO
-
-	uri := probeAlertQueryPath(zone, typ, name, offset)
-	res, err := s.client.get(uri, &ald)
-
-	as := []ProbeAlertDataDTO{}
-	for _, a := range ald.Alerts {
-		as = append(as, a)
-	}
-	return as, ald.Resultinfo, res, err
-}
-
-// GetProbe returns a probe with name, type, zone & guid
-func (s *SBTCService) GetProbe(name, typ, zone, guid string) (ProbeInfoDTO, *Response, error) {
-	var t ProbeInfoDTO
-	uri := ProbePath(zone, typ, name, guid)
-	res, err := s.client.get(uri, &t)
-	return t, res, err
-}
-
-// CreateProbe creates a probe with name, type & zone using the ProbeInfoDTO dp
-func (s *SBTCService) CreateProbe(name, typ, zone string, dp ProbeInfoDTO) (*Response, error) {
-	uri := ProbePath(zone, typ, name, "")
-	var ignored interface{}
-	return s.client.post(uri, dp, &ignored)
-}
-
-// UpdateProbe updates a probe given a name, type, zone & guid with the ProbeInfoDTO dp
-func (s *SBTCService) UpdateProbe(name, typ, zone, guid string, dp ProbeInfoDTO) (*Response, error) {
-	uri := ProbePath(zone, typ, name, guid)
-	var ignored interface{}
-	return s.client.put(uri, dp, &ignored)
-}
-
-// ListProbes returns all probes by name, type & zone, with an optional query
-func (s *SBTCService) ListProbes(query, name, typ, zone string) ([]ProbeInfoDTO, *Response, error) {
+// Select returns all probes by a RRSetKey, with an optional query
+func (s *ProbesService) Select(r RRSetKey, query string) ([]ProbeInfoDTO, *Response, error) {
 	var pld ProbeListDTO
 
 	// This API does not support pagination.
-	uri := probeQueryPath(zone, typ, name, query)
+	uri := r.ProbesQueryURI(query)
 	res, err := s.client.get(uri, &pld)
 
 	ps := []ProbeInfoDTO{}
@@ -326,8 +218,41 @@ func (s *SBTCService) ListProbes(query, name, typ, zone string) ([]ProbeInfoDTO,
 	return ps, res, err
 }
 
-// DeleteProbe deletes a probe by its name, type, zone & guid
-func (s *SBTCService) DeleteProbe(name, typ, zone, guid string) (*Response, error) {
-	uri := ProbePath(zone, typ, name, guid)
-	return s.client.delete(uri, nil)
+// ProbeKey collects the identifiers of a Probe
+type ProbeKey struct {
+	Zone string
+	Type string
+	Name string
+	GUID string
+}
+
+// RRSetKey generates the RRSetKey for the ProbeKey
+func (p *ProbeKey) RRSetKey() *RRSetKey {
+	return &RRSetKey{
+		Zone: p.Zone,
+		Type: p.Type,
+		Name: p.Name,
+	}
+}
+
+// URI generates the URI for a probe
+func (p *ProbeKey) URI() string {
+	return fmt.Sprintf("%s/%s", p.RRSetKey().ProbesURI(), p.GUID)
+}
+
+// Find returns a probe from a ProbeKey
+func (s *ProbesService) Find(p ProbeKey) (ProbeInfoDTO, *Response, error) {
+	var t ProbeInfoDTO
+	res, err := s.client.get(p.URI(), &t)
+	return t, res, err
+}
+
+// Update updates a probe given a ProbeKey with the ProbeInfoDTO dp
+func (s *ProbesService) Update(p ProbeKey, dp ProbeInfoDTO) (*Response, error) {
+	return s.client.put(p.URI(), dp, nil)
+}
+
+// Delete deletes a probe by its ProbeKey
+func (s *ProbesService) Delete(p ProbeKey) (*Response, error) {
+	return s.client.delete(p.URI(), nil)
 }
