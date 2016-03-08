@@ -238,14 +238,12 @@ func (s *RRSetsService) SelectWithOffset(r RRSetKey, offset int) ([]RRSet, Resul
 
 // Create creates an rrset with val
 func (s *RRSetsService) Create(r RRSetKey, rrset RRSet) (*Response, error) {
-	var ignored interface{}
-	return s.client.post(r.URI(), rrset, &ignored)
+	return s.client.post(r.URI(), rrset, nil)
 }
 
 // Update updates a RRSet with the provided val
 func (s *RRSetsService) Update(r RRSetKey, val RRSet) (*Response, error) {
-	var ignored interface{}
-	return s.client.put(r.URI(), val, &ignored)
+	return s.client.put(r.URI(), val, nil)
 }
 
 // Delete deletes an RRSet

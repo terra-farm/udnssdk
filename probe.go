@@ -198,8 +198,7 @@ type ProbeListDTO struct {
 
 // Create creates a probe with a RRSetKey using the ProbeInfoDTO dp
 func (s *ProbesService) Create(r RRSetKey, dp ProbeInfoDTO) (*Response, error) {
-	var ignored interface{}
-	return s.client.post(r.ProbesURI(), dp, &ignored)
+	return s.client.post(r.ProbesURI(), dp, nil)
 }
 
 // Select returns all probes by a RRSetKey, with an optional query
@@ -250,8 +249,7 @@ func (s *ProbesService) Find(p ProbeKey) (ProbeInfoDTO, *Response, error) {
 
 // Update updates a probe given a ProbeKey with the ProbeInfoDTO dp
 func (s *ProbesService) Update(p ProbeKey, dp ProbeInfoDTO) (*Response, error) {
-	var ignored interface{}
-	return s.client.put(p.URI(), dp, &ignored)
+	return s.client.put(p.URI(), dp, nil)
 }
 
 // Delete deletes a probe by its ProbeKey

@@ -108,8 +108,7 @@ func (s *EventsService) SelectWithOffset(r RRSetKey, query string, offset int) (
 
 // Create requests creation of an event by RRSetKey, with provided event-info, returning actual response or an error
 func (s *EventsService) Create(r RRSetKey, ev EventInfoDTO) (*Response, error) {
-	var ignored interface{}
-	return s.client.post(r.EventsURI(), ev, &ignored)
+	return s.client.post(r.EventsURI(), ev, nil)
 }
 
 // Find requests an event by name, type, zone & guid, also returning the actual response, or an error
@@ -121,8 +120,7 @@ func (s *EventsService) Find(e EventKey) (EventInfoDTO, *Response, error) {
 
 // Update requests update of an event by EventKey, withprovided event-info, returning the actual response or an error
 func (s *EventsService) Update(e EventKey, ev EventInfoDTO) (*Response, error) {
-	var ignored interface{}
-	return s.client.put(e.URI(), ev, &ignored)
+	return s.client.put(e.URI(), ev, nil)
 }
 
 // Delete requests deletion of an event by EventKey, returning the actual response or an error
