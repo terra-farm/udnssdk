@@ -32,8 +32,6 @@ type RRSetKey struct {
 
 // URI generates the URI for an RRSet
 func (r *RRSetKey) URI() string {
-	return fmt.Sprintf("zones/%s/rrsets/%s/%s", r.Zone, r.Type, r.Name)
-
 	uri := fmt.Sprintf("zones/%s/rrsets", r.Zone)
 	if r.Type != "" {
 		uri += fmt.Sprintf("/%v", r.Type)
