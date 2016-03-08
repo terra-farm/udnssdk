@@ -78,7 +78,34 @@ func NewClient(username, password, BaseURL string) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	c := &Client{AccessToken: accesstoken, RefreshToken: refreshtoken, Username: username, Password: password, HTTPClient: &http.Client{}, BaseURL: BaseURL, UserAgent: userAgent}
+	c := &Client{
+		AccessToken:  accesstoken,
+		RefreshToken: refreshtoken,
+		Username:     username,
+		Password:     password,
+		HTTPClient:   &http.Client{},
+		BaseURL:      BaseURL,
+		UserAgent:    userAgent,
+	}
+	c.RRSets = &RRSetsService{client: c}
+	c.Tasks = &TasksService{client: c}
+	c.Accounts = &AccountsService{client: c}
+	c.DirectionalPools = &DirectionalPoolsService{client: c}
+	c.SBTCService = &SBTCService{client: c}
+	return c, nil
+}
+
+// newStubClient returns a new ultradns API client.
+func newStubClient(username, password, BaseURL, accesstoken, refreshtoken string) (*Client, error) {
+	c := &Client{
+		AccessToken:  accesstoken,
+		RefreshToken: refreshtoken,
+		Username:     username,
+		Password:     password,
+		HTTPClient:   &http.Client{},
+		BaseURL:      BaseURL,
+		UserAgent:    userAgent,
+	}
 	c.RRSets = &RRSetsService{client: c}
 	c.Tasks = &TasksService{client: c}
 	c.Accounts = &AccountsService{client: c}
@@ -305,7 +332,6 @@ func CheckAuthResponse(r *http.Response, body []byte) error {
 
 	if err == nil {
 		er.Response = r
-		//log.Printf("CheckAuthResponse: %d", er)
 
 		return er
 	}
