@@ -114,29 +114,25 @@ func (s *DirectionalPoolsService) GetDirectionalIPPool(name, acct string) (Accou
 // CreateDirectionalGeoPool requests creation of a geo direcctional-pool by name & account, given a directional-pool
 func (s *DirectionalPoolsService) CreateDirectionalGeoPool(name, acct string, dp AccountLevelGeoDirectionalGroupDTO) (*Response, error) {
 	uri := DirectionalPoolPath(acct, "geo", name)
-	var ignored interface{}
-	return s.client.post(uri, dp, &ignored)
+	return s.client.post(uri, dp, nil)
 }
 
 // CreateDirectionalIPPool requests creation of an IP directional-pool by name & account, given a directional-pool
 func (s *DirectionalPoolsService) CreateDirectionalIPPool(name, acct string, dp AccountLevelIPDirectionalGroupDTO) (*Response, error) {
 	uri := DirectionalPoolPath(acct, "ip", name)
-	var ignored interface{}
-	return s.client.post(uri, dp, &ignored)
+	return s.client.post(uri, dp, nil)
 }
 
 // UpdateDirectionalGeoPool requests update of a geo directional-pool by name & account, given a directional-pool
 func (s *DirectionalPoolsService) UpdateDirectionalGeoPool(name, acct string, dp AccountLevelGeoDirectionalGroupDTO) (*Response, error) {
 	uri := DirectionalPoolPath(acct, "geo", name)
-	var ignored interface{}
-	return s.client.put(uri, dp, &ignored)
+	return s.client.put(uri, dp, nil)
 }
 
 // UpdateDirectionalIPPool requests update of an IP directional-pool by name & account, given a directional-pool
 func (s *DirectionalPoolsService) UpdateDirectionalIPPool(name, acct string, dp AccountLevelIPDirectionalGroupDTO) (*Response, error) {
 	uri := DirectionalPoolPath(acct, "ip", name)
-	var ignored interface{}
-	return s.client.put(uri, dp, &ignored)
+	return s.client.put(uri, dp, nil)
 }
 
 // ListAllDirectionalGeoPools requests all geo directional-pools, by query and account, providing pagination and error handling

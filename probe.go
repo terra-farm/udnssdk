@@ -298,15 +298,13 @@ func (s *SBTCService) GetProbe(name, typ, zone, guid string) (ProbeInfoDTO, *Res
 // CreateProbe creates a probe with name, type & zone using the ProbeInfoDTO dp
 func (s *SBTCService) CreateProbe(name, typ, zone string, dp ProbeInfoDTO) (*Response, error) {
 	uri := ProbePath(zone, typ, name, "")
-	var ignored interface{}
-	return s.client.post(uri, dp, &ignored)
+	return s.client.post(uri, dp, nil)
 }
 
 // UpdateProbe updates a probe given a name, type, zone & guid with the ProbeInfoDTO dp
 func (s *SBTCService) UpdateProbe(name, typ, zone, guid string, dp ProbeInfoDTO) (*Response, error) {
 	uri := ProbePath(zone, typ, name, guid)
-	var ignored interface{}
-	return s.client.put(uri, dp, &ignored)
+	return s.client.put(uri, dp, nil)
 }
 
 // ListProbes returns all probes by name, type & zone, with an optional query

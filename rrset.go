@@ -259,15 +259,13 @@ func (s *RRSetsService) ListRRSets(zone, rrsetName, rrsetType string, offset int
 // CreateRRSet creates a zone rrset.
 func (s *RRSetsService) CreateRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
 	uri := rrsetPath(zone, rrsetAttributes.RRType, rrsetAttributes.OwnerName)
-	var ignored interface{}
-	return s.client.post(uri, rrsetAttributes, &ignored)
+	return s.client.post(uri, rrsetAttributes, nil)
 }
 
 // UpdateRRSet updates a zone rrset.
 func (s *RRSetsService) UpdateRRSet(zone string, rrsetAttributes RRSet) (*Response, error) {
 	uri := rrsetPath(zone, rrsetAttributes.RRType, rrsetAttributes.OwnerName)
-	var ignored interface{}
-	return s.client.put(uri, rrsetAttributes, &ignored)
+	return s.client.put(uri, rrsetAttributes, nil)
 }
 
 // DeleteRRSet deletes a zone rrset.
