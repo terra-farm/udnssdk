@@ -54,22 +54,32 @@ var (
 func TestMain(m *testing.M) {
 	rand.Seed(time.Now().UnixNano())
 
-	if testUsername == "" {
-		log.Printf("Please configure ULTRADNS_USERNAME.\n")
-		os.Exit(1)
+
+	if envEnableIntegrationTests == "false" || envEnableIntegrationTests == "0" {
+		enableIntegrationTests = false
+	} else if envEnableIntegrationTests == "true" || envEnableIntegrationTests == "1" {
+		enableIntegrationTests = true
 	}
-	if testPassword == "" {
-		log.Printf("Please configure ULTRADNS_PASSWORD.\n")
-		os.Exit(1)
+
+	if enableIntegrationTests {
+		if testUsername == "" {
+			log.Printf("Please configure ULTRADNS_USERNAME.\n")
+			os.Exit(1)
+		}
+		if testPassword == "" {
+			log.Printf("Please configure ULTRADNS_PASSWORD.\n")
+			os.Exit(1)
+		}
+		if testDomain == "" {
+			log.Printf("Please configure ULTRADNS_DOMAIN.\n")
+			os.Exit(1)
+		}
+		if testHostname == "" {
+			log.Printf("Please configure ULTRADNS_TEST_HOSTNAME.\n")
+			os.Exit(1)
+		}
 	}
-	if testDomain == "" {
-		log.Printf("Please configure ULTRADNS_DOMAIN.\n")
-		os.Exit(1)
-	}
-	if testHostname == "" {
-		log.Printf("Please configure ULTRADNS_TEST_HOSTNAME.\n")
-		os.Exit(1)
-	}
+
 	if testBaseURL == "" {
 		testBaseURL = DefaultTestBaseURL
 	}
@@ -128,12 +138,6 @@ func TestMain(m *testing.M) {
 		enableDirectionalPoolTests = false
 	} else if envenableDirectionalPoolTests == "true" || envenableDirectionalPoolTests == "1" {
 		enableDirectionalPoolTests = true
-	}
-
-	if envEnableIntegrationTests == "false" || envEnableIntegrationTests == "0" {
-		enableIntegrationTests = false
-	} else if envEnableIntegrationTests == "true" || envEnableIntegrationTests == "1" {
-		enableIntegrationTests = true
 	}
 
 	testAccounts = nil
