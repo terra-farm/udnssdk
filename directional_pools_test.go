@@ -14,7 +14,6 @@ func Test_ListAllDirectionPoolsGeoNoQuery(t *testing.T) {
 		t.SkipNow()
 	}
 
-
 	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
 	if err != nil {
 		t.Fatal(err)

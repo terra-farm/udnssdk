@@ -105,7 +105,6 @@ func Test_Accounts_Find(t *testing.T) {
 	}
 }
 
-
 func Test_AccountsURI(t *testing.T) {
 	uri := AccountsURI()
 	want := "accounts"

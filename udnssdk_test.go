@@ -54,7 +54,6 @@ var (
 func TestMain(m *testing.M) {
 	rand.Seed(time.Now().UnixNano())
 
-
 	if envEnableIntegrationTests == "false" || envEnableIntegrationTests == "0" {
 		enableIntegrationTests = false
 	} else if envEnableIntegrationTests == "true" || envEnableIntegrationTests == "1" {
