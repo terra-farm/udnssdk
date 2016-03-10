@@ -103,15 +103,13 @@ func (s *SBTCService) GetEvent(name, typ, zone, guid string) (EventInfoDTO, *Res
 // CreateEvent requests creation of an event by name, type, zone, with provided event-info, returning actual response or an error
 func (s *SBTCService) CreateEvent(name, typ, zone string, ev EventInfoDTO) (*Response, error) {
 	reqStr := EventPath(zone, typ, name, "")
-	var ignored interface{}
-	return s.client.post(reqStr, ev, &ignored)
+	return s.client.post(reqStr, ev, nil)
 }
 
 // UpdateEvent requests update of an event by name, type, zone & guid, withprovided event-info, returning the actual response or an error
 func (s *SBTCService) UpdateEvent(name, typ, zone, guid string, ev EventInfoDTO) (*Response, error) {
 	reqStr := EventPath(zone, typ, name, guid)
-	var ignored interface{}
-	return s.client.put(reqStr, ev, &ignored)
+	return s.client.put(reqStr, ev, nil)
 }
 
 // DeleteEvent requests deletion of an event by name, type, zone & guid, returning the actual response or an error

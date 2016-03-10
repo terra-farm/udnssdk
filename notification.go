@@ -113,15 +113,13 @@ func (s *SBTCService) GetNotification(name, typ, zone, guid string) (Notificatio
 // CreateNotification creates a notification by name, type & zone, with the NotificationInfoDTO ev
 func (s *SBTCService) CreateNotification(name, typ, zone string, ev NotificationInfoDTO) (*Response, error) {
 	reqStr := NotificationPath(zone, typ, name, "")
-	var ignored interface{}
-	return s.client.post(reqStr, ev, &ignored)
+	return s.client.post(reqStr, ev, nil)
 }
 
 // UpdateNotification updates a notification by name, type, zone & guid, with NotificationInfoDTO ev
 func (s *SBTCService) UpdateNotification(name, typ, zone, guid string, ev NotificationInfoDTO) (*Response, error) {
 	reqStr := NotificationPath(zone, typ, name, guid)
-	var ignored interface{}
-	return s.client.put(reqStr, ev, &ignored)
+	return s.client.put(reqStr, ev, nil)
 }
 
 // DeleteNotification deletes a notification by name, type, zone & guid
