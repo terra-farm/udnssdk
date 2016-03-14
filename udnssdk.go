@@ -67,6 +67,8 @@ type Client struct {
 	DirectionalPools *DirectionalPoolsService
 	// Events API
 	Events *EventsService
+	// Notifications API
+	Notifications *NotificationsService
 	// Probes API
 	Probes *ProbesService
 	// Resource Record Sets API
@@ -96,6 +98,7 @@ func NewClient(username, password, BaseURL string) (*Client, error) {
 	c.Alerts = &AlertsService{client: c}
 	c.DirectionalPools = &DirectionalPoolsService{client: c}
 	c.Events = &EventsService{client: c}
+	c.Notifications = &NotificationsService{client: c}
 	c.Probes = &ProbesService{client: c}
 	c.RRSets = &RRSetsService{client: c}
 	c.SBTCService = &SBTCService{client: c}
@@ -118,6 +121,7 @@ func newStubClient(username, password, BaseURL, accesstoken, refreshtoken string
 	c.Alerts = &AlertsService{client: c}
 	c.DirectionalPools = &DirectionalPoolsService{client: c}
 	c.Events = &EventsService{client: c}
+	c.Notifications = &NotificationsService{client: c}
 	c.Probes = &ProbesService{client: c}
 	c.RRSets = &RRSetsService{client: c}
 	c.SBTCService = &SBTCService{client: c}
