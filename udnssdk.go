@@ -67,12 +67,12 @@ type Client struct {
 	DirectionalPools *DirectionalPoolsService
 	// Events API
 	Events *EventsService
+	// Notifications API
+	Notifications *NotificationsService
 	// Probes API
 	Probes *ProbesService
 	// Resource Record Sets API
 	RRSets *RRSetsService
-	// SBTC API
-	SBTCService *SBTCService
 	// Tasks API
 	Tasks *TasksService
 }
@@ -96,9 +96,9 @@ func NewClient(username, password, BaseURL string) (*Client, error) {
 	c.Alerts = &AlertsService{client: c}
 	c.DirectionalPools = &DirectionalPoolsService{client: c}
 	c.Events = &EventsService{client: c}
+	c.Notifications = &NotificationsService{client: c}
 	c.Probes = &ProbesService{client: c}
 	c.RRSets = &RRSetsService{client: c}
-	c.SBTCService = &SBTCService{client: c}
 	c.Tasks = &TasksService{client: c}
 	return c, nil
 }
@@ -118,9 +118,9 @@ func newStubClient(username, password, BaseURL, accesstoken, refreshtoken string
 	c.Alerts = &AlertsService{client: c}
 	c.DirectionalPools = &DirectionalPoolsService{client: c}
 	c.Events = &EventsService{client: c}
+	c.Notifications = &NotificationsService{client: c}
 	c.Probes = &ProbesService{client: c}
 	c.RRSets = &RRSetsService{client: c}
-	c.SBTCService = &SBTCService{client: c}
 	c.Tasks = &TasksService{client: c}
 	return c, nil
 }
@@ -228,37 +228,36 @@ func (c *Client) Do(method, path string, payload, v interface{}) (*Response, err
 	if err != nil {
 		return nil, err
 	}
-	//log.Printf("Req: %+v\n", req)
+	log.Printf("[DEBUG] HTTP Request: %+v\n", req)
 	res, err := c.HTTPClient.Do(req)
+	log.Printf("[DEBUG] HTTP Response: %+v\n", res)
 	if err != nil {
 		return nil, err
 	}
 	defer res.Body.Close()
 	origresponse := &Response{Response: res}
 
-	//response := &Response{Response: res}
-	log.Printf("ReS: %+v\n", res)
 	var nres *http.Response
 	nres = res
 	if res.StatusCode == 202 {
 		// This is a deferred task.
-		mytaskid := res.Header.Get("X-Task-Id")
-		log.Printf("Received Async Task %+v..  will retry...\n", mytaskid)
+		tid := TaskID(res.Header.Get("X-Task-Id"))
+		log.Printf("[DEBUG] Received Async Task %+v..  will retry...\n", tid)
 		// TODO: Sane Configuration for timeouts / retries
 		timeout := 5
 		waittime := 5 * time.Second
 		i := 0
 		breakmeout := false
 		for i < timeout || breakmeout {
-			myt, statusres, err := c.Tasks.GetTaskStatus(mytaskid)
+			myt, statusres, err := c.Tasks.Find(tid)
 			if err != nil {
 				return origresponse, err
 			}
-			log.Printf("ID %+v Retry %d Status Code %s\n", mytaskid, i, myt.TaskStatusCode)
+                        log.Printf("[DEBUG] Task ID: %+v Retry: %d Status Code: %s\n", tid, i, myt.TaskStatusCode)
 			switch myt.TaskStatusCode {
 			case "COMPLETE":
 				// Yay
-				tres, err := c.Tasks.GetTaskResultByTask(myt)
+				tres, err := c.Tasks.FindResultByTask(myt)
 				if err != nil {
 					return origresponse, err
 				}

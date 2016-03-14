@@ -280,6 +280,22 @@ func (r *RRSetKey) EventsQueryURI(query string, offset int) string {
 	return uri
 }
 
+// NotificationsURI generates the notifications URI for an RRSet
+func (r *RRSetKey) NotificationsURI() string {
+	return fmt.Sprintf("%s/notifications", r.URI())
+}
+
+// NotificationsQueryURI generates the notifications query URI for an RRSet with query
+func (r *RRSetKey) NotificationsQueryURI(query string, offset int) string {
+	uri := r.NotificationsURI()
+	if query != "" {
+		uri = fmt.Sprintf("%s?sort=NAME&query=%s&offset=%d", uri, query, offset)
+	} else {
+		uri = fmt.Sprintf("%s?offset=%d", uri, offset)
+	}
+	return uri
+}
+
 // ProbesURI generates the probes URI for an RRSet
 func (r *RRSetKey) ProbesURI() string {
 	return fmt.Sprintf("%s/probes", r.URI())

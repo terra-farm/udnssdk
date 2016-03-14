@@ -29,11 +29,6 @@ type EventInfoListDTO struct {
 	Resultinfo ResultInfo     `json:"resultInfo"`
 }
 
-// Events builds an EventService from an SBTCService
-func (s *SBTCService) Events() *EventsService {
-	return &EventsService{client: s.client}
-}
-
 // EventKey collects the identifiers of an Event
 type EventKey struct {
 	Zone string
