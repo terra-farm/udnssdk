@@ -30,62 +30,6 @@ type taskWrapper struct {
 	Task Task `json:"task"`
 }
 
-// taskResultPath links to the task result url.
-func taskResultPath(tid string) string {
-	t := TaskID(tid)
-	return t.ResultURI()
-}
-
-// taskPath links to the task url.
-func taskPath(tid string) string {
-	t := TaskID(tid)
-	return t.URI()
-}
-
-func taskQueryPath(query string, offset int) string {
-	return TasksQueryURI(query, offset)
-}
-
-// GetTaskStatus Get the status of a task.
-func (s *TasksService) GetTaskStatus(tid string) (Task, *Response, error) {
-	t := TaskID(tid)
-	return s.Find(t)
-}
-
-// GetTaskResultByURI requests a task by its URI
-func (s *TasksService) GetTaskResultByURI(uri string) (*Response, error) {
-	return s.client.GetResultByURI(uri)
-}
-
-// GetTaskResultByID  requests a task by its task id
-func (s *TasksService) GetTaskResultByID(tid string) (*Response, error) {
-	t := TaskID(tid)
-	return s.FindResult(t)
-}
-
-// GetTaskResultByTask  requests a task by the provided task's result uri
-func (s *TasksService) GetTaskResultByTask(t Task) (*Response, error) {
-	return s.FindResultByTask(t)
-}
-
-// ListAllTasks requests all tasks, list
-func (s *TasksService) ListAllTasks(query string) ([]Task, error) {
-	return s.Select(query)
-}
-
-// ListTasks request tasks by query & offset, list them also returning list metadata, the actual response, or an error
-func (s *TasksService) ListTasks(query string, offset int) ([]Task, ResultInfo, *Response, error) {
-	return s.SelectWithOffset(query, offset)
-}
-
-// DeleteTask deletes a task.
-func (s *TasksService) DeleteTask(tid string) (*Response, error) {
-	t := TaskID(tid)
-	return s.Delete(t)
-}
-
-// ===== //
-
 type TaskID string
 
 // URI generates URI for the task result
