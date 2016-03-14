@@ -32,56 +32,80 @@ type taskWrapper struct {
 
 // taskResultPath links to the task result url.
 func taskResultPath(tid string) string {
-	return fmt.Sprintf("tasks/%s/result", tid)
+	t := TaskID(tid)
+	return t.ResultURI()
 }
 
 // taskPath links to the task url.
 func taskPath(tid string) string {
-	return fmt.Sprintf("tasks/%s", tid)
+	t := TaskID(tid)
+	return t.URI()
 }
 
 func taskQueryPath(query string, offset int) string {
+	return TasksQueryURI(query, offset)
+}
+
+// GetTaskStatus Get the status of a task.
+func (s *TasksService) GetTaskStatus(tid string) (Task, *Response, error) {
+	t := TaskID(tid)
+	return s.Find(t)
+}
+
+// GetTaskResultByURI requests a task by its URI
+func (s *TasksService) GetTaskResultByURI(uri string) (*Response, error) {
+	return s.client.GetResultByURI(uri)
+}
+
+// GetTaskResultByID  requests a task by its task id
+func (s *TasksService) GetTaskResultByID(tid string) (*Response, error) {
+	t := TaskID(tid)
+	return s.FindResult(t)
+}
+
+// GetTaskResultByTask  requests a task by the provided task's result uri
+func (s *TasksService) GetTaskResultByTask(t Task) (*Response, error) {
+	return s.FindResultByTask(t)
+}
+
+// ListAllTasks requests all tasks, list
+func (s *TasksService) ListAllTasks(query string) ([]Task, error) {
+	return s.Select(query)
+}
+
+// ListTasks request tasks by query & offset, list them also returning list metadata, the actual response, or an error
+func (s *TasksService) ListTasks(query string, offset int) ([]Task, ResultInfo, *Response, error) {
+	return s.SelectWithOffset(query, offset)
+}
+
+// DeleteTask deletes a task.
+func (s *TasksService) DeleteTask(tid string) (*Response, error) {
+	t := TaskID(tid)
+	return s.Delete(t)
+}
+
+// ===== //
+
+type TaskID string
+
+// URI generates URI for the task result
+func (t TaskID) ResultURI() string {
+	return fmt.Sprintf("%s/result", t.URI())
+}
+// taskPath links to the task url.
+func (t TaskID) URI() string {
+	return fmt.Sprintf("tasks/%s", t)
+}
+
+func TasksQueryURI(query string, offset int) string {
 	if query != "" {
 		return fmt.Sprintf("tasks?sort=NAME&query=%s&offset=%d", query, offset)
 	}
 	return fmt.Sprintf("tasks?offset=%d", offset)
 }
 
-// GetTaskStatus Get the status of a task.
-func (s *TasksService) GetTaskStatus(tid string) (Task, *Response, error) {
-	uri := taskPath(tid)
-	var t Task
-	res, err := s.client.get(uri, &t)
-	return t, res, err
-}
-
-// GetTaskResultByURI requests a task by its URI
-func (s *TasksService) GetTaskResultByURI(uri string) (*Response, error) {
-	req, err := s.client.NewRequest("GET", uri, nil)
-	if err != nil {
-		return nil, err
-	}
-	res, err := s.client.HTTPClient.Do(req)
-
-	if err != nil {
-		return &Response{Response: res}, err
-	}
-	return &Response{Response: res}, err
-}
-
-// GetTaskResultByID  requests a task by its task id
-func (s *TasksService) GetTaskResultByID(tid string) (*Response, error) {
-	uri := taskResultPath(tid)
-	return s.client.GetResultByURI(uri)
-}
-
-// GetTaskResultByTask  requests a task by the provided task's result uri
-func (s *TasksService) GetTaskResultByTask(t Task) (*Response, error) {
-	return s.client.GetResultByURI(t.ResultURI)
-}
-
-// ListAllTasks requests all tasks, list
-func (s *TasksService) ListAllTasks(query string) ([]Task, error) {
+// Select requests all tasks, with pagination
+func (s *TasksService) Select(query string) ([]Task, error) {
 	// TODO: Sane Configuration for timeouts / retries
 	maxerrs := 5
 	waittime := 5 * time.Second
@@ -92,7 +116,7 @@ func (s *TasksService) ListAllTasks(query string) ([]Task, error) {
 	errcnt := 0
 
 	for {
-		reqDtos, ri, res, err := s.ListTasks(query, offset)
+		reqDtos, ri, res, err := s.SelectWithOffset(query, offset)
 		if err != nil {
 			if res.StatusCode >= 500 {
 				errcnt = errcnt + 1
@@ -116,11 +140,11 @@ func (s *TasksService) ListAllTasks(query string) ([]Task, error) {
 	}
 }
 
-// ListTasks request tasks by query & offset, list them also returning list metadata, the actual response, or an error
-func (s *TasksService) ListTasks(query string, offset int) ([]Task, ResultInfo, *Response, error) {
+// SelectWithOffset request tasks by query & offset, list them also returning list metadata, the actual response, or an error
+func (s *TasksService) SelectWithOffset(query string, offset int) ([]Task, ResultInfo, *Response, error) {
 	var tld TaskListDTO
 
-	uri := taskQueryPath(query, offset)
+	uri := TasksQueryURI(query, offset)
 	res, err := s.client.get(uri, &tld)
 
 	ts := []Task{}
@@ -130,8 +154,24 @@ func (s *TasksService) ListTasks(query string, offset int) ([]Task, ResultInfo, 
 	return ts, tld.Resultinfo, res, err
 }
 
-// DeleteTask deletes a task.
-func (s *TasksService) DeleteTask(tid string) (*Response, error) {
-	path := taskPath(tid)
-	return s.client.delete(path, nil)
+// Find Get the status of a task.
+func (s *TasksService) Find(t TaskID) (Task, *Response, error) {
+	var tv Task
+	res, err := s.client.get(t.URI(), &tv)
+	return tv, res, err
+}
+
+// FindResult requests
+func (s *TasksService) FindResult(t TaskID) (*Response, error) {
+	return s.client.GetResultByURI(t.ResultURI())
+}
+
+// FindResultByTask  requests a task by the provided task's result uri
+func (s *TasksService) FindResultByTask(t Task) (*Response, error) {
+	return s.client.GetResultByURI(t.ResultURI)
+}
+
+// Delete requests deletions
+func (s *TasksService) Delete(t TaskID) (*Response, error) {
+	return s.client.delete(t.URI(), nil)
 }
