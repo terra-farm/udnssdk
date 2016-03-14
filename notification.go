@@ -11,11 +11,6 @@ type NotificationsService struct {
 	client *Client
 }
 
-// Notifications builds an NotificationsService from an SBTCService
-func (s *SBTCService) Notifications() *NotificationsService {
-	return &NotificationsService{client: s.client}
-}
-
 // NotificationDTO manages notifications
 type NotificationDTO struct {
 	Email       string                   `json:"email"`

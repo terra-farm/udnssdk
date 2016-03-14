@@ -10,11 +10,6 @@ type AlertsService struct {
 	client *Client
 }
 
-// Alerts allows access to the Alerts API
-func (s *SBTCService) Alerts() *AlertsService {
-	return &AlertsService{client: s.client}
-}
-
 // ProbeAlertDataDTO wraps a probe alert response
 type ProbeAlertDataDTO struct {
 	PoolRecord      string    `json:"poolRecord"`

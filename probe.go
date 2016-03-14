@@ -191,11 +191,6 @@ type ProbesService struct {
 	client *Client
 }
 
-// Probes allows access to the Probes API
-func (s *SBTCService) Probes() *ProbesService {
-	return &ProbesService{client: s.client}
-}
-
 // ProbeKey collects the identifiers of a Probe
 type ProbeKey struct {
 	Zone string

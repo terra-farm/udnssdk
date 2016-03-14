@@ -73,8 +73,6 @@ type Client struct {
 	Probes *ProbesService
 	// Resource Record Sets API
 	RRSets *RRSetsService
-	// SBTC API
-	SBTCService *SBTCService
 	// Tasks API
 	Tasks *TasksService
 }
@@ -101,7 +99,6 @@ func NewClient(username, password, BaseURL string) (*Client, error) {
 	c.Notifications = &NotificationsService{client: c}
 	c.Probes = &ProbesService{client: c}
 	c.RRSets = &RRSetsService{client: c}
-	c.SBTCService = &SBTCService{client: c}
 	c.Tasks = &TasksService{client: c}
 	return c, nil
 }
@@ -124,7 +121,6 @@ func newStubClient(username, password, BaseURL, accesstoken, refreshtoken string
 	c.Notifications = &NotificationsService{client: c}
 	c.Probes = &ProbesService{client: c}
 	c.RRSets = &RRSetsService{client: c}
-	c.SBTCService = &SBTCService{client: c}
 	c.Tasks = &TasksService{client: c}
 	return c, nil
 }
