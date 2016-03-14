@@ -14,7 +14,7 @@ func Test_ListTasks(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	tasks, err := testClient.Tasks.ListAllTasks("")
+	tasks, err := testClient.Tasks.Select("")
 	t.Logf("Tasks: %+v \n", tasks)
 	if err != nil {
 		t.Fatal(err)
