@@ -325,6 +325,23 @@ func (r *RRSetKey) QueryURI(offset int) string {
 	return fmt.Sprintf("%s?offset=%d", r.URI(), offset)
 }
 
+// EventsURI generates the URI for an RRSet
+func (r *RRSetKey) EventsURI() string {
+	return fmt.Sprintf("%s/events", r.URI())
+}
+
+// EventsQueryURI generates the events query URI for an RRSet with query
+func (r *RRSetKey) EventsQueryURI(query string, offset int) string {
+	uri := r.EventsURI()
+	if query != "" {
+		return fmt.Sprintf("%s?sort=NAME&query=%s&offset=%d", uri, query, offset)
+	}
+	if offset != 0 {
+		return fmt.Sprintf("%s?offset=%d", uri, offset)
+	}
+	return uri
+}
+
 // Select will list the zone rrsets, paginating through all available results
 func (s *RRSetsService) Select(r RRSetKey) ([]RRSet, error) {
 	// TODO: Sane Configuration for timeouts / retries
