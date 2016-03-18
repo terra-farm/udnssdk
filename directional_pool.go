@@ -82,16 +82,16 @@ type DirectionalPoolKey struct {
 }
 
 // URI generates the URI for directional pools by account, type & slug ID
-func (p DirectionalPoolKey) URI() string {
-	if p.Name == "" {
-		return fmt.Sprintf("%s/dirgroups/%s", p.Account.URI(), p.Type)
+func (k DirectionalPoolKey) URI() string {
+	if k.Name == "" {
+		return fmt.Sprintf("%s/dirgroups/%s", k.Account.URI(), k.Type)
 	}
-	return fmt.Sprintf("%s/dirgroups/%s/%s", p.Account.URI(), p.Type, p.Name)
+	return fmt.Sprintf("%s/dirgroups/%s/%s", k.Account.URI(), k.Type, k.Name)
 }
 
 // QueryURI generates the URI for directional pools by account, type, query & offset
-func (p DirectionalPoolKey) QueryURI(query string, offset int) string {
-	uri := p.URI()
+func (k DirectionalPoolKey) QueryURI(query string, offset int) string {
+	uri := k.URI()
 
 	if query != "" {
 		uri = fmt.Sprintf("%s?sort=NAME&query=%s&offset=%d", uri, query, offset)
@@ -109,22 +109,22 @@ type GeoDirectionalPoolKey struct {
 }
 
 // DirectionalPoolKey generates the DirectionalPoolKey for the GeoDirectionalPoolKey
-func (p GeoDirectionalPoolKey) DirectionalPoolKey() DirectionalPoolKey {
+func (k GeoDirectionalPoolKey) DirectionalPoolKey() DirectionalPoolKey {
 	return DirectionalPoolKey{
-		Account: p.Account,
+		Account: k.Account,
 		Type:    "geo",
-		Name:    p.Name,
+		Name:    k.Name,
 	}
 }
 
 // URI generates the URI for a GeoDirectionalPool
-func (p GeoDirectionalPoolKey) URI() string {
-	return p.DirectionalPoolKey().URI()
+func (k GeoDirectionalPoolKey) URI() string {
+	return k.DirectionalPoolKey().URI()
 }
 
 // QueryURI generates the GeoDirectionalPool URI with query
-func (p GeoDirectionalPoolKey) QueryURI(query string, offset int) string {
-	return p.DirectionalPoolKey().QueryURI(query, offset)
+func (k GeoDirectionalPoolKey) QueryURI(query string, offset int) string {
+	return k.DirectionalPoolKey().QueryURI(query, offset)
 }
 
 // GeoDirectionalPoolsService manages 'geo' groups for directional-pools
@@ -133,7 +133,7 @@ type GeoDirectionalPoolsService struct {
 }
 
 // Select requests all geo directional-pools, by query and account, providing pagination and error handling
-func (s *GeoDirectionalPoolsService) Select(p GeoDirectionalPoolKey, query string) ([]AccountLevelGeoDirectionalGroupDTO, error) {
+func (s *GeoDirectionalPoolsService) Select(k GeoDirectionalPoolKey, query string) ([]AccountLevelGeoDirectionalGroupDTO, error) {
 	// TODO: Sane Configuration for timeouts / retries
 	maxerrs := 5
 	waittime := 5 * time.Second
@@ -144,7 +144,7 @@ func (s *GeoDirectionalPoolsService) Select(p GeoDirectionalPoolKey, query strin
 	offset := 0
 
 	for {
-		reqDtos, ri, res, err := s.SelectWithOffset(p, query, offset)
+		reqDtos, ri, res, err := s.SelectWithOffset(k, query, offset)
 		if err != nil {
 			if res.StatusCode >= 500 {
 				errcnt = errcnt + 1
@@ -169,10 +169,10 @@ func (s *GeoDirectionalPoolsService) Select(p GeoDirectionalPoolKey, query strin
 }
 
 // SelectWithOffset requests list of geo directional-pools, by query & account, and an offset, returning the directional-group, the list-metadata, the actual response, or an error
-func (s *GeoDirectionalPoolsService) SelectWithOffset(p GeoDirectionalPoolKey, query string, offset int) ([]AccountLevelGeoDirectionalGroupDTO, ResultInfo, *Response, error) {
+func (s *GeoDirectionalPoolsService) SelectWithOffset(k GeoDirectionalPoolKey, query string, offset int) ([]AccountLevelGeoDirectionalGroupDTO, ResultInfo, *Response, error) {
 	var tld AccountLevelGeoDirectionalGroupListDTO
 
-	res, err := s.client.get(p.QueryURI(query, offset), &tld)
+	res, err := s.client.get(k.QueryURI(query, offset), &tld)
 
 	pis := []AccountLevelGeoDirectionalGroupDTO{}
 	for _, pi := range tld.GeoGroups {
@@ -182,25 +182,25 @@ func (s *GeoDirectionalPoolsService) SelectWithOffset(p GeoDirectionalPoolKey, q
 }
 
 // Find requests a geo directional-pool by name & account
-func (s *GeoDirectionalPoolsService) Find(p GeoDirectionalPoolKey) (AccountLevelGeoDirectionalGroupDTO, *Response, error) {
+func (s *GeoDirectionalPoolsService) Find(k GeoDirectionalPoolKey) (AccountLevelGeoDirectionalGroupDTO, *Response, error) {
 	var t AccountLevelGeoDirectionalGroupDTO
-	res, err := s.client.get(p.URI(), &t)
+	res, err := s.client.get(k.URI(), &t)
 	return t, res, err
 }
 
 // Create requests creation of a DirectionalPool by DirectionalPoolKey given a directional-pool
-func (s *GeoDirectionalPoolsService) Create(p GeoDirectionalPoolKey, val interface{}) (*Response, error) {
-	return s.client.post(p.URI(), val, nil)
+func (s *GeoDirectionalPoolsService) Create(k GeoDirectionalPoolKey, val interface{}) (*Response, error) {
+	return s.client.post(k.URI(), val, nil)
 }
 
 // Update requests update of a DirectionalPool by DirectionalPoolKey given a directional-pool
-func (s *GeoDirectionalPoolsService) Update(p GeoDirectionalPoolKey, val interface{}) (*Response, error) {
-	return s.client.put(p.URI(), val, nil)
+func (s *GeoDirectionalPoolsService) Update(k GeoDirectionalPoolKey, val interface{}) (*Response, error) {
+	return s.client.put(k.URI(), val, nil)
 }
 
 // Delete requests deletion of a DirectionalPool
-func (s *GeoDirectionalPoolsService) Delete(p GeoDirectionalPoolKey) (*Response, error) {
-	return s.client.delete(p.URI(), nil)
+func (s *GeoDirectionalPoolsService) Delete(k GeoDirectionalPoolKey) (*Response, error) {
+	return s.client.delete(k.URI(), nil)
 }
 
 // IPDirectionalPoolKey collects the identifiers of an DirectionalPool with type IP
@@ -210,22 +210,22 @@ type IPDirectionalPoolKey struct {
 }
 
 // DirectionalPoolKey generates the DirectionalPoolKey for the IPDirectionalPoolKey
-func (p IPDirectionalPoolKey) DirectionalPoolKey() DirectionalPoolKey {
+func (k IPDirectionalPoolKey) DirectionalPoolKey() DirectionalPoolKey {
 	return DirectionalPoolKey{
-		Account: p.Account,
+		Account: k.Account,
 		Type:    "ip",
-		Name:    p.Name,
+		Name:    k.Name,
 	}
 }
 
 // URI generates the IPDirectionalPool query URI
-func (p IPDirectionalPoolKey) URI() string {
-	return p.DirectionalPoolKey().URI()
+func (k IPDirectionalPoolKey) URI() string {
+	return k.DirectionalPoolKey().URI()
 }
 
 // QueryURI generates the IPDirectionalPool URI with query
-func (p IPDirectionalPoolKey) QueryURI(query string, offset int) string {
-	return p.DirectionalPoolKey().QueryURI(query, offset)
+func (k IPDirectionalPoolKey) QueryURI(query string, offset int) string {
+	return k.DirectionalPoolKey().QueryURI(query, offset)
 }
 
 // IPDirectionalPoolsService manages 'geo' groups for directional-pools
@@ -234,7 +234,7 @@ type IPDirectionalPoolsService struct {
 }
 
 // Select requests all IP directional-pools, using pagination and error handling
-func (s *IPDirectionalPoolsService) Select(p IPDirectionalPoolKey, query string) ([]AccountLevelIPDirectionalGroupDTO, error) {
+func (s *IPDirectionalPoolsService) Select(k IPDirectionalPoolKey, query string) ([]AccountLevelIPDirectionalGroupDTO, error) {
 	// TODO: Sane Configuration for timeouts / retries
 	maxerrs := 5
 	waittime := 5 * time.Second
@@ -245,7 +245,7 @@ func (s *IPDirectionalPoolsService) Select(p IPDirectionalPoolKey, query string)
 	offset := 0
 
 	for {
-		reqIPGroups, ri, res, err := s.SelectWithOffset(p, query, offset)
+		reqIPGroups, ri, res, err := s.SelectWithOffset(k, query, offset)
 		if err != nil {
 			if res.StatusCode >= 500 {
 				errcnt = errcnt + 1
@@ -270,10 +270,10 @@ func (s *IPDirectionalPoolsService) Select(p IPDirectionalPoolKey, query string)
 }
 
 // SelectWithOffset requests all IP directional-pools, by query & account, and an offset, returning the list of IP groups, list metadata & the actual response, or an error
-func (s *IPDirectionalPoolsService) SelectWithOffset(p IPDirectionalPoolKey, query string, offset int) ([]AccountLevelIPDirectionalGroupDTO, ResultInfo, *Response, error) {
+func (s *IPDirectionalPoolsService) SelectWithOffset(k IPDirectionalPoolKey, query string, offset int) ([]AccountLevelIPDirectionalGroupDTO, ResultInfo, *Response, error) {
 	var tld AccountLevelIPDirectionalGroupListDTO
 
-	res, err := s.client.get(p.QueryURI(query, offset), &tld)
+	res, err := s.client.get(k.QueryURI(query, offset), &tld)
 
 	pis := []AccountLevelIPDirectionalGroupDTO{}
 	for _, pi := range tld.IPGroups {
@@ -284,23 +284,23 @@ func (s *IPDirectionalPoolsService) SelectWithOffset(p IPDirectionalPoolKey, que
 }
 
 // Find requests a directional-pool by name & account
-func (s *IPDirectionalPoolsService) Find(p IPDirectionalPoolKey) (AccountLevelIPDirectionalGroupDTO, *Response, error) {
+func (s *IPDirectionalPoolsService) Find(k IPDirectionalPoolKey) (AccountLevelIPDirectionalGroupDTO, *Response, error) {
 	var t AccountLevelIPDirectionalGroupDTO
-	res, err := s.client.get(p.URI(), &t)
+	res, err := s.client.get(k.URI(), &t)
 	return t, res, err
 }
 
 // Create requests creation of a DirectionalPool by DirectionalPoolKey given a directional-pool
-func (s *IPDirectionalPoolsService) Create(p IPDirectionalPoolKey, val interface{}) (*Response, error) {
-	return s.client.post(p.URI(), val, nil)
+func (s *IPDirectionalPoolsService) Create(k IPDirectionalPoolKey, val interface{}) (*Response, error) {
+	return s.client.post(k.URI(), val, nil)
 }
 
 // Update requests update of a DirectionalPool by DirectionalPoolKey given a directional-pool
-func (s *IPDirectionalPoolsService) Update(p IPDirectionalPoolKey, val interface{}) (*Response, error) {
-	return s.client.put(p.URI(), val, nil)
+func (s *IPDirectionalPoolsService) Update(k IPDirectionalPoolKey, val interface{}) (*Response, error) {
+	return s.client.put(k.URI(), val, nil)
 }
 
 // Delete deletes an  directional-pool
-func (s *IPDirectionalPoolsService) Delete(p IPDirectionalPoolKey) (*Response, error) {
-	return s.client.delete(p.URI(), nil)
+func (s *IPDirectionalPoolsService) Delete(k IPDirectionalPoolKey) (*Response, error) {
+	return s.client.delete(k.URI(), nil)
 }

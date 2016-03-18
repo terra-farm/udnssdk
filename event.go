@@ -38,8 +38,8 @@ type EventKey struct {
 }
 
 // RRSetKey generates the RRSetKey for the EventKey
-func (p *EventKey) RRSetKey() *RRSetKey {
-	return &RRSetKey{
+func (p EventKey) RRSetKey() RRSetKey {
+	return RRSetKey{
 		Zone: p.Zone,
 		Type: p.Type,
 		Name: p.Name,
@@ -47,7 +47,7 @@ func (p *EventKey) RRSetKey() *RRSetKey {
 }
 
 // URI generates the URI for a probe
-func (p *EventKey) URI() string {
+func (p EventKey) URI() string {
 	return fmt.Sprintf("%s/%s", p.RRSetKey().EventsURI(), p.GUID)
 }
 

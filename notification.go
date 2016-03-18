@@ -39,28 +39,28 @@ type NotificationListDTO struct {
 
 // NotificationKey collects the identifiers of an Notification
 type NotificationKey struct {
-	Zone string
-	Type string
-	Name string
-	GUID string
+	Zone  string
+	Type  string
+	Name  string
+	Email string
 }
 
 // RRSetKey generates the RRSetKey for the NotificationKey
-func (n *NotificationKey) RRSetKey() *RRSetKey {
-	return &RRSetKey{
-		Zone: n.Zone,
-		Type: n.Type,
-		Name: n.Name,
+func (k NotificationKey) RRSetKey() RRSetKey {
+	return RRSetKey{
+		Zone: k.Zone,
+		Type: k.Type,
+		Name: k.Name,
 	}
 }
 
 // URI generates the URI for a probe
-func (n *NotificationKey) URI() string {
-	return fmt.Sprintf("%s/%s", n.RRSetKey().NotificationsURI(), n.GUID)
+func (k NotificationKey) URI() string {
+	return fmt.Sprintf("%s/%s", k.RRSetKey().NotificationsURI(), k.Email)
 }
 
 // Select requests all notifications by RRSetKey and optional query, using pagination and error handling
-func (s *NotificationsService) Select(r RRSetKey, query string) ([]NotificationDTO, *Response, error) {
+func (s *NotificationsService) Select(k RRSetKey, query string) ([]NotificationDTO, *Response, error) {
 	// TODO: Sane Configuration for timeouts / retries
 	maxerrs := 5
 	waittime := 5 * time.Second
@@ -71,7 +71,7 @@ func (s *NotificationsService) Select(r RRSetKey, query string) ([]NotificationD
 	offset := 0
 
 	for {
-		reqNotifications, ri, res, err := s.SelectWithOffset(r, query, offset)
+		reqNotifications, ri, res, err := s.SelectWithOffset(k, query, offset)
 		if err != nil {
 			if res.StatusCode >= 500 {
 				errcnt = errcnt + 1
@@ -96,10 +96,10 @@ func (s *NotificationsService) Select(r RRSetKey, query string) ([]NotificationD
 }
 
 // SelectWithOffset requests list of notifications by RRSetKey, query and offset, also returning list metadata, the actual response, or an error
-func (s *NotificationsService) SelectWithOffset(r RRSetKey, query string, offset int) ([]NotificationDTO, ResultInfo, *Response, error) {
+func (s *NotificationsService) SelectWithOffset(k RRSetKey, query string, offset int) ([]NotificationDTO, ResultInfo, *Response, error) {
 	var tld NotificationListDTO
 
-	uri := r.NotificationsQueryURI(query, offset)
+	uri := k.NotificationsQueryURI(query, offset)
 	res, err := s.client.get(uri, &tld)
 
 	log.Printf("DEBUG - ResultInfo: %+v\n", tld.Resultinfo)
@@ -111,23 +111,23 @@ func (s *NotificationsService) SelectWithOffset(r RRSetKey, query string, offset
 }
 
 // Find requests a notification by NotificationKey,returning the actual response, or an error
-func (s *NotificationsService) Find(n NotificationKey) (NotificationInfoDTO, *Response, error) {
-	var t NotificationInfoDTO
-	res, err := s.client.get(n.URI(), &t)
+func (s *NotificationsService) Find(k NotificationKey) (NotificationDTO, *Response, error) {
+	var t NotificationDTO
+	res, err := s.client.get(k.URI(), &t)
 	return t, res, err
 }
 
 // Create requests creation of an event by RRSetKey, with provided NotificationInfoDTO, returning actual response or an error
-func (s *NotificationsService) Create(r RRSetKey, ev NotificationInfoDTO) (*Response, error) {
-	return s.client.post(r.NotificationsURI(), ev, nil)
+func (s *NotificationsService) Create(k NotificationKey, n NotificationDTO) (*Response, error) {
+	return s.client.post(k.URI(), n, nil)
 }
 
 // Update requests update of an event by NotificationKey, with provided NotificationInfoDTO, returning the actual response or an error
-func (s *NotificationsService) Update(n NotificationKey, ev NotificationInfoDTO) (*Response, error) {
-	return s.client.put(n.URI(), ev, nil)
+func (s *NotificationsService) Update(k NotificationKey, n NotificationDTO) (*Response, error) {
+	return s.client.put(k.URI(), n, nil)
 }
 
 // Delete requests deletion of an event by NotificationKey, returning the actual response or an error
-func (s *NotificationsService) Delete(n NotificationKey) (*Response, error) {
-	return s.client.delete(n.URI(), nil)
+func (s *NotificationsService) Delete(k NotificationKey) (*Response, error) {
+	return s.client.delete(k.URI(), nil)
 }

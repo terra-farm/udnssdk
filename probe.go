@@ -194,31 +194,30 @@ type ProbesService struct {
 // ProbeKey collects the identifiers of a Probe
 type ProbeKey struct {
 	Zone string
-	Type string
 	Name string
-	GUID string
+	ID   string
 }
 
 // RRSetKey generates the RRSetKey for the ProbeKey
-func (p *ProbeKey) RRSetKey() *RRSetKey {
-	return &RRSetKey{
-		Zone: p.Zone,
-		Type: p.Type,
-		Name: p.Name,
+func (k ProbeKey) RRSetKey() RRSetKey {
+	return RRSetKey{
+		Zone: k.Zone,
+		Type: "A", // Only A records have probes
+		Name: k.Name,
 	}
 }
 
 // URI generates the URI for a probe
-func (p *ProbeKey) URI() string {
-	return fmt.Sprintf("%s/%s", p.RRSetKey().ProbesURI(), p.GUID)
+func (k ProbeKey) URI() string {
+	return fmt.Sprintf("%s/%s", k.RRSetKey().ProbesURI(), k.ID)
 }
 
 // Select returns all probes by a RRSetKey, with an optional query
-func (s *ProbesService) Select(r RRSetKey, query string) ([]ProbeInfoDTO, *Response, error) {
+func (s *ProbesService) Select(k RRSetKey, query string) ([]ProbeInfoDTO, *Response, error) {
 	var pld ProbeListDTO
 
 	// This API does not support pagination.
-	uri := r.ProbesQueryURI(query)
+	uri := k.ProbesQueryURI(query)
 	res, err := s.client.get(uri, &pld)
 
 	ps := []ProbeInfoDTO{}
@@ -231,23 +230,23 @@ func (s *ProbesService) Select(r RRSetKey, query string) ([]ProbeInfoDTO, *Respo
 }
 
 // Find returns a probe from a ProbeKey
-func (s *ProbesService) Find(p ProbeKey) (ProbeInfoDTO, *Response, error) {
+func (s *ProbesService) Find(k ProbeKey) (ProbeInfoDTO, *Response, error) {
 	var t ProbeInfoDTO
-	res, err := s.client.get(p.URI(), &t)
+	res, err := s.client.get(k.URI(), &t)
 	return t, res, err
 }
 
 // Create creates a probe with a RRSetKey using the ProbeInfoDTO dp
-func (s *ProbesService) Create(r RRSetKey, dp ProbeInfoDTO) (*Response, error) {
-	return s.client.post(r.ProbesURI(), dp, nil)
+func (s *ProbesService) Create(k RRSetKey, dp ProbeInfoDTO) (*Response, error) {
+	return s.client.post(k.ProbesURI(), dp, nil)
 }
 
 // Update updates a probe given a ProbeKey with the ProbeInfoDTO dp
-func (s *ProbesService) Update(p ProbeKey, dp ProbeInfoDTO) (*Response, error) {
-	return s.client.put(p.URI(), dp, nil)
+func (s *ProbesService) Update(k ProbeKey, dp ProbeInfoDTO) (*Response, error) {
+	return s.client.put(k.URI(), dp, nil)
 }
 
 // Delete deletes a probe by its ProbeKey
-func (s *ProbesService) Delete(p ProbeKey) (*Response, error) {
-	return s.client.delete(p.URI(), nil)
+func (s *ProbesService) Delete(k ProbeKey) (*Response, error) {
+	return s.client.delete(k.URI(), nil)
 }

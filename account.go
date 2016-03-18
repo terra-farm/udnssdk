@@ -29,10 +29,10 @@ type AccountListDTO struct {
 type AccountKey string
 
 // URI generates the URI for an Account
-func (a AccountKey) URI() string {
+func (k AccountKey) URI() string {
 	uri := "accounts"
-	if a != "" {
-		uri = fmt.Sprintf("accounts/%s", a)
+	if k != "" {
+		uri = fmt.Sprintf("accounts/%s", k)
 	}
 	return uri
 }
@@ -55,13 +55,13 @@ func (s *AccountsService) Select() ([]Account, *Response, error) {
 }
 
 // Find requests an Account by AccountKey
-func (s *AccountsService) Find(a AccountKey) (Account, *Response, error) {
+func (s *AccountsService) Find(k AccountKey) (Account, *Response, error) {
 	var t Account
-	res, err := s.client.get(a.URI(), &t)
+	res, err := s.client.get(k.URI(), &t)
 	return t, res, err
 }
 
 // Delete requests deletion of an Account by AccountKey
-func (s *AccountsService) Delete(a AccountKey) (*Response, error) {
-	return s.client.delete(a.URI(), nil)
+func (s *AccountsService) Delete(k AccountKey) (*Response, error) {
+	return s.client.delete(k.URI(), nil)
 }

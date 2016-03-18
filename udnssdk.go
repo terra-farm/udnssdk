@@ -1,7 +1,6 @@
 package udnssdk
 
 // udnssdk - a golang sdk for the ultradns REST service.
-// based heavily on github.com/weppos/dnsimple
 // 2015-07-03 - jmasseo@gmail.com
 
 import (
@@ -126,19 +125,21 @@ func newStubClient(username, password, BaseURL, accesstoken, refreshtoken string
 }
 
 // NewAuthRequest creates an Authorization request to get an access and refresh token.
-// {"tokenType":"Bearer","refreshToken":"48472efcdce044c8850ee6a395c74a7872932c7112","accessToken":"b91d037c75934fc89a9f43fe4a","expiresIn":"3600"
-// ,"expires_in":"3600","token_type":"Bearer","refresh_token":"48472efcdce044c8850ee6a395c74a7872932c7112","access_token":"b91d037c75934fc89a9f43fe4a"}
+//
+// {
+//   "tokenType":"Bearer",
+//   "refreshToken":"48472efcdce044c8850ee6a395c74a7872932c7112",
+//    "accessToken":"b91d037c75934fc89a9f43fe4a",
+//    "expiresIn":"3600",
+//    "expires_in":"3600"
+// }
 
 // AuthResponse wraps the response to an auth request
 type AuthResponse struct {
-	TokenType     string `json:"tokenType"`
-	RefreshToken  string `json:"refreshToken"`
-	AccessToken   string `json:"accessToken"`
-	ExpiresIn     string `json:"expiresIn"`
-	Expires_in    string `json:"expires_in"`    // yes, these have terrible names.
-	Token_type    string `json:"token_type"`    // |
-	Refresh_token string `json:"refresh_token"` // |
-	Access_token  string `json:"access_token"`  // |
+	TokenType    string `json:"tokenType"`
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+	ExpiresIn    string `json:"expiresIn"`
 }
 
 // GetAuthTokens requests by username, password & base URL, returns the access-token & refresh-token, or a possible error
@@ -155,23 +156,17 @@ func GetAuthTokens(username, password, BaseURL string) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-	// BUG: Looking for an intermittant edge case causing a JSON error
-	log.Printf("ResCode: %d Body: %s\n", res.StatusCode, body)
-
 	err = CheckAuthResponse(res, body)
 	if err != nil {
 		return "", "", err
 	}
 
 	var authr AuthResponse
-	//log.Printf("GetAuthTokens: %s", string(body))
 	err = json.Unmarshal(body, &authr)
 	if err != nil {
 		return string(body), "JSON Decode Error", err
 	}
-	//log.Printf("Expires: %v Access T: %v Refresh T: %v\n", authr.Expires_in, authr.Access_token, authr.Refresh_token)
-	//log.Printf("%+v", authr)
-	return authr.Access_token, authr.Refresh_token, err
+	return authr.AccessToken, authr.RefreshToken, err
 }
 
 // NewRequest creates an API request.
@@ -253,7 +248,7 @@ func (c *Client) Do(method, path string, payload, v interface{}) (*Response, err
 			if err != nil {
 				return origresponse, err
 			}
-                        log.Printf("[DEBUG] Task ID: %+v Retry: %d Status Code: %s\n", tid, i, myt.TaskStatusCode)
+			log.Printf("[DEBUG] Task ID: %+v Retry: %d Status Code: %s\n", tid, i, myt.TaskStatusCode)
 			switch myt.TaskStatusCode {
 			case "COMPLETE":
 				// Yay
@@ -328,67 +323,55 @@ func (r ErrorResponseList) Error() string {
 
 // CheckAuthResponse checks the API response for errors, and returns them if so
 func CheckAuthResponse(r *http.Response, body []byte) error {
-
 	if code := r.StatusCode; 200 <= code && code <= 299 {
 		return nil
 	}
 
-	//var er ErrorResponseList
+	// Attempt marshaling to ErrorResponse
 	var er ErrorResponse
-	//log.Printf("Body: %s\n", body)
-
 	err := json.Unmarshal(body, &er)
-	//err = json.NewDecoder(r.Body).Decode(errorResponse)
-
 	if err == nil {
 		er.Response = r
-
 		return er
 	}
-	log.Printf("ERROR: %+v - Body: %s\n", err, body)
-	var er2 []ErrorResponse
-	err = json.Unmarshal(body, &er2)
-	//err = json.NewDecoder(r.Body).Decode(errorResponse)
-	if err != nil {
-		return err
+
+	// Attempt marshaling to ErrorResponseList
+	var ers []ErrorResponse
+	err = json.Unmarshal(body, &ers)
+	if err == nil {
+		return &ErrorResponseList{Response: r, Responses: ers}
 	}
-	//log.Printf("CheckResponse: %+v", er)
-	x := &ErrorResponseList{Response: r, Responses: er2}
-	return x
+
+	return fmt.Errorf("Response had non-successful status: %d, but could not extract error from body: %+v", r.StatusCode, body)
 }
 
 // CheckResponse checks the API response for errors, and returns them if present.
 // A response is considered an error if the status code is different than 2xx. Specific requests
 // may have additional requirements, but this is sufficient in most of the cases.
 func CheckResponse(r *http.Response) error {
-
 	if code := r.StatusCode; 200 <= code && code <= 299 {
 		return nil
 	}
 
-	//errorResponse := &ErrorResponseList{Response: r}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("Body: %s\n", body)
-	//var er ErrorResponseList
-	var er []ErrorResponse
+	// Attempt marshaling to ErrorResponse
+	var er ErrorResponse
 	err = json.Unmarshal(body, &er)
-	//err = json.NewDecoder(r.Body).Decode(errorResponse)
 	if err == nil {
-		//log.Printf("CheckResponse: %+v", er)
-		x := &ErrorResponseList{Response: r, Responses: er}
-		return x
+		er.Response = r
+		return er
 	}
-	var er2 ErrorResponse
-	err = json.Unmarshal(body, &er2)
-	if err != nil {
-		return err
 
+	// Attempt marshaling to ErrorResponseList
+	var ers []ErrorResponse
+	err = json.Unmarshal(body, &ers)
+	if err == nil {
+		return &ErrorResponseList{Response: r, Responses: ers}
 	}
-	er2.Response = r
-	return er2
 
+	return fmt.Errorf("Response had non-successful status: %d, but could not extract error from body: %+v", r.StatusCode, body)
 }

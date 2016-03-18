@@ -229,34 +229,34 @@ type RRSetKey struct {
 }
 
 // URI generates the URI for an RRSet
-func (r *RRSetKey) URI() string {
-	uri := fmt.Sprintf("zones/%s/rrsets", r.Zone)
-	if r.Type != "" {
-		uri += fmt.Sprintf("/%v", r.Type)
-		if r.Name != "" {
-			uri += fmt.Sprintf("/%v", r.Name)
+func (k RRSetKey) URI() string {
+	uri := fmt.Sprintf("zones/%s/rrsets", k.Zone)
+	if k.Type != "" {
+		uri += fmt.Sprintf("/%v", k.Type)
+		if k.Name != "" {
+			uri += fmt.Sprintf("/%v", k.Name)
 		}
 	}
 	return uri
 }
 
 // QueryURI generates the query URI for an RRSet and offset
-func (r *RRSetKey) QueryURI(offset int) string {
+func (k RRSetKey) QueryURI(offset int) string {
 	// TODO: find a more appropriate place to set "" to "ANY"
-	if r.Type == "" {
-		r.Type = "ANY"
+	if k.Type == "" {
+		k.Type = "ANY"
 	}
-	return fmt.Sprintf("%s?offset=%d", r.URI(), offset)
+	return fmt.Sprintf("%s?offset=%d", k.URI(), offset)
 }
 
 // AlertsURI generates the URI for an RRSet
-func (r *RRSetKey) AlertsURI() string {
-	return fmt.Sprintf("%s/alerts", r.URI())
+func (k RRSetKey) AlertsURI() string {
+	return fmt.Sprintf("%s/alerts", k.URI())
 }
 
 // AlertsQueryURI generates the alerts query URI for an RRSet with query
-func (r *RRSetKey) AlertsQueryURI(offset int) string {
-	uri := r.AlertsURI()
+func (k RRSetKey) AlertsQueryURI(offset int) string {
+	uri := k.AlertsURI()
 	if offset != 0 {
 		uri = fmt.Sprintf("%s?offset=%d", uri, offset)
 	}
@@ -264,13 +264,13 @@ func (r *RRSetKey) AlertsQueryURI(offset int) string {
 }
 
 // EventsURI generates the URI for an RRSet
-func (r *RRSetKey) EventsURI() string {
-	return fmt.Sprintf("%s/events", r.URI())
+func (k RRSetKey) EventsURI() string {
+	return fmt.Sprintf("%s/events", k.URI())
 }
 
 // EventsQueryURI generates the events query URI for an RRSet with query
-func (r *RRSetKey) EventsQueryURI(query string, offset int) string {
-	uri := r.EventsURI()
+func (k RRSetKey) EventsQueryURI(query string, offset int) string {
+	uri := k.EventsURI()
 	if query != "" {
 		return fmt.Sprintf("%s?sort=NAME&query=%s&offset=%d", uri, query, offset)
 	}
@@ -281,13 +281,13 @@ func (r *RRSetKey) EventsQueryURI(query string, offset int) string {
 }
 
 // NotificationsURI generates the notifications URI for an RRSet
-func (r *RRSetKey) NotificationsURI() string {
-	return fmt.Sprintf("%s/notifications", r.URI())
+func (k RRSetKey) NotificationsURI() string {
+	return fmt.Sprintf("%s/notifications", k.URI())
 }
 
 // NotificationsQueryURI generates the notifications query URI for an RRSet with query
-func (r *RRSetKey) NotificationsQueryURI(query string, offset int) string {
-	uri := r.NotificationsURI()
+func (k RRSetKey) NotificationsQueryURI(query string, offset int) string {
+	uri := k.NotificationsURI()
 	if query != "" {
 		uri = fmt.Sprintf("%s?sort=NAME&query=%s&offset=%d", uri, query, offset)
 	} else {
@@ -297,13 +297,13 @@ func (r *RRSetKey) NotificationsQueryURI(query string, offset int) string {
 }
 
 // ProbesURI generates the probes URI for an RRSet
-func (r *RRSetKey) ProbesURI() string {
-	return fmt.Sprintf("%s/probes", r.URI())
+func (k RRSetKey) ProbesURI() string {
+	return fmt.Sprintf("%s/probes", k.URI())
 }
 
 // ProbesQueryURI generates the probes query URI for an RRSet with query
-func (r *RRSetKey) ProbesQueryURI(query string) string {
-	uri := r.ProbesURI()
+func (k RRSetKey) ProbesQueryURI(query string) string {
+	uri := k.ProbesURI()
 	if query != "" {
 		uri = fmt.Sprintf("%s?sort=NAME&query=%s", uri, query)
 	}
@@ -311,7 +311,7 @@ func (r *RRSetKey) ProbesQueryURI(query string) string {
 }
 
 // Select will list the zone rrsets, paginating through all available results
-func (s *RRSetsService) Select(r RRSetKey) ([]RRSet, error) {
+func (s *RRSetsService) Select(k RRSetKey) ([]RRSet, error) {
 	// TODO: Sane Configuration for timeouts / retries
 	maxerrs := 5
 	waittime := 5 * time.Second
@@ -321,7 +321,7 @@ func (s *RRSetsService) Select(r RRSetKey) ([]RRSet, error) {
 	offset := 0
 
 	for {
-		reqRrsets, ri, res, err := s.SelectWithOffset(r, offset)
+		reqRrsets, ri, res, err := s.SelectWithOffset(k, offset)
 		if err != nil {
 			if res.StatusCode >= 500 {
 				errcnt = errcnt + 1
@@ -346,10 +346,10 @@ func (s *RRSetsService) Select(r RRSetKey) ([]RRSet, error) {
 }
 
 // SelectWithOffset requests zone rrsets by RRSetKey & optional offset
-func (s *RRSetsService) SelectWithOffset(r RRSetKey, offset int) ([]RRSet, ResultInfo, *Response, error) {
+func (s *RRSetsService) SelectWithOffset(k RRSetKey, offset int) ([]RRSet, ResultInfo, *Response, error) {
 	var rrsld RRSetListDTO
 
-	uri := r.QueryURI(offset)
+	uri := k.QueryURI(offset)
 	res, err := s.client.get(uri, &rrsld)
 
 	rrsets := []RRSet{}
@@ -360,18 +360,18 @@ func (s *RRSetsService) SelectWithOffset(r RRSetKey, offset int) ([]RRSet, Resul
 }
 
 // Create creates an rrset with val
-func (s *RRSetsService) Create(r RRSetKey, rrset RRSet) (*Response, error) {
+func (s *RRSetsService) Create(k RRSetKey, rrset RRSet) (*Response, error) {
 	var ignored interface{}
-	return s.client.post(r.URI(), rrset, &ignored)
+	return s.client.post(k.URI(), rrset, &ignored)
 }
 
 // Update updates a RRSet with the provided val
-func (s *RRSetsService) Update(r RRSetKey, val RRSet) (*Response, error) {
+func (s *RRSetsService) Update(k RRSetKey, val RRSet) (*Response, error) {
 	var ignored interface{}
-	return s.client.put(r.URI(), val, &ignored)
+	return s.client.put(k.URI(), val, &ignored)
 }
 
 // Delete deletes an RRSet
-func (s *RRSetsService) Delete(r RRSetKey) (*Response, error) {
-	return s.client.delete(r.URI(), nil)
+func (s *RRSetsService) Delete(k RRSetKey) (*Response, error) {
+	return s.client.delete(k.URI(), nil)
 }

@@ -29,7 +29,7 @@ type ProbeAlertDataListDTO struct {
 }
 
 // Select returns all probe alerts with a RRSetKey
-func (s *AlertsService) Select(r RRSetKey) ([]ProbeAlertDataDTO, error) {
+func (s *AlertsService) Select(k RRSetKey) ([]ProbeAlertDataDTO, error) {
 	// TODO: Sane Configuration for timeouts / retries
 	maxerrs := 5
 	waittime := 5 * time.Second
@@ -40,7 +40,7 @@ func (s *AlertsService) Select(r RRSetKey) ([]ProbeAlertDataDTO, error) {
 	errcnt := 0
 
 	for {
-		reqAlerts, ri, res, err := s.SelectWithOffset(r, offset)
+		reqAlerts, ri, res, err := s.SelectWithOffset(k, offset)
 		if err != nil {
 			if res.StatusCode >= 500 {
 				errcnt = errcnt + 1
@@ -65,10 +65,10 @@ func (s *AlertsService) Select(r RRSetKey) ([]ProbeAlertDataDTO, error) {
 }
 
 // SelectWithOffset returns the probe alerts with a RRSetKey, accepting an offset
-func (s *AlertsService) SelectWithOffset(r RRSetKey, offset int) ([]ProbeAlertDataDTO, ResultInfo, *Response, error) {
+func (s *AlertsService) SelectWithOffset(k RRSetKey, offset int) ([]ProbeAlertDataDTO, ResultInfo, *Response, error) {
 	var ald ProbeAlertDataListDTO
 
-	uri := r.AlertsQueryURI(offset)
+	uri := k.AlertsQueryURI(offset)
 	res, err := s.client.get(uri, &ald)
 
 	as := []ProbeAlertDataDTO{}

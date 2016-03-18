@@ -30,17 +30,20 @@ type taskWrapper struct {
 	Task Task `json:"task"`
 }
 
+// TaskID represents the string identifier of a task
 type TaskID string
 
-// URI generates URI for the task result
+// ResultURI generates URI for the task result
 func (t TaskID) ResultURI() string {
 	return fmt.Sprintf("%s/result", t.URI())
 }
-// taskPath links to the task url.
+
+// URI generates the URI for a task
 func (t TaskID) URI() string {
 	return fmt.Sprintf("tasks/%s", t)
 }
 
+// TasksQueryURI generates the query URI for the tasks collection given a query and offset
 func TasksQueryURI(query string, offset int) string {
 	if query != "" {
 		return fmt.Sprintf("tasks?sort=NAME&query=%s&offset=%d", query, offset)
