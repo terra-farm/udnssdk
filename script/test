@@ -1,0 +1,5 @@
+#!/bin/sh
+
+scripts/bootstrap
+go fmt
+go test ./...
