@@ -79,8 +79,8 @@ type RDPoolProfile struct {
 type SBPoolProfile struct {
 	Context       ProfileSchema  `json:"@context"`
 	Description   string         `json:"description"`
-	RunProbes     bool           `json:"runProbes,omitempty"`
-	ActOnProbes   bool           `json:"actOnProbes,omitempty"`
+	RunProbes     bool           `json:"runProbes"`
+	ActOnProbes   bool           `json:"actOnProbes"`
 	Order         string         `json:"order,omitempty"`
 	MaxActive     int            `json:"maxActive,omitempty"`
 	MaxServed     int            `json:"maxServed,omitempty"`
@@ -91,7 +91,7 @@ type SBPoolProfile struct {
 // SBRDataInfo wraps the rdataInfo object of a SBPoolProfile
 type SBRDataInfo struct {
 	State         string `json:"state"`
-	RunProbes     bool   `json:"runProbes,omitempty"`
+	RunProbes     bool   `json:"runProbes"`
 	Priority      int    `json:"priority"`
 	FailoverDelay int    `json:"failoverDelay,omitempty"`
 	Threshold     int    `json:"threshold"`
@@ -100,7 +100,7 @@ type SBRDataInfo struct {
 
 // BackupRecord wraps the backupRecord objects of an SBPoolProfile response
 type BackupRecord struct {
-	RData         string `json:"rdata"`
+	RData         string `json:"rdata,omitempty"`
 	FailoverDelay int    `json:"failoverDelay,omitempty"`
 }
 
@@ -108,11 +108,11 @@ type BackupRecord struct {
 type TCPoolProfile struct {
 	Context      ProfileSchema `json:"@context"`
 	Description  string        `json:"description"`
-	RunProbes    bool          `json:"runProbes,omitempty"`
-	ActOnProbes  bool          `json:"actOnProbes,omitempty"`
+	RunProbes    bool          `json:"runProbes"`
+	ActOnProbes  bool          `json:"actOnProbes"`
 	MaxToLB      int           `json:"maxToLB,omitempty"`
 	RDataInfo    []SBRDataInfo `json:"rdataInfo"`
-	BackupRecord BackupRecord  `json:"backupRecord"`
+	BackupRecord *BackupRecord `json:"backupRecord,omitempty"`
 }
 
 // UnmarshalJSON does what it says on the tin
