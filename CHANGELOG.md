@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Fixed
+* ProbeAlertDataDTO equivalence for times with different locations
 
 ## [1.0.0] - 2016-05-11
 ### Added

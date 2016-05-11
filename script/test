@@ -1,5 +1,6 @@
 #!/bin/sh
 
-scripts/bootstrap
+set -e
+script/bootstrap
 go fmt
 go test ./...
