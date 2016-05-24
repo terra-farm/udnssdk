@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * ProbeAlertDataDTO equivalence for times with different locations
 
 ### Changed
+* convert RawProfile to use mapstructure and structs instead of round-tripping through json
 * CHANGELOG.md: fix link to v1.0.0 commit history
 
 ## [1.0.0] - 2016-05-11
