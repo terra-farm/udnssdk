@@ -46,9 +46,8 @@ func (i IPAddrDTO) Min() net.IP {
 		// on error, ip is nil just like ParseIP
 		ip, _, _ := net.ParseCIDR(i.CIDR)
 		return ip
-	} else {
-		return nil
 	}
+	return nil
 }
 
 // ByIPRange implements sort.Interface for []IPAddrDTO based on
