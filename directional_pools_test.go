@@ -6,8 +6,29 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"sort"
 	"testing"
 )
+
+func Test_IPAddrDTO_Sort(t *testing.T) {
+	ips := []IPAddrDTO {
+		IPAddrDTO{Address: "127.0.0.1"},
+		IPAddrDTO{CIDR: "10.0.0.0/24"},
+		IPAddrDTO{Start: "1.2.3.4", End: "2.3.4.5"},
+	}
+
+	want := []IPAddrDTO {
+		IPAddrDTO{Start: "1.2.3.4", End: "2.3.4.5"},
+		IPAddrDTO{CIDR: "10.0.0.0/24"},
+		IPAddrDTO{Address: "127.0.0.1"},
+	}
+
+	sort.Sort(ByIPRange(ips))
+
+	if !reflect.DeepEqual(ips, want) {
+		t.Errorf("IPAddrDTO.Sort: %#v, want %#v", ips, want)
+	}
+}
 
 func Test_GeoDirectionalPoolKey_URI(t *testing.T) {
 	want := "accounts/udnssdk/dirgroups/geo/unicorn"
