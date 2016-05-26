@@ -157,23 +157,23 @@ type DirPoolProfile struct {
 
 // DPRDataInfo wraps the rdataInfo object of a DirPoolProfile response
 type DPRDataInfo struct {
-	AllNonConfigured bool     `json:"allNonConfigured,omitempty"`
-	IPInfo           *IPInfo  `json:"ipInfo,omitempty"`
-	GeoInfo          *GeoInfo `json:"geoInfo,omitempty"`
+	AllNonConfigured bool     `json:"allNonConfigured,omitempty" terraform:"all_non_configured"`
+	IPInfo           *IPInfo  `json:"ipInfo,omitempty" terraform:"ip_info"`
+	GeoInfo          *GeoInfo `json:"geoInfo,omitempty" terraform:"geo_info"`
 }
 
 // IPInfo wraps the ipInfo object of a DPRDataInfo
 type IPInfo struct {
-	Name           string      `json:"name"`
-	IsAccountLevel bool        `json:"isAccountLevel,omitempty"`
-	Ips            []IPAddrDTO `json:"ips,omitempty"`
+	Name           string      `json:"name" terraform:"name"`
+	IsAccountLevel bool        `json:"isAccountLevel,omitempty" terraform:"is_account_level"`
+	Ips            []IPAddrDTO `json:"ips,omitempty" terraform:"-"`
 }
 
 // GeoInfo wraps the geoInfo object of a DPRDataInfo
 type GeoInfo struct {
-	Name           string   `json:"name"`
-	IsAccountLevel bool     `json:"isAccountLevel,omitempty"`
-	Codes          []string `json:"codes,omitempty"`
+	Name           string   `json:"name" terraform:"name"`
+	IsAccountLevel bool     `json:"isAccountLevel,omitempty" terraform:"is_account_level"`
+	Codes          []string `json:"codes,omitempty" terraform:"codes"`
 }
 
 // RDPoolProfile wraps a Profile for a Resource Distribution pool
