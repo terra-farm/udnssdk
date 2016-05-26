@@ -7,6 +7,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Support sorting IPAddrDTO
 
 ### Fixed
+* `omitempty` tags fixed for `DirPoolProfile.NoResponse`, `DPRDataInfo.GeoInfo`, `DPRDataInfo.IPInfo`, `IPInfo.Ips` & `GeoInfo.Codes`
 * ProbeAlertDataDTO equivalence for times with different locations
 
 ### Changed

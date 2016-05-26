@@ -140,28 +140,28 @@ type DirPoolProfile struct {
 	Description     string        `json:"description"`
 	ConflictResolve string        `json:"conflictResolve,omitempty"`
 	RDataInfo       []DPRDataInfo `json:"rdataInfo"`
-	NoResponse      DPRDataInfo   `json:"noResponse"`
+	NoResponse      DPRDataInfo   `json:"noResponse,omitempty"`
 }
 
 // DPRDataInfo wraps the rdataInfo object of a DirPoolProfile response
 type DPRDataInfo struct {
 	AllNonConfigured bool    `json:"allNonConfigured,omitempty"`
-	IPInfo           IPInfo  `json:"ipInfo,omitempty"`
-	GeoInfo          GeoInfo `json:"geoInfo,omitempty"`
+	IPInfo           *IPInfo  `json:"ipInfo,omitempty"`
+	GeoInfo          *GeoInfo `json:"geoInfo,omitempty"`
 }
 
 // IPInfo wraps the ipInfo object of a DPRDataInfo
 type IPInfo struct {
 	Name           string      `json:"name"`
 	IsAccountLevel bool        `json:"isAccountLevel,omitempty"`
-	Ips            []IPAddrDTO `json:"ips"`
+	Ips            []IPAddrDTO `json:"ips,omitempty"`
 }
 
 // GeoInfo wraps the geoInfo object of a DPRDataInfo
 type GeoInfo struct {
 	Name           string   `json:"name"`
 	IsAccountLevel bool     `json:"isAccountLevel,omitempty"`
-	Codes          []string `json:"codes"`
+	Codes          []string `json:"codes,omitempty"`
 }
 
 // RDPoolProfile wraps a Profile for a Resource Distribution pool
