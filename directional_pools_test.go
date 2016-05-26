@@ -11,13 +11,13 @@ import (
 )
 
 func Test_IPAddrDTO_Sort(t *testing.T) {
-	ips := []IPAddrDTO {
+	ips := []IPAddrDTO{
 		IPAddrDTO{Address: "127.0.0.1"},
 		IPAddrDTO{CIDR: "10.0.0.0/24"},
 		IPAddrDTO{Start: "1.2.3.4", End: "2.3.4.5"},
 	}
 
-	want := []IPAddrDTO {
+	want := []IPAddrDTO{
 		IPAddrDTO{Start: "1.2.3.4", End: "2.3.4.5"},
 		IPAddrDTO{CIDR: "10.0.0.0/24"},
 		IPAddrDTO{Address: "127.0.0.1"},
