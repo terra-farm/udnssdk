@@ -173,7 +173,7 @@ type IPInfo struct {
 type GeoInfo struct {
 	Name           string   `json:"name" terraform:"name"`
 	IsAccountLevel bool     `json:"isAccountLevel,omitempty" terraform:"is_account_level"`
-	Codes          []string `json:"codes,omitempty" terraform:"codes"`
+	Codes          []string `json:"codes,omitempty" terraform:"-"`
 }
 
 // RDPoolProfile wraps a Profile for a Resource Distribution pool
