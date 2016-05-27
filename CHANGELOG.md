@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [1.1.1] - 2016-05-27
 ### Fixed
 * remove terraform tag for `GeoInfo.Codes`
 
@@ -24,5 +26,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * `Client` wraps common API access including OAuth, deferred tasks and retries
 
 [Unreleased]: https://github.com/Ensighten/udnssdk/compare/v1.0.0...HEAD
+[1.1.1]: https://github.com/Ensighten/udnssdk/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/Ensighten/udnssdk/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Ensighten/udnssdk/compare/v0.0.0...v1.0.0
