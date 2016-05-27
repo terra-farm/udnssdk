@@ -1,10 +1,8 @@
 package udnssdk
 
 import (
-	"bytes"
 	"fmt"
 	"log"
-	"net"
 	"time"
 )
 
@@ -35,28 +33,6 @@ type IPAddrDTO struct {
 	CIDR    string `json:"cidr,omitempty"`
 	Address string `json:"address,omitempty"`
 }
-
-// Min returns the lowest net.IP member of an IPAddrDTO, returning nil on error
-func (i IPAddrDTO) Min() net.IP {
-	if i.Start != "" {
-		return net.ParseIP(i.Start)
-	} else if i.Address != "" {
-		return net.ParseIP(i.Address)
-	} else if i.CIDR != "" {
-		// on error, ip is nil just like ParseIP
-		ip, _, _ := net.ParseCIDR(i.CIDR)
-		return ip
-	}
-	return nil
-}
-
-// ByIPRange implements sort.Interface for []IPAddrDTO based on
-// the Min function.
-type ByIPRange []IPAddrDTO
-
-func (is ByIPRange) Len() int           { return len(is) }
-func (is ByIPRange) Swap(i, j int)      { is[i], is[j] = is[j], is[i] }
-func (is ByIPRange) Less(i, j int) bool { return bytes.Compare(is[i].Min(), is[j].Min()) == -1 }
 
 // AccountLevelIPDirectionalGroupDTO wraps an account-level, IP directional-group response
 type AccountLevelIPDirectionalGroupDTO struct {
