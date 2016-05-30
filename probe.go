@@ -3,6 +3,7 @@ package udnssdk
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 )
 
@@ -213,7 +214,7 @@ func (k ProbeKey) URI() string {
 }
 
 // Select returns all probes by a RRSetKey, with an optional query
-func (s *ProbesService) Select(k RRSetKey, query string) ([]ProbeInfoDTO, *Response, error) {
+func (s *ProbesService) Select(k RRSetKey, query string) ([]ProbeInfoDTO, *http.Response, error) {
 	var pld ProbeListDTO
 
 	// This API does not support pagination.
@@ -230,23 +231,23 @@ func (s *ProbesService) Select(k RRSetKey, query string) ([]ProbeInfoDTO, *Respo
 }
 
 // Find returns a probe from a ProbeKey
-func (s *ProbesService) Find(k ProbeKey) (ProbeInfoDTO, *Response, error) {
+func (s *ProbesService) Find(k ProbeKey) (ProbeInfoDTO, *http.Response, error) {
 	var t ProbeInfoDTO
 	res, err := s.client.get(k.URI(), &t)
 	return t, res, err
 }
 
 // Create creates a probe with a RRSetKey using the ProbeInfoDTO dp
-func (s *ProbesService) Create(k RRSetKey, dp ProbeInfoDTO) (*Response, error) {
+func (s *ProbesService) Create(k RRSetKey, dp ProbeInfoDTO) (*http.Response, error) {
 	return s.client.post(k.ProbesURI(), dp, nil)
 }
 
 // Update updates a probe given a ProbeKey with the ProbeInfoDTO dp
-func (s *ProbesService) Update(k ProbeKey, dp ProbeInfoDTO) (*Response, error) {
+func (s *ProbesService) Update(k ProbeKey, dp ProbeInfoDTO) (*http.Response, error) {
 	return s.client.put(k.URI(), dp, nil)
 }
 
 // Delete deletes a probe by its ProbeKey
-func (s *ProbesService) Delete(k ProbeKey) (*Response, error) {
+func (s *ProbesService) Delete(k ProbeKey) (*http.Response, error) {
 	return s.client.delete(k.URI(), nil)
 }

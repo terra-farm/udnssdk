@@ -118,7 +118,7 @@ func Test_RRSets_Create(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("Response: %+v\n", resp.Response)
+	t.Logf("Response: %+v\n", resp)
 }
 
 // Another Get Test if it matchs the Ip in IP1
@@ -194,7 +194,7 @@ func Test_RRSets_Update(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("Response: %+v\n", resp.Response)
+	t.Logf("Response: %+v\n", resp)
 }
 
 // Another Get Test if it matches the Ip in IP2
@@ -279,7 +279,7 @@ func Test_RRSet_Delete(t *testing.T) {
 		}
 		t.Logf("Delete(%v)", r)
 		resp, err := testClient.RRSets.Delete(r)
-		t.Logf("Response: %+v\n", resp.Response)
+		t.Logf("Response: %+v\n", resp)
 		if err != nil {
 			t.Fatal(err)
 		}
