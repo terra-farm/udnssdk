@@ -3,9 +3,13 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+* Add probe detail serialization helpers
+
 ### Changed
 * Flatten udnssdk.Response to mere http.Response
 * Extract self-contained passwordcredentials oauth2 TokenSource
+* Change ProbeTypes to constants
 
 ## [1.1.1] - 2016-05-27
 ### Fixed
