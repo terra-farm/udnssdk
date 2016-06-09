@@ -197,19 +197,19 @@ func (c *Client) NewRequest(method, path string, payload interface{}) (*http.Req
 	return req, nil
 }
 
-func (c *Client) get(path string, v interface{}) (*Response, error) {
+func (c *Client) get(path string, v interface{}) (*http.Response, error) {
 	return c.Do("GET", path, nil, v)
 }
 
-func (c *Client) post(path string, payload, v interface{}) (*Response, error) {
+func (c *Client) post(path string, payload, v interface{}) (*http.Response, error) {
 	return c.Do("POST", path, payload, v)
 }
 
-func (c *Client) put(path string, payload, v interface{}) (*Response, error) {
+func (c *Client) put(path string, payload, v interface{}) (*http.Response, error) {
 	return c.Do("PUT", path, payload, v)
 }
 
-func (c *Client) delete(path string, payload interface{}) (*Response, error) {
+func (c *Client) delete(path string, payload interface{}) (*http.Response, error) {
 	return c.Do("DELETE", path, payload, nil)
 }
 
@@ -218,7 +218,7 @@ func (c *Client) delete(path string, payload interface{}) (*Response, error) {
 // or returned as an error if an API error has occurred.
 // If v implements the io.Writer interface, the raw response body will be written to v,
 // without attempting to decode it.
-func (c *Client) Do(method, path string, payload, v interface{}) (*Response, error) {
+func (c *Client) Do(method, path string, payload, v interface{}) (*http.Response, error) {
 	req, err := c.NewRequest(method, path, payload)
 	if err != nil {
 		return nil, err
@@ -230,7 +230,7 @@ func (c *Client) Do(method, path string, payload, v interface{}) (*Response, err
 		return nil, err
 	}
 	defer res.Body.Close()
-	origresponse := &Response{Response: res}
+	origresponse := res
 
 	var nres *http.Response
 	nres = res
@@ -256,7 +256,7 @@ func (c *Client) Do(method, path string, payload, v interface{}) (*Response, err
 				if err != nil {
 					return origresponse, err
 				}
-				nres = tres.Response
+				nres = tres
 				breakmeout = true
 			case "PENDING", "IN_PROCESS":
 				i = i + 1
@@ -268,7 +268,7 @@ func (c *Client) Do(method, path string, payload, v interface{}) (*Response, err
 			}
 		}
 	}
-	response := &Response{Response: nres}
+	response := nres
 
 	err = CheckResponse(nres)
 	if err != nil {
@@ -284,11 +284,6 @@ func (c *Client) Do(method, path string, payload, v interface{}) (*Response, err
 	}
 
 	return response, err
-}
-
-// A Response represents an API response.
-type Response struct {
-	*http.Response
 }
 
 // ErrorResponse represents an error caused by an API request.
