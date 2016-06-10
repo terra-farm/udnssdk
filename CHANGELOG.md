@@ -5,6 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Fixed
 * `omitempty` tags fixed for `ProbeInfoDTO.PoolRecord` & `ProbeInfoDTO.ID`
+* Check `*http.Response` values for nil before access
 
 ## [1.2.0] - 2016-06-09
 ### Added

@@ -25,7 +25,7 @@ func Test_ProbesSelectProbes(t *testing.T) {
 	probes, resp, err := testClient.Probes.Select(r, "")
 
 	if err != nil {
-		if resp.StatusCode == 404 {
+		if resp != nil && resp.StatusCode == 404 {
 			t.Logf("ERROR - %+v", err)
 			t.SkipNow()
 		}
