@@ -180,7 +180,7 @@ func Test_GeoDirectionalPoolsService_Find_Live(t *testing.T) {
 	t.Logf("DPool: %+v\n", dp)
 	if err != nil {
 		t.Logf("GetDirectionalPoolIP Error: %+v\n", err)
-		if resp.StatusCode == 404 {
+		if resp != nil && resp.StatusCode == 404 {
 			return
 		}
 		t.Fatal(err)
@@ -253,7 +253,7 @@ func Test_GeoDirectionalPoolService_Delete_Live(t *testing.T) {
 
 	if err != nil {
 		t.Logf("DeleteDirectionalPoolIP Error: %+v\n", err)
-		if resp.StatusCode == 404 {
+		if resp != nil && resp.StatusCode == 404 {
 			return
 		}
 		t.Fatal(err)

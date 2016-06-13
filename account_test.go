@@ -24,7 +24,7 @@ func Test_Accounts_Select_Live(t *testing.T) {
 	accounts, resp, err := testClient.Accounts.Select()
 
 	if err != nil {
-		if resp.StatusCode == 404 {
+		if resp != nil && resp.StatusCode == 404 {
 			t.SkipNow()
 		}
 		t.Fatal(err)
