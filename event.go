@@ -12,8 +12,8 @@ type EventsService struct {
 	client *Client
 }
 
-// EventInfoDTO wraps an event's info response
-type EventInfoDTO struct {
+// EventInfo wraps an event's info response
+type EventInfo struct {
 	ID         string    `json:"id"`
 	PoolRecord string    `json:"poolRecord"`
 	EventType  string    `json:"type"`
@@ -23,11 +23,11 @@ type EventInfoDTO struct {
 	Notify     string    `json:"notify"`
 }
 
-// EventInfoListDTO wraps a list of event info and list metadata, from an index request
-type EventInfoListDTO struct {
-	Events     []EventInfoDTO `json:"events"`
-	Queryinfo  QueryInfo      `json:"queryInfo"`
-	Resultinfo ResultInfo     `json:"resultInfo"`
+// EventInfoList wraps a list of event info and list metadata, from an index request
+type EventInfoList struct {
+	Events     []EventInfo `json:"events"`
+	Queryinfo  QueryInfo   `json:"queryInfo"`
+	Resultinfo ResultInfo  `json:"resultInfo"`
 }
 
 // EventKey collects the identifiers of an Event
@@ -53,13 +53,13 @@ func (p EventKey) URI() string {
 }
 
 // Select requests all events, using pagination and error handling
-func (s *EventsService) Select(r RRSetKey, query string) ([]EventInfoDTO, error) {
+func (s *EventsService) Select(r RRSetKey, query string) ([]EventInfo, error) {
 	// TODO: Sane Configuration for timeouts / retries
 	maxerrs := 5
 	waittime := 5 * time.Second
 
 	// init accumulators
-	pis := []EventInfoDTO{}
+	pis := []EventInfo{}
 	offset := 0
 	errcnt := 0
 
@@ -89,13 +89,13 @@ func (s *EventsService) Select(r RRSetKey, query string) ([]EventInfoDTO, error)
 }
 
 // SelectWithOffset requests list of events by RRSetKey, query and offset, also returning list metadata, the actual response, or an error
-func (s *EventsService) SelectWithOffset(r RRSetKey, query string, offset int) ([]EventInfoDTO, ResultInfo, *http.Response, error) {
-	var tld EventInfoListDTO
+func (s *EventsService) SelectWithOffset(r RRSetKey, query string, offset int) ([]EventInfo, ResultInfo, *http.Response, error) {
+	var tld EventInfoList
 
 	uri := r.EventsQueryURI(query, offset)
 	res, err := s.client.get(uri, &tld)
 
-	pis := []EventInfoDTO{}
+	pis := []EventInfo{}
 	for _, pi := range tld.Events {
 		pis = append(pis, pi)
 	}
@@ -103,19 +103,19 @@ func (s *EventsService) SelectWithOffset(r RRSetKey, query string, offset int) (
 }
 
 // Find requests an event by name, type, zone & guid, also returning the actual response, or an error
-func (s *EventsService) Find(e EventKey) (EventInfoDTO, *http.Response, error) {
-	var t EventInfoDTO
+func (s *EventsService) Find(e EventKey) (EventInfo, *http.Response, error) {
+	var t EventInfo
 	res, err := s.client.get(e.URI(), &t)
 	return t, res, err
 }
 
 // Create requests creation of an event by RRSetKey, with provided event-info, returning actual response or an error
-func (s *EventsService) Create(r RRSetKey, ev EventInfoDTO) (*http.Response, error) {
+func (s *EventsService) Create(r RRSetKey, ev EventInfo) (*http.Response, error) {
 	return s.client.post(r.EventsURI(), ev, nil)
 }
 
 // Update requests update of an event by EventKey, withprovided event-info, returning the actual response or an error
-func (s *EventsService) Update(e EventKey, ev EventInfoDTO) (*http.Response, error) {
+func (s *EventsService) Update(e EventKey, ev EventInfo) (*http.Response, error) {
 	return s.client.put(e.URI(), ev, nil)
 }
 

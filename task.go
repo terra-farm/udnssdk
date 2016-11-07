@@ -20,8 +20,8 @@ type Task struct {
 	ResultURI      string `json:"resultUri"`
 }
 
-// TaskListDTO wraps a list of Task resources, from an HTTP response
-type TaskListDTO struct {
+// TaskList wraps a list of Task resources, from an HTTP response
+type TaskList struct {
 	Tasks      []Task     `json:"tasks"`
 	Queryinfo  QueryInfo  `json:"queryInfo"`
 	Resultinfo ResultInfo `json:"resultInfo"`
@@ -90,7 +90,7 @@ func (s *TasksService) Select(query string) ([]Task, error) {
 
 // SelectWithOffset request tasks by query & offset, list them also returning list metadata, the actual response, or an error
 func (s *TasksService) SelectWithOffset(query string, offset int) ([]Task, ResultInfo, *http.Response, error) {
-	var tld TaskListDTO
+	var tld TaskList
 
 	uri := TasksQueryURI(query, offset)
 	res, err := s.client.get(uri, &tld)

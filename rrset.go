@@ -234,8 +234,8 @@ type RRSet struct {
 	Profile   RawProfile `json:"profile,omitempty"`
 }
 
-// RRSetListDTO wraps a list of RRSet resources
-type RRSetListDTO struct {
+// RRSetList wraps a list of RRSet resources
+type RRSetList struct {
 	ZoneName   string     `json:"zoneName"`
 	Rrsets     []RRSet    `json:"rrsets"`
 	Queryinfo  QueryInfo  `json:"queryInfo"`
@@ -368,7 +368,7 @@ func (s *RRSetsService) Select(k RRSetKey) ([]RRSet, error) {
 
 // SelectWithOffset requests zone rrsets by RRSetKey & optional offset
 func (s *RRSetsService) SelectWithOffset(k RRSetKey, offset int) ([]RRSet, ResultInfo, *http.Response, error) {
-	var rrsld RRSetListDTO
+	var rrsld RRSetList
 
 	uri := k.QueryURI(offset)
 	res, err := s.client.get(uri, &rrsld)

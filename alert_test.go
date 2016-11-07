@@ -36,8 +36,8 @@ func Test_GetProbeAlerts(t *testing.T) {
 }
 
 func Test_Alerts_Select(t *testing.T) {
-	want := []ProbeAlertDataDTO{
-		ProbeAlertDataDTO{
+	want := []ProbeAlertData{
+		ProbeAlertData{
 			PoolRecord:      "1.2.3.4",
 			ProbeType:       "DNS",
 			ProbeStatus:     "Failed",
@@ -48,7 +48,7 @@ func Test_Alerts_Select(t *testing.T) {
 		},
 	}
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		resp := ProbeAlertDataListDTO{
+		resp := ProbeAlertDataList{
 			Alerts: want,
 			Queryinfo: QueryInfo{
 				Q:       "",
