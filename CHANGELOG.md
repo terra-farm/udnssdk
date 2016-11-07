@@ -4,6 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Changed
+- IPAddrRange: rename from IPAddrDTO
 - Client.NewRequest: shallow-copy BaseURL to avoid retaining modifications
 
 ## [1.3.0] - 2017-02-28
