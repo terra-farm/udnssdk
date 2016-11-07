@@ -20,8 +20,8 @@ type Account struct {
 	AccountType           string `json:"accountType"`
 }
 
-// AccountListDTO represents a account index response
-type AccountListDTO struct {
+// AccountList represents a account index response
+type AccountList struct {
 	Accounts   []Account  `json:"accounts"`
 	Resultinfo ResultInfo `json:"resultInfo"`
 }
@@ -45,7 +45,7 @@ func AccountsURI() string {
 
 // Select requests all Accounts of user
 func (s *AccountsService) Select() ([]Account, *http.Response, error) {
-	var ald AccountListDTO
+	var ald AccountList
 	res, err := s.client.get(AccountsURI(), &ald)
 
 	accts := []Account{}
