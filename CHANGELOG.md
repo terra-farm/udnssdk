@@ -4,6 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Changed
+- ZoneKey: add, wrap users of string Zones
 - Client.NewRequest: shallow-copy BaseURL to avoid retaining modifications
 
 ## [1.3.0] - 2017-02-28

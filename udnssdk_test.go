@@ -12,7 +12,7 @@ import (
 var (
 	testUsername    = os.Getenv("ULTRADNS_USERNAME")
 	testPassword    = os.Getenv("ULTRADNS_PASSWORD")
-	testDomain      = os.Getenv("ULTRADNS_DOMAIN")
+	testDomain      = ZoneKey(os.Getenv("ULTRADNS_DOMAIN"))
 	testHostname    = os.Getenv("ULTRADNS_TEST_HOSTNAME")
 	testIP1         = os.Getenv("ULTRADNS_TEST_IP1")
 	testIP2         = os.Getenv("ULTRADNS_TEST_IP2")
@@ -20,7 +20,7 @@ var (
 	testQuery       = os.Getenv("ULTRADNS_TEST_QUERY")
 	testProbeType   = os.Getenv("ULTRADNS_TEST_PROBE_TYPE")
 	testProbeName   = os.Getenv("ULTRADNS_TEST_PROBE_NAME")
-	testProbeDomain = os.Getenv("ULTRADNS_TEST_PROBE_DOMAIN")
+	testProbeDomain = ZoneKey(os.Getenv("ULTRADNS_TEST_PROBE_DOMAIN"))
 
 	testIPDPoolName    = "testipdpool"
 	testIPDPoolAddress = "127.0.0.1"
