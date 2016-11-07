@@ -71,6 +71,8 @@ type Client struct {
 	RRSets *RRSetsService
 	// Tasks API
 	Tasks *TasksService
+	// Zones API
+	Zones *ZonesService
 }
 
 // NewClient returns a new ultradns API client.
@@ -97,6 +99,7 @@ func NewClient(username, password, baseURL string) (*Client, error) {
 	c.Probes = &ProbesService{client: c}
 	c.RRSets = &RRSetsService{client: c}
 	c.Tasks = &TasksService{client: c}
+	c.Zones = &ZonesService{client: c}
 	return c, nil
 }
 
@@ -120,6 +123,7 @@ func newStubClient(username, password, baseURL, clientID, clientSecret string) (
 	c.Probes = &ProbesService{client: c}
 	c.RRSets = &RRSetsService{client: c}
 	c.Tasks = &TasksService{client: c}
+	c.Zones = &ZonesService{client: c}
 	return c, nil
 }
 
