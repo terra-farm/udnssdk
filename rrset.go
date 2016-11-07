@@ -236,7 +236,7 @@ type RRSet struct {
 
 // RRSetListDTO wraps a list of RRSet resources
 type RRSetListDTO struct {
-	ZoneName   string     `json:"zoneName"`
+	Zone       ZoneKey    `json:"zoneName"`
 	Rrsets     []RRSet    `json:"rrsets"`
 	Queryinfo  QueryInfo  `json:"queryInfo"`
 	Resultinfo ResultInfo `json:"resultInfo"`
@@ -244,14 +244,14 @@ type RRSetListDTO struct {
 
 // RRSetKey collects the identifiers of a Zone
 type RRSetKey struct {
-	Zone string
+	Zone ZoneKey
 	Type string
 	Name string
 }
 
 // URI generates the URI for an RRSet
 func (k RRSetKey) URI() string {
-	uri := fmt.Sprintf("zones/%s/rrsets", k.Zone)
+	uri := fmt.Sprintf("%s/rrsets", k.Zone.URI())
 	if k.Type != "" {
 		uri += fmt.Sprintf("/%v", k.Type)
 		if k.Name != "" {

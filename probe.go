@@ -238,7 +238,7 @@ type ProbesService struct {
 
 // ProbeKey collects the identifiers of a Probe
 type ProbeKey struct {
-	Zone string
+	Zone ZoneKey
 	Name string
 	ID   string
 }
