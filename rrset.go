@@ -166,9 +166,9 @@ type DPRDataInfo struct {
 
 // IPInfo wraps the ipInfo object of a DPRDataInfo
 type IPInfo struct {
-	Name           string      `json:"name" terraform:"name"`
-	IsAccountLevel bool        `json:"isAccountLevel,omitempty" terraform:"is_account_level"`
-	Ips            []IPAddrDTO `json:"ips,omitempty" terraform:"-"`
+	Name           string        `json:"name" terraform:"name"`
+	IsAccountLevel bool          `json:"isAccountLevel,omitempty" terraform:"is_account_level"`
+	Ips            []IPAddrRange `json:"ips,omitempty" terraform:"-"`
 }
 
 // GeoInfo wraps the geoInfo object of a DPRDataInfo
