@@ -318,7 +318,8 @@ func Test_DirPoolProfile_RawProfile(t *testing.T) {
 	expected := RawProfile{
 		"@context":    ProfileSchema(""),
 		"description": "",
-		"rdataInfo":   []DPRDataInfo(nil),
+		// "rdataInfo":   []DPRDataInfo(nil),
+		"rdataInfo": []interface{}{},
 	}
 
 	actual := p.RawProfile()
@@ -366,12 +367,14 @@ func Test_RDPoolProfile_RawProfile(t *testing.T) {
 func Test_SBPoolProfile_RawProfile(t *testing.T) {
 	p := SBPoolProfile{}
 	expected := RawProfile{
-		"@context":      ProfileSchema(""),
-		"description":   "",
-		"actOnProbes":   false,
-		"rdataInfo":     []SBRDataInfo(nil),
-		"runProbes":     false,
-		"backupRecords": []BackupRecord(nil),
+		"@context":    ProfileSchema(""),
+		"description": "",
+		"actOnProbes": false,
+		// "rdataInfo":   []SBRDataInfo(nil),
+		"rdataInfo": []interface{}{},
+		"runProbes": false,
+		// "backupRecords": []BackupRecord(nil),
+		"backupRecords": []interface{}{},
 	}
 
 	actual := p.RawProfile()
@@ -423,8 +426,9 @@ func Test_TCPoolProfile_RawProfile(t *testing.T) {
 		"@context":    ProfileSchema(""),
 		"description": "",
 		"actOnProbes": false,
-		"rdataInfo":   []SBRDataInfo(nil),
-		"runProbes":   false,
+		// "rdataInfo":   []SBRDataInfo(nil),
+		"rdataInfo": []interface{}{},
+		"runProbes": false,
 	}
 
 	actual := input.RawProfile()
