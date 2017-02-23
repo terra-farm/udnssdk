@@ -15,7 +15,7 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/Ensighten/udnssdk/passwordcredentials"
+	oauthPassword "github.com/Ensighten/udnssdk/password"
 )
 
 const (
@@ -49,7 +49,7 @@ type ResultInfo struct {
 type Client struct {
 	// This is our client structure.
 	HTTPClient *http.Client
-	Config     *passwordcredentials.Config
+	Config     *oauthPassword.Config
 
 	BaseURL   string
 	UserAgent string
