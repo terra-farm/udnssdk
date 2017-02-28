@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- cmd/udns: add rrset query tool
+- DPRDataInfo.Type: add field to support API change
 
 ## [1.2.1] - 2016-06-13
 ### Fixed
