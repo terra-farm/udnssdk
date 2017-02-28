@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [1.3.0] - 2017-02-28
 ### Added
 - cmd/udns: add rrset query tool
 - DPRDataInfo.Type: add field to support API change
@@ -43,6 +45,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * `Client` wraps common API access including OAuth, deferred tasks and retries
 
 [Unreleased]: https://github.com/Ensighten/udnssdk/compare/v1.2.1...HEAD
+[1.3.0]: https://github.com/Ensighten/udnssdk/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/Ensighten/udnssdk/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/Ensighten/udnssdk/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/Ensighten/udnssdk/compare/v1.1.0...v1.1.1
