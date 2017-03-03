@@ -110,8 +110,8 @@ func Test_GeoDirectionalPoolsService_Select_Query_Live(t *testing.T) {
 }
 
 func Test_GeoDirectionalPoolsService_Select(t *testing.T) {
-	want := []AccountLevelGeoDirectionalGroupDTO{
-		AccountLevelGeoDirectionalGroupDTO{
+	want := []AccountLevelGeoDirectionalGroup{
+		AccountLevelGeoDirectionalGroup{
 			Name:        "unicorn",
 			Description: "unicorn: a service of rainbows",
 			Codes:       []string{"US", "CA"},
@@ -190,7 +190,7 @@ func Test_GeoDirectionalPoolsService_Find_Live(t *testing.T) {
 }
 
 func Test_GeoDirectionalPoolsService_Find(t *testing.T) {
-	want := AccountLevelGeoDirectionalGroupDTO{
+	want := AccountLevelGeoDirectionalGroup{
 		Name:        "unicorn",
 		Description: "unicorn: a service of rainbows",
 		Codes:       []string{"US", "CA"},

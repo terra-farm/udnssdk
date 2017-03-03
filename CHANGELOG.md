@@ -4,6 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Changed
+- AccountLevelGeoDirectionalGroup: rename from AccountLevelGeoDirectionalGroupDTO
 - ProbeAlertDataList: rename from ProbeAlertDataListDTO
 - ProbeAlertData: rename from ProbeAlertDataDTO
 - AccountList: rename from AccountListDTO
