@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [1.3.2] - 2017-03-03
 ### Changed
 - CheckResponse: improve fallthrough error to include full Response Status and properly format Body
 - Client.NewRequest: split query to avoid encoding "?" as "%3F" into path
@@ -51,7 +53,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Support for API endpoints for `RRSets`, `Accounts`,  `DirectionalPools`, Traffic Controller Pool `Probes`, `Events`, `Notifications` & `Alerts`
 * `Client` wraps common API access including OAuth, deferred tasks and retries
 
-[Unreleased]: https://github.com/Ensighten/udnssdk/compare/v1.3.1...HEAD
+[Unreleased]: https://github.com/Ensighten/udnssdk/compare/v1.3.2...HEAD
+[1.3.2]: https://github.com/Ensighten/udnssdk/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/Ensighten/udnssdk/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/Ensighten/udnssdk/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/Ensighten/udnssdk/compare/v1.2.0...v1.2.1
