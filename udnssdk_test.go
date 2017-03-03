@@ -2,9 +2,12 @@ package udnssdk
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math/rand"
+	"net/http"
 	"os"
+	"strings"
 	"testing"
 	"time"
 )
@@ -191,5 +194,17 @@ func Test_Do_PreservesBaseURL(t *testing.T) {
 
 	if testClient.BaseURL.String() != testBaseURL {
 		t.Fatalf("BaseURL = %v; want: %v", testClient.BaseURL.String(), testBaseURL)
+	}
+}
+
+func Test_CheckResponse_StatusCode4xx(t *testing.T) {
+	h := &http.Response{
+		Body:       ioutil.NopCloser(strings.NewReader("")),
+		StatusCode: 400,
+		Status:     "400 Bad Request",
+	}
+	err := CheckResponse(h)
+	if err.Error() != "Response had non-successful Status: \"400 Bad Request\", but could not extract any errors from Body: \"\"" {
+		t.Fatal(err)
 	}
 }
