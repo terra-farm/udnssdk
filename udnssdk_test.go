@@ -159,3 +159,37 @@ func Test_CreateClient(t *testing.T) {
 	}
 	t.Logf("Client created successfully.\n")
 }
+
+func Test_Do(t *testing.T) {
+	if !enableIntegrationTests {
+		t.SkipNow()
+	}
+
+	testClient, err := NewClient(testUsername, testPassword, testBaseURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = testClient.Do("GET", "zones", nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func Test_Do_PreservesBaseURL(t *testing.T) {
+	if !enableIntegrationTests {
+		t.SkipNow()
+	}
+
+	testClient, _ := NewClient(testUsername, testPassword, testBaseURL)
+
+	if testClient.BaseURL.String() != testBaseURL {
+		t.Fatalf("BaseURL = %v; want: %v", testClient.BaseURL.String(), testBaseURL)
+	}
+
+	testClient.Do("GET", "zones", nil, nil)
+
+	if testClient.BaseURL.String() != testBaseURL {
+		t.Fatalf("BaseURL = %v; want: %v", testClient.BaseURL.String(), testBaseURL)
+	}
+}
