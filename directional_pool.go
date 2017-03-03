@@ -35,8 +35,8 @@ type IPAddrRange struct {
 	Address string `json:"address,omitempty" terraform:"address"`
 }
 
-// AccountLevelIPDirectionalGroupDTO wraps an account-level, IP directional-group response
-type AccountLevelIPDirectionalGroupDTO struct {
+// AccountLevelIPDirectionalGroup wraps an account-level, IP directional-group response
+type AccountLevelIPDirectionalGroup struct {
 	Name        string        `json:"name"`
 	Description string        `json:"description"`
 	IPs         []IPAddrRange `json:"ips"`
@@ -59,10 +59,10 @@ type AccountLevelGeoDirectionalGroupListDTO struct {
 
 // AccountLevelIPDirectionalGroupListDTO wraps an account-level, IP directional-group response
 type AccountLevelIPDirectionalGroupListDTO struct {
-	AccountName string                              `json:"zoneName"`
-	IPGroups    []AccountLevelIPDirectionalGroupDTO `json:"ipGroups"`
-	Queryinfo   QueryInfo                           `json:"queryInfo"`
-	Resultinfo  ResultInfo                          `json:"resultInfo"`
+	AccountName string                           `json:"zoneName"`
+	IPGroups    []AccountLevelIPDirectionalGroup `json:"ipGroups"`
+	Queryinfo   QueryInfo                        `json:"queryInfo"`
+	Resultinfo  ResultInfo                       `json:"resultInfo"`
 }
 
 // Geos allows access to the Geo DirectionalPools API
@@ -235,13 +235,13 @@ type IPDirectionalPoolsService struct {
 }
 
 // Select requests all IP directional-pools, using pagination and error handling
-func (s *IPDirectionalPoolsService) Select(k IPDirectionalPoolKey, query string) ([]AccountLevelIPDirectionalGroupDTO, error) {
+func (s *IPDirectionalPoolsService) Select(k IPDirectionalPoolKey, query string) ([]AccountLevelIPDirectionalGroup, error) {
 	// TODO: Sane Configuration for timeouts / retries
 	maxerrs := 5
 	waittime := 5 * time.Second
 
 	// init accumulators
-	gs := []AccountLevelIPDirectionalGroupDTO{}
+	gs := []AccountLevelIPDirectionalGroup{}
 	errcnt := 0
 	offset := 0
 
@@ -271,12 +271,12 @@ func (s *IPDirectionalPoolsService) Select(k IPDirectionalPoolKey, query string)
 }
 
 // SelectWithOffset requests all IP directional-pools, by query & account, and an offset, returning the list of IP groups, list metadata & the actual response, or an error
-func (s *IPDirectionalPoolsService) SelectWithOffset(k IPDirectionalPoolKey, query string, offset int) ([]AccountLevelIPDirectionalGroupDTO, ResultInfo, *http.Response, error) {
+func (s *IPDirectionalPoolsService) SelectWithOffset(k IPDirectionalPoolKey, query string, offset int) ([]AccountLevelIPDirectionalGroup, ResultInfo, *http.Response, error) {
 	var tld AccountLevelIPDirectionalGroupListDTO
 
 	res, err := s.client.get(k.QueryURI(query, offset), &tld)
 
-	pis := []AccountLevelIPDirectionalGroupDTO{}
+	pis := []AccountLevelIPDirectionalGroup{}
 	for _, pi := range tld.IPGroups {
 		pis = append(pis, pi)
 	}
@@ -285,8 +285,8 @@ func (s *IPDirectionalPoolsService) SelectWithOffset(k IPDirectionalPoolKey, que
 }
 
 // Find requests a directional-pool by name & account
-func (s *IPDirectionalPoolsService) Find(k IPDirectionalPoolKey) (AccountLevelIPDirectionalGroupDTO, *http.Response, error) {
-	var t AccountLevelIPDirectionalGroupDTO
+func (s *IPDirectionalPoolsService) Find(k IPDirectionalPoolKey) (AccountLevelIPDirectionalGroup, *http.Response, error) {
+	var t AccountLevelIPDirectionalGroup
 	res, err := s.client.get(k.URI(), &t)
 	return t, res, err
 }

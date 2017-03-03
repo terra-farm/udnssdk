@@ -26,7 +26,7 @@ var (
 	testIPDPoolAddress = "127.0.0.1"
 	testIPDPoolDescr   = "A Test IP Directional Pool Group"
 	testIPAddrRange    = IPAddrRange{Address: "127.0.0.1"}
-	testIPDPool        = AccountLevelIPDirectionalGroupDTO{Name: "testippool", Description: "An IP Test Pool", IPs: []IPAddrRange{IPAddrRange{Address: "127.0.0.1"}}}
+	testIPDPool        = AccountLevelIPDirectionalGroup{Name: "testippool", Description: "An IP Test Pool", IPs: []IPAddrRange{IPAddrRange{Address: "127.0.0.1"}}}
 	testGeoDPool       = AccountLevelGeoDirectionalGroup{Name: "testgeopool", Description: "A test geo pool", Codes: []string{"US, UK"}}
 	testGeoDPoolName   = "testgeodpool"
 	testGeoDPoolDescr  = "A Test Geo Directional Pool Group"

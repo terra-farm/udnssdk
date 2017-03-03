@@ -375,7 +375,7 @@ func Test_IPDirectionalPoolsService_Select(t *testing.T) {
 	t.SkipNow()
 }
 func Test_IPDirectionalPoolsService_Find(t *testing.T) {
-	want := AccountLevelIPDirectionalGroupDTO{
+	want := AccountLevelIPDirectionalGroup{
 		Name:        "unicorn",
 		Description: "unicorn: a service of rainbows",
 		IPs: []IPAddrRange{
