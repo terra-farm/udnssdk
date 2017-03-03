@@ -48,7 +48,7 @@ func Test_Alerts_Select(t *testing.T) {
 		},
 	}
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		resp := ProbeAlertDataListDTO{
+		resp := ProbeAlertDataList{
 			Alerts: want,
 			Queryinfo: QueryInfo{
 				Q:       "",

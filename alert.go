@@ -33,8 +33,8 @@ func (a ProbeAlertData) Equal(b ProbeAlertData) bool {
 		a.Status == b.Status
 }
 
-// ProbeAlertDataListDTO wraps the response for an index of probe alerts
-type ProbeAlertDataListDTO struct {
+// ProbeAlertDataList wraps the response for an index of probe alerts
+type ProbeAlertDataList struct {
 	Alerts     []ProbeAlertData `json:"alerts"`
 	Queryinfo  QueryInfo        `json:"queryInfo"`
 	Resultinfo ResultInfo       `json:"resultInfo"`
@@ -78,7 +78,7 @@ func (s *AlertsService) Select(k RRSetKey) ([]ProbeAlertData, error) {
 
 // SelectWithOffset returns the probe alerts with a RRSetKey, accepting an offset
 func (s *AlertsService) SelectWithOffset(k RRSetKey, offset int) ([]ProbeAlertData, ResultInfo, *http.Response, error) {
-	var ald ProbeAlertDataListDTO
+	var ald ProbeAlertDataList
 
 	uri := k.AlertsQueryURI(offset)
 	res, err := s.client.get(uri, &ald)
