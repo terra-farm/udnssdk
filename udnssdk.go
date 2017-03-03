@@ -300,5 +300,5 @@ func CheckResponse(r *http.Response) error {
 		return &ErrorResponseList{Response: r, Responses: ers}
 	}
 
-	return fmt.Errorf("Response had non-successful status: %d, but could not extract error from body: %+v", r.StatusCode, body)
+	return fmt.Errorf("Response had non-successful Status: %#v, but could not extract any errors from Body: %#v", r.Status, string(body))
 }

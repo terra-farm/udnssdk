@@ -4,6 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Changed
+- CheckResponse: improve fallthrough error to include full Response Status and properly format Body
 - Client.NewRequest: split query to avoid encoding "?" as "%3F" into path
 
 ## [1.3.1] - 2017-03-03
