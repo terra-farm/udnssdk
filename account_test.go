@@ -46,7 +46,7 @@ func Test_Accounts_Select(t *testing.T) {
 	}
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		resp := AccountListDTO{
+		resp := AccountList{
 			Accounts: want,
 			Resultinfo: ResultInfo{
 				TotalCount:    len(want),

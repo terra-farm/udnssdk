@@ -110,15 +110,15 @@ func Test_GeoDirectionalPoolsService_Select_Query_Live(t *testing.T) {
 }
 
 func Test_GeoDirectionalPoolsService_Select(t *testing.T) {
-	want := []AccountLevelGeoDirectionalGroupDTO{
-		AccountLevelGeoDirectionalGroupDTO{
+	want := []AccountLevelGeoDirectionalGroup{
+		AccountLevelGeoDirectionalGroup{
 			Name:        "unicorn",
 			Description: "unicorn: a service of rainbows",
 			Codes:       []string{"US", "CA"},
 		},
 	}
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		resp := AccountLevelGeoDirectionalGroupListDTO{
+		resp := AccountLevelGeoDirectionalGroupList{
 			AccountName: "udnssdk",
 			GeoGroups:   want,
 			Queryinfo: QueryInfo{
@@ -190,7 +190,7 @@ func Test_GeoDirectionalPoolsService_Find_Live(t *testing.T) {
 }
 
 func Test_GeoDirectionalPoolsService_Find(t *testing.T) {
-	want := AccountLevelGeoDirectionalGroupDTO{
+	want := AccountLevelGeoDirectionalGroup{
 		Name:        "unicorn",
 		Description: "unicorn: a service of rainbows",
 		Codes:       []string{"US", "CA"},
@@ -375,11 +375,11 @@ func Test_IPDirectionalPoolsService_Select(t *testing.T) {
 	t.SkipNow()
 }
 func Test_IPDirectionalPoolsService_Find(t *testing.T) {
-	want := AccountLevelIPDirectionalGroupDTO{
+	want := AccountLevelIPDirectionalGroup{
 		Name:        "unicorn",
 		Description: "unicorn: a service of rainbows",
-		IPs: []IPAddrDTO{
-			IPAddrDTO{Address: "1.2.3.4"},
+		IPs: []IPAddrRange{
+			IPAddrRange{Address: "1.2.3.4"},
 		},
 	}
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

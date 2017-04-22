@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// ProbeType wraps the possible types of a ProbeInfoDTO
+// ProbeType wraps the possible types of a ProbeInfo
 type ProbeType string
 
 // Here lie all the possible ProbeType values
@@ -20,33 +20,33 @@ const (
 	TCPProbeType      ProbeType = "TCP"
 )
 
-// ProbeInfoDTO wraps a probe response
-type ProbeInfoDTO struct {
-	ID         string           `json:"id,omitempty"`
-	PoolRecord string           `json:"poolRecord,omitempty"`
-	ProbeType  ProbeType        `json:"type"`
-	Interval   string           `json:"interval"`
-	Agents     []string         `json:"agents"`
-	Threshold  int              `json:"threshold"`
-	Details    *ProbeDetailsDTO `json:"details"`
+// ProbeInfo wraps a probe response
+type ProbeInfo struct {
+	ID         string        `json:"id,omitempty"`
+	PoolRecord string        `json:"poolRecord,omitempty"`
+	ProbeType  ProbeType     `json:"type"`
+	Interval   string        `json:"interval"`
+	Agents     []string      `json:"agents"`
+	Threshold  int           `json:"threshold"`
+	Details    *ProbeDetails `json:"details"`
 }
 
-// ProbeDetailsLimitDTO wraps a probe
-type ProbeDetailsLimitDTO struct {
+// ProbeDetailsLimit wraps a probe
+type ProbeDetailsLimit struct {
 	Warning  int `json:"warning"`
 	Critical int `json:"critical"`
 	Fail     int `json:"fail"`
 }
 
-// ProbeDetailsDTO wraps the details of a probe
-type ProbeDetailsDTO struct {
+// ProbeDetails wraps the details of a probe
+type ProbeDetails struct {
 	data   []byte
 	Detail interface{} `json:"detail,omitempty"`
 	typ    ProbeType
 }
 
 // GetData returns the data because I'm working around something.
-func (s *ProbeDetailsDTO) GetData() []byte {
+func (s *ProbeDetails) GetData() []byte {
 	return s.data
 }
 
@@ -54,7 +54,7 @@ func (s *ProbeDetailsDTO) GetData() []byte {
 // an appropriate datatype.  These are helper structures and functions for testing
 // and direct API use.  In the Terraform implementation, we will use Terraforms own
 // warped schema structure to handle the marshalling and unmarshalling.
-func (s *ProbeDetailsDTO) Populate(t ProbeType) (err error) {
+func (s *ProbeDetails) Populate(t ProbeType) (err error) {
 	s.typ = t
 	d, err := s.GetDetailsObject(t)
 	if err != nil {
@@ -64,8 +64,8 @@ func (s *ProbeDetailsDTO) Populate(t ProbeType) (err error) {
 	return nil
 }
 
-// GetDetailsObject extracts the appropriate details object from a ProbeDetailsDTO with the given ProbeType
-func (s *ProbeDetailsDTO) GetDetailsObject(t ProbeType) (interface{}, error) {
+// GetDetailsObject extracts the appropriate details object from a ProbeDetails with the given ProbeType
+func (s *ProbeDetails) GetDetailsObject(t ProbeType) (interface{}, error) {
 	switch t {
 	case DNSProbeType:
 		return s.DNSProbeDetails()
@@ -86,63 +86,63 @@ func (s *ProbeDetailsDTO) GetDetailsObject(t ProbeType) (interface{}, error) {
 	}
 }
 
-// DNSProbeDetails returns the ProbeDetailsDTO data deserialized as a DNSProbeDetailsDTO
-func (s *ProbeDetailsDTO) DNSProbeDetails() (DNSProbeDetailsDTO, error) {
-	var d DNSProbeDetailsDTO
+// DNSProbeDetails returns the ProbeDetails data deserialized as a DNSProbeDetails
+func (s *ProbeDetails) DNSProbeDetails() (DNSProbeDetails, error) {
+	var d DNSProbeDetails
 	err := json.Unmarshal(s.data, &d)
 	return d, err
 }
 
-// FTPProbeDetails returns the ProbeDetailsDTO data deserialized as a FTPProbeDetailsDTO
-func (s *ProbeDetailsDTO) FTPProbeDetails() (FTPProbeDetailsDTO, error) {
-	var d FTPProbeDetailsDTO
+// FTPProbeDetails returns the ProbeDetails data deserialized as a FTPProbeDetails
+func (s *ProbeDetails) FTPProbeDetails() (FTPProbeDetails, error) {
+	var d FTPProbeDetails
 	err := json.Unmarshal(s.data, &d)
 	return d, err
 }
 
-// HTTPProbeDetails returns the ProbeDetailsDTO data deserialized as a HTTPProbeDetailsDTO
-func (s *ProbeDetailsDTO) HTTPProbeDetails() (HTTPProbeDetailsDTO, error) {
-	var d HTTPProbeDetailsDTO
+// HTTPProbeDetails returns the ProbeDetails data deserialized as a HTTPProbeDetails
+func (s *ProbeDetails) HTTPProbeDetails() (HTTPProbeDetails, error) {
+	var d HTTPProbeDetails
 	err := json.Unmarshal(s.data, &d)
 	return d, err
 }
 
-// PingProbeDetails returns the ProbeDetailsDTO data deserialized as a PingProbeDetailsDTO
-func (s *ProbeDetailsDTO) PingProbeDetails() (PingProbeDetailsDTO, error) {
-	var d PingProbeDetailsDTO
+// PingProbeDetails returns the ProbeDetails data deserialized as a PingProbeDetails
+func (s *ProbeDetails) PingProbeDetails() (PingProbeDetails, error) {
+	var d PingProbeDetails
 	err := json.Unmarshal(s.data, &d)
 	return d, err
 }
 
-// SMTPProbeDetails returns the ProbeDetailsDTO data deserialized as a SMTPProbeDetailsDTO
-func (s *ProbeDetailsDTO) SMTPProbeDetails() (SMTPProbeDetailsDTO, error) {
-	var d SMTPProbeDetailsDTO
+// SMTPProbeDetails returns the ProbeDetails data deserialized as a SMTPProbeDetails
+func (s *ProbeDetails) SMTPProbeDetails() (SMTPProbeDetails, error) {
+	var d SMTPProbeDetails
 	err := json.Unmarshal(s.data, &d)
 	return d, err
 }
 
-// SMTPSENDProbeDetails returns the ProbeDetailsDTO data deserialized as a SMTPSENDProbeDetailsDTO
-func (s *ProbeDetailsDTO) SMTPSENDProbeDetails() (SMTPSENDProbeDetailsDTO, error) {
-	var d SMTPSENDProbeDetailsDTO
+// SMTPSENDProbeDetails returns the ProbeDetails data deserialized as a SMTPSENDProbeDetails
+func (s *ProbeDetails) SMTPSENDProbeDetails() (SMTPSENDProbeDetails, error) {
+	var d SMTPSENDProbeDetails
 	err := json.Unmarshal(s.data, &d)
 	return d, err
 }
 
-// TCPProbeDetails returns the ProbeDetailsDTO data deserialized as a TCPProbeDetails
-func (s *ProbeDetailsDTO) TCPProbeDetails() (TCPProbeDetailsDTO, error) {
-	var d TCPProbeDetailsDTO
+// TCPProbeDetails returns the ProbeDetails data deserialized as a TCPProbeDetails
+func (s *ProbeDetails) TCPProbeDetails() (TCPProbeDetails, error) {
+	var d TCPProbeDetails
 	err := json.Unmarshal(s.data, &d)
 	return d, err
 }
 
 // UnmarshalJSON does what it says on the tin
-func (s *ProbeDetailsDTO) UnmarshalJSON(b []byte) (err error) {
+func (s *ProbeDetails) UnmarshalJSON(b []byte) (err error) {
 	s.data = b
 	return nil
 }
 
 // MarshalJSON does what it says on the tin
-func (s *ProbeDetailsDTO) MarshalJSON() ([]byte, error) {
+func (s *ProbeDetails) MarshalJSON() ([]byte, error) {
 	var err error
 	if s.Detail != nil {
 		return json.Marshal(s.Detail)
@@ -153,82 +153,82 @@ func (s *ProbeDetailsDTO) MarshalJSON() ([]byte, error) {
 	return json.Marshal(nil)
 }
 
-// GoString returns a string representation of the ProbeDetailsDTO internal data
-func (s *ProbeDetailsDTO) GoString() string {
+// GoString returns a string representation of the ProbeDetails internal data
+func (s *ProbeDetails) GoString() string {
 	return string(s.data)
 }
-func (s *ProbeDetailsDTO) String() string {
+func (s *ProbeDetails) String() string {
 	return string(s.data)
 }
 
 // Transaction wraps a transaction response
 type Transaction struct {
-	Method          string                          `json:"method"`
-	URL             string                          `json:"url"`
-	TransmittedData string                          `json:"transmittedData,omitempty"`
-	FollowRedirects bool                            `json:"followRedirects,omitempty"`
-	Limits          map[string]ProbeDetailsLimitDTO `json:"limits"`
+	Method          string                       `json:"method"`
+	URL             string                       `json:"url"`
+	TransmittedData string                       `json:"transmittedData,omitempty"`
+	FollowRedirects bool                         `json:"followRedirects,omitempty"`
+	Limits          map[string]ProbeDetailsLimit `json:"limits"`
 }
 
-// HTTPProbeDetailsDTO wraps HTTP probe details
-type HTTPProbeDetailsDTO struct {
-	Transactions []Transaction         `json:"transactions"`
-	TotalLimits  *ProbeDetailsLimitDTO `json:"totalLimits,omitempty"`
+// HTTPProbeDetails wraps HTTP probe details
+type HTTPProbeDetails struct {
+	Transactions []Transaction      `json:"transactions"`
+	TotalLimits  *ProbeDetailsLimit `json:"totalLimits,omitempty"`
 }
 
-// PingProbeDetailsDTO wraps Ping probe details
-type PingProbeDetailsDTO struct {
-	Packets    int                             `json:"packets,omitempty"`
-	PacketSize int                             `json:"packetSize,omitempty"`
-	Limits     map[string]ProbeDetailsLimitDTO `json:"limits"`
+// PingProbeDetails wraps Ping probe details
+type PingProbeDetails struct {
+	Packets    int                          `json:"packets,omitempty"`
+	PacketSize int                          `json:"packetSize,omitempty"`
+	Limits     map[string]ProbeDetailsLimit `json:"limits"`
 }
 
-// FTPProbeDetailsDTO wraps FTP probe details
-type FTPProbeDetailsDTO struct {
-	Port        int                             `json:"port,omitempty"`
-	PassiveMode bool                            `json:"passiveMode,omitempty"`
-	Username    string                          `json:"username,omitempty"`
-	Password    string                          `json:"password,omitempty"`
-	Path        string                          `json:"path"`
-	Limits      map[string]ProbeDetailsLimitDTO `json:"limits"`
+// FTPProbeDetails wraps FTP probe details
+type FTPProbeDetails struct {
+	Port        int                          `json:"port,omitempty"`
+	PassiveMode bool                         `json:"passiveMode,omitempty"`
+	Username    string                       `json:"username,omitempty"`
+	Password    string                       `json:"password,omitempty"`
+	Path        string                       `json:"path"`
+	Limits      map[string]ProbeDetailsLimit `json:"limits"`
 }
 
-// TCPProbeDetailsDTO wraps TCP probe details
-type TCPProbeDetailsDTO struct {
-	Port      int                             `json:"port,omitempty"`
-	ControlIP string                          `json:"controlIP,omitempty"`
-	Limits    map[string]ProbeDetailsLimitDTO `json:"limits"`
+// TCPProbeDetails wraps TCP probe details
+type TCPProbeDetails struct {
+	Port      int                          `json:"port,omitempty"`
+	ControlIP string                       `json:"controlIP,omitempty"`
+	Limits    map[string]ProbeDetailsLimit `json:"limits"`
 }
 
-// SMTPProbeDetailsDTO wraps SMTP probe details
-type SMTPProbeDetailsDTO struct {
-	Port   int                             `json:"port,omitempty"`
-	Limits map[string]ProbeDetailsLimitDTO `json:"limits"`
+// SMTPProbeDetails wraps SMTP probe details
+type SMTPProbeDetails struct {
+	Port   int                          `json:"port,omitempty"`
+	Limits map[string]ProbeDetailsLimit `json:"limits"`
 }
 
-// SMTPSENDProbeDetailsDTO wraps SMTP SEND probe details
-type SMTPSENDProbeDetailsDTO struct {
-	Port    int                             `json:"port,omitempty"`
-	From    string                          `json:"from"`
-	To      string                          `json:"to"`
-	Message string                          `json:"message,omitempty"`
-	Limits  map[string]ProbeDetailsLimitDTO `json:"limits"`
+// SMTPSENDProbeDetails wraps SMTP SEND probe details
+type SMTPSENDProbeDetails struct {
+	Port    int                          `json:"port,omitempty"`
+	From    string                       `json:"from"`
+	To      string                       `json:"to"`
+	Message string                       `json:"message,omitempty"`
+	Limits  map[string]ProbeDetailsLimit `json:"limits"`
 }
 
-// DNSProbeDetailsDTO wraps DNS probe details
-type DNSProbeDetailsDTO struct {
-	Port       int                             `json:"port,omitempty"`
-	TCPOnly    bool                            `json:"tcpOnly,omitempty"`
-	RecordType string                          `json:"type,omitempty"`
-	OwnerName  string                          `json:"ownerName,omitempty"`
-	Limits     map[string]ProbeDetailsLimitDTO `json:"limits"`
+// DNSProbeDetails wraps DNS probe details
+type DNSProbeDetails struct {
+	Port       int                          `json:"port,omitempty"`
+	TCPOnly    bool                         `json:"tcpOnly,omitempty"`
+	RecordType string                       `json:"type,omitempty"`
+	OwnerName  string                       `json:"ownerName,omitempty"`
+	Limits     map[string]ProbeDetailsLimit `json:"limits"`
 }
 
-// ProbeListDTO wraps a list of probes
-type ProbeListDTO struct {
-	Probes     []ProbeInfoDTO `json:"probes"`
-	Queryinfo  QueryInfo      `json:"queryInfo"`
-	Resultinfo ResultInfo     `json:"resultInfo"`
+// ProbeList wraps a list of probes
+type ProbeList struct {
+	Probes     []ProbeInfo `json:"probes"`
+	Queryinfo  QueryInfo   `json:"queryInfo"`
+	Resultinfo ResultInfo  `json:"resultInfo"`
 }
 
 // ProbesService manages Probes
@@ -258,14 +258,14 @@ func (k ProbeKey) URI() string {
 }
 
 // Select returns all probes by a RRSetKey, with an optional query
-func (s *ProbesService) Select(k RRSetKey, query string) ([]ProbeInfoDTO, *http.Response, error) {
-	var pld ProbeListDTO
+func (s *ProbesService) Select(k RRSetKey, query string) ([]ProbeInfo, *http.Response, error) {
+	var pld ProbeList
 
 	// This API does not support pagination.
 	uri := k.ProbesQueryURI(query)
 	res, err := s.client.get(uri, &pld)
 
-	ps := []ProbeInfoDTO{}
+	ps := []ProbeInfo{}
 	if err == nil {
 		for _, t := range pld.Probes {
 			ps = append(ps, t)
@@ -275,19 +275,19 @@ func (s *ProbesService) Select(k RRSetKey, query string) ([]ProbeInfoDTO, *http.
 }
 
 // Find returns a probe from a ProbeKey
-func (s *ProbesService) Find(k ProbeKey) (ProbeInfoDTO, *http.Response, error) {
-	var t ProbeInfoDTO
+func (s *ProbesService) Find(k ProbeKey) (ProbeInfo, *http.Response, error) {
+	var t ProbeInfo
 	res, err := s.client.get(k.URI(), &t)
 	return t, res, err
 }
 
-// Create creates a probe with a RRSetKey using the ProbeInfoDTO dp
-func (s *ProbesService) Create(k RRSetKey, dp ProbeInfoDTO) (*http.Response, error) {
+// Create creates a probe with a RRSetKey using the ProbeInfo dp
+func (s *ProbesService) Create(k RRSetKey, dp ProbeInfo) (*http.Response, error) {
 	return s.client.post(k.ProbesURI(), dp, nil)
 }
 
-// Update updates a probe given a ProbeKey with the ProbeInfoDTO dp
-func (s *ProbesService) Update(k ProbeKey, dp ProbeInfoDTO) (*http.Response, error) {
+// Update updates a probe given a ProbeKey with the ProbeInfo dp
+func (s *ProbesService) Update(k ProbeKey, dp ProbeInfo) (*http.Response, error) {
 	return s.client.put(k.URI(), dp, nil)
 }
 
