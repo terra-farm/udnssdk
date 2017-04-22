@@ -378,8 +378,8 @@ func Test_IPDirectionalPoolsService_Find(t *testing.T) {
 	want := AccountLevelIPDirectionalGroupDTO{
 		Name:        "unicorn",
 		Description: "unicorn: a service of rainbows",
-		IPs: []IPAddrDTO{
-			IPAddrDTO{Address: "1.2.3.4"},
+		IPs: []IPAddrRange{
+			IPAddrRange{Address: "1.2.3.4"},
 		},
 	}
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
