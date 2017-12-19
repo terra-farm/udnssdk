@@ -196,7 +196,7 @@ type SBPoolProfile struct {
 	MaxServed        int            `json:"maxServed,omitempty"`
 	RDataInfo        []SBRDataInfo  `json:"rdataInfo"`
 	BackupRecords    []BackupRecord `json:"backupRecords"`
-	AvailableToServe bool           `json:"availableToServe,-"`
+	AvailableToServe bool           `json:"availableToServe,omitempty"`
 }
 
 // SBRDataInfo wraps the rdataInfo object of a SBPoolProfile
@@ -224,7 +224,7 @@ type TCPoolProfile struct {
 	MaxToLB          int           `json:"maxToLB,omitempty"`
 	RDataInfo        []SBRDataInfo `json:"rdataInfo"`
 	BackupRecord     *BackupRecord `json:"backupRecord,omitempty"`
-	AvailableToServe bool          `json:"availableToServe,-"`
+	AvailableToServe bool          `json:"availableToServe,omitempty"`
 }
 
 // RRSet wraps an RRSet resource
