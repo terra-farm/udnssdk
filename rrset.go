@@ -187,15 +187,16 @@ type RDPoolProfile struct {
 
 // SBPoolProfile wraps a Profile for a SiteBacker pool
 type SBPoolProfile struct {
-	Context       ProfileSchema  `json:"@context"`
-	Description   string         `json:"description"`
-	RunProbes     bool           `json:"runProbes"`
-	ActOnProbes   bool           `json:"actOnProbes"`
-	Order         string         `json:"order,omitempty"`
-	MaxActive     int            `json:"maxActive,omitempty"`
-	MaxServed     int            `json:"maxServed,omitempty"`
-	RDataInfo     []SBRDataInfo  `json:"rdataInfo"`
-	BackupRecords []BackupRecord `json:"backupRecords"`
+	Context          ProfileSchema  `json:"@context"`
+	Description      string         `json:"description"`
+	RunProbes        bool           `json:"runProbes"`
+	ActOnProbes      bool           `json:"actOnProbes"`
+	Order            string         `json:"order,omitempty"`
+	MaxActive        int            `json:"maxActive,omitempty"`
+	MaxServed        int            `json:"maxServed,omitempty"`
+	RDataInfo        []SBRDataInfo  `json:"rdataInfo"`
+	BackupRecords    []BackupRecord `json:"backupRecords"`
+	AvailableToServe bool           `json:"availableToServe,omitempty"`
 }
 
 // SBRDataInfo wraps the rdataInfo object of a SBPoolProfile
@@ -216,13 +217,14 @@ type BackupRecord struct {
 
 // TCPoolProfile wraps a Profile for a Traffic Controller pool
 type TCPoolProfile struct {
-	Context      ProfileSchema `json:"@context"`
-	Description  string        `json:"description"`
-	RunProbes    bool          `json:"runProbes"`
-	ActOnProbes  bool          `json:"actOnProbes"`
-	MaxToLB      int           `json:"maxToLB,omitempty"`
-	RDataInfo    []SBRDataInfo `json:"rdataInfo"`
-	BackupRecord *BackupRecord `json:"backupRecord,omitempty"`
+	Context          ProfileSchema `json:"@context"`
+	Description      string        `json:"description"`
+	RunProbes        bool          `json:"runProbes"`
+	ActOnProbes      bool          `json:"actOnProbes"`
+	MaxToLB          int           `json:"maxToLB,omitempty"`
+	RDataInfo        []SBRDataInfo `json:"rdataInfo"`
+	BackupRecord     *BackupRecord `json:"backupRecord,omitempty"`
+	AvailableToServe bool          `json:"availableToServe,omitempty"`
 }
 
 // RRSet wraps an RRSet resource

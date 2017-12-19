@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.3] - 2017-12-19
+### Changed
+- Added 'availableToServe' to SBPool and TCPool profile DTOs.
+
 ## [1.3.2] - 2017-03-03
 ### Changed
 - CheckResponse: improve fallthrough error to include full Response Status and properly format Body
