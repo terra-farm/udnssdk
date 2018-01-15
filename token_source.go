@@ -5,7 +5,7 @@ import (
 
 	"golang.org/x/oauth2"
 
-	oauthPassword "github.com/Ensighten/udnssdk/password"
+	oauthPassword "github.com/terra-farm/udnssdk/password"
 )
 
 // NewConfig creates a new *password.config for UltraDNS OAuth2

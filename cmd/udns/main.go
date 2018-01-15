@@ -9,7 +9,7 @@ import (
 
 	"github.com/hashicorp/logutils"
 
-	"github.com/Ensighten/udnssdk"
+	"github.com/terra-farm/udnssdk"
 )
 
 var username string
