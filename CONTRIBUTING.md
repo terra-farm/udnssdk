@@ -105,7 +105,7 @@ For some things, the best we've got is a decent formatting tool:
 -   `markdown`: `pandoc --to=markdown --reference-links --atx-headers --columns 72`
 -   `json`: `jq .`
 
-  [issues]: https://github.com/Ensighten/udnssdk/issues
+  [issues]: https://github.com/terra-farm/udnssdk/issues
   [Writing a Good Bug Report]: http://www.webkit.org/quality/bugwriting.html
   [Fork the repository.]: https://help.github.com/articles/fork-a-repo
   [Create a topic branch.]: http://learn.github.com/p/branching.html

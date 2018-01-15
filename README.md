@@ -2,7 +2,7 @@
 
 This is a golang SDK for the UltraDNS REST API. It's not feature complete, and currently is only known to be used for Terraform's `ultradns` provider.
 
-Full API docs are available at [godoc](https://godoc.org/github.com/Ensighten/udnssdk)
+Full API docs are available at [godoc](https://godoc.org/github.com/terra-farm/udnssdk)
 
 ## Example
 
@@ -13,7 +13,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Ensighten/udnssdk"
+	"github.com/terra-farm/udnssdk"
 )
 
 func main() {

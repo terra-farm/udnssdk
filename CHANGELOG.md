@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.4] - 2018-01-15
+### Changed
+- Update all references to udnssdk from Ensighten to terra-farm
+
 ## [1.3.3] - 2017-12-19
 ### Changed
 - Added 'availableToServe' to SBPool and TCPool profile DTOs.
