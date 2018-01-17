@@ -187,26 +187,26 @@ type RDPoolProfile struct {
 
 // SBPoolProfile wraps a Profile for a SiteBacker pool
 type SBPoolProfile struct {
-	Context          ProfileSchema  `json:"@context"`
-	Description      string         `json:"description"`
-	RunProbes        bool           `json:"runProbes"`
-	ActOnProbes      bool           `json:"actOnProbes"`
-	Order            string         `json:"order,omitempty"`
-	MaxActive        int            `json:"maxActive,omitempty"`
-	MaxServed        int            `json:"maxServed,omitempty"`
-	RDataInfo        []SBRDataInfo  `json:"rdataInfo"`
-	BackupRecords    []BackupRecord `json:"backupRecords"`
-	AvailableToServe bool           `json:"availableToServe,omitempty"`
+	Context       ProfileSchema  `json:"@context"`
+	Description   string         `json:"description"`
+	RunProbes     bool           `json:"runProbes"`
+	ActOnProbes   bool           `json:"actOnProbes"`
+	Order         string         `json:"order,omitempty"`
+	MaxActive     int            `json:"maxActive,omitempty"`
+	MaxServed     int            `json:"maxServed,omitempty"`
+	RDataInfo     []SBRDataInfo  `json:"rdataInfo"`
+	BackupRecords []BackupRecord `json:"backupRecords"`
 }
 
 // SBRDataInfo wraps the rdataInfo object of a SBPoolProfile
 type SBRDataInfo struct {
-	State         string `json:"state"`
-	RunProbes     bool   `json:"runProbes"`
-	Priority      int    `json:"priority"`
-	FailoverDelay int    `json:"failoverDelay,omitempty"`
-	Threshold     int    `json:"threshold"`
-	Weight        int    `json:"weight"`
+	State            string `json:"state"`
+	RunProbes        bool   `json:"runProbes"`
+	Priority         int    `json:"priority"`
+	FailoverDelay    int    `json:"failoverDelay,omitempty"`
+	Threshold        int    `json:"threshold"`
+	Weight           int    `json:"weight"`
+	AvailableToServe bool   `json:"availableToServe,omitempty"`
 }
 
 // BackupRecord wraps the backupRecord objects of an SBPoolProfile response
@@ -217,14 +217,13 @@ type BackupRecord struct {
 
 // TCPoolProfile wraps a Profile for a Traffic Controller pool
 type TCPoolProfile struct {
-	Context          ProfileSchema `json:"@context"`
-	Description      string        `json:"description"`
-	RunProbes        bool          `json:"runProbes"`
-	ActOnProbes      bool          `json:"actOnProbes"`
-	MaxToLB          int           `json:"maxToLB,omitempty"`
-	RDataInfo        []SBRDataInfo `json:"rdataInfo"`
-	BackupRecord     *BackupRecord `json:"backupRecord,omitempty"`
-	AvailableToServe bool          `json:"availableToServe,omitempty"`
+	Context      ProfileSchema `json:"@context"`
+	Description  string        `json:"description"`
+	RunProbes    bool          `json:"runProbes"`
+	ActOnProbes  bool          `json:"actOnProbes"`
+	MaxToLB      int           `json:"maxToLB,omitempty"`
+	RDataInfo    []SBRDataInfo `json:"rdataInfo"`
+	BackupRecord *BackupRecord `json:"backupRecord,omitempty"`
 }
 
 // RRSet wraps an RRSet resource
