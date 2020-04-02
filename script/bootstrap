@@ -1,5 +1,5 @@
 #!/bin/sh
 
 set -e
-go get -u github.com/golang/lint/golint
-go get ./...
+go mod init github.com
+go mod tidy
