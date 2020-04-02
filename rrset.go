@@ -210,12 +210,15 @@ type SBRDataInfo struct {
 }
 
 // BackupRecord wraps the backupRecord objects of an SBPoolProfile response
+// AvailableToServe required by UltraDNS restapi
 type BackupRecord struct {
 	RData         string `json:"rdata,omitempty"`
 	FailoverDelay int    `json:"failoverDelay,omitempty"`
+        AvailableToServe bool   `json:"availableToServe,omitempty"`
 }
 
 // TCPoolProfile wraps a Profile for a Traffic Controller pool
+// Status required by UltraDNS restapi
 type TCPoolProfile struct {
 	Context      ProfileSchema `json:"@context"`
 	Description  string        `json:"description"`
@@ -224,6 +227,7 @@ type TCPoolProfile struct {
 	MaxToLB      int           `json:"maxToLB,omitempty"`
 	RDataInfo    []SBRDataInfo `json:"rdataInfo"`
 	BackupRecord *BackupRecord `json:"backupRecord,omitempty"`
+	Status       string        `json:"status,omitempty"`
 }
 
 // RRSet wraps an RRSet resource
