@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+## [1.3.5]
+- Added 'availableToServe' to BackupRecord DTO
+- Added 'status' to TCPool profile DTO
+- Improved the testing steps used latest `go 1.14` and `go mod`
 
 ## [1.3.4] - 2018-01-15
 ### Changed

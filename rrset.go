@@ -211,8 +211,9 @@ type SBRDataInfo struct {
 
 // BackupRecord wraps the backupRecord objects of an SBPoolProfile response
 type BackupRecord struct {
-	RData         string `json:"rdata,omitempty"`
-	FailoverDelay int    `json:"failoverDelay,omitempty"`
+	RData            string `json:"rdata,omitempty"`
+	FailoverDelay    int    `json:"failoverDelay,omitempty"`
+	AvailableToServe bool   `json:"availableToServe,omitempty"`
 }
 
 // TCPoolProfile wraps a Profile for a Traffic Controller pool
@@ -224,6 +225,7 @@ type TCPoolProfile struct {
 	MaxToLB      int           `json:"maxToLB,omitempty"`
 	RDataInfo    []SBRDataInfo `json:"rdataInfo"`
 	BackupRecord *BackupRecord `json:"backupRecord,omitempty"`
+	Status       string        `json:"status,omitempty"`
 }
 
 // RRSet wraps an RRSet resource
