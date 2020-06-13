@@ -32,7 +32,7 @@ type EventInfoListDTO struct {
 
 // EventKey collects the identifiers of an Event
 type EventKey struct {
-	Zone string
+	Zone ZoneKey
 	Type string
 	Name string
 	GUID string

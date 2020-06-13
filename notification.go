@@ -40,7 +40,7 @@ type NotificationListDTO struct {
 
 // NotificationKey collects the identifiers of an Notification
 type NotificationKey struct {
-	Zone  string
+	Zone  ZoneKey
 	Type  string
 	Name  string
 	Email string

@@ -65,7 +65,7 @@ func main() {
 	}
 
 	k := udnssdk.RRSetKey{
-		Zone: zone,
+		Zone: udnssdk.ZoneKey(zone),
 		Type: typ,
 		Name: domain,
 	}
