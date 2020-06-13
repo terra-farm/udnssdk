@@ -29,7 +29,7 @@ const (
 
 	userAgent = "udnssdk-go/" + libraryVersion
 
-	apiVersion = "v1"
+	apiVersion = "v2"
 )
 
 // QueryInfo wraps a query request
