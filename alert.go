@@ -11,8 +11,8 @@ type AlertsService struct {
 	client *Client
 }
 
-// ProbeAlertDataDTO wraps a probe alert response
-type ProbeAlertDataDTO struct {
+// ProbeAlertData wraps a probe alert response
+type ProbeAlertData struct {
 	PoolRecord      string    `json:"poolRecord"`
 	ProbeType       string    `json:"probeType"`
 	ProbeStatus     string    `json:"probeStatus"`
@@ -22,8 +22,8 @@ type ProbeAlertDataDTO struct {
 	Status          string    `json:"status"`
 }
 
-// Equal compares to another ProbeAlertDataDTO, but uses time.Equals to compare semantic equvalance of AlertDate
-func (a ProbeAlertDataDTO) Equal(b ProbeAlertDataDTO) bool {
+// Equal compares to another ProbeAlertData, but uses time.Equals to compare semantic equvalance of AlertDate
+func (a ProbeAlertData) Equal(b ProbeAlertData) bool {
 	return a.PoolRecord == b.PoolRecord &&
 		a.ProbeType == b.ProbeType &&
 		a.ProbeStatus == b.ProbeStatus &&
@@ -33,21 +33,21 @@ func (a ProbeAlertDataDTO) Equal(b ProbeAlertDataDTO) bool {
 		a.Status == b.Status
 }
 
-// ProbeAlertDataListDTO wraps the response for an index of probe alerts
-type ProbeAlertDataListDTO struct {
-	Alerts     []ProbeAlertDataDTO `json:"alerts"`
-	Queryinfo  QueryInfo           `json:"queryInfo"`
-	Resultinfo ResultInfo          `json:"resultInfo"`
+// ProbeAlertDataList wraps the response for an index of probe alerts
+type ProbeAlertDataList struct {
+	Alerts     []ProbeAlertData `json:"alerts"`
+	Queryinfo  QueryInfo        `json:"queryInfo"`
+	Resultinfo ResultInfo       `json:"resultInfo"`
 }
 
 // Select returns all probe alerts with a RRSetKey
-func (s *AlertsService) Select(k RRSetKey) ([]ProbeAlertDataDTO, error) {
+func (s *AlertsService) Select(k RRSetKey) ([]ProbeAlertData, error) {
 	// TODO: Sane Configuration for timeouts / retries
 	maxerrs := 5
 	waittime := 5 * time.Second
 
 	// init accumulators
-	as := []ProbeAlertDataDTO{}
+	as := []ProbeAlertData{}
 	offset := 0
 	errcnt := 0
 
@@ -77,13 +77,13 @@ func (s *AlertsService) Select(k RRSetKey) ([]ProbeAlertDataDTO, error) {
 }
 
 // SelectWithOffset returns the probe alerts with a RRSetKey, accepting an offset
-func (s *AlertsService) SelectWithOffset(k RRSetKey, offset int) ([]ProbeAlertDataDTO, ResultInfo, *http.Response, error) {
-	var ald ProbeAlertDataListDTO
+func (s *AlertsService) SelectWithOffset(k RRSetKey, offset int) ([]ProbeAlertData, ResultInfo, *http.Response, error) {
+	var ald ProbeAlertDataList
 
 	uri := k.AlertsQueryURI(offset)
 	res, err := s.client.get(uri, &ald)
 
-	as := []ProbeAlertDataDTO{}
+	as := []ProbeAlertData{}
 	for _, a := range ald.Alerts {
 		as = append(as, a)
 	}

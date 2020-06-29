@@ -20,26 +20,26 @@ type DirectionalPool struct {
 	ResultURI                 string `json:"resultUri"`
 }
 
-// AccountLevelGeoDirectionalGroupDTO wraps an account-level, geo directonal-group response
-type AccountLevelGeoDirectionalGroupDTO struct {
+// AccountLevelGeoDirectionalGroup wraps an account-level, geo directonal-group response
+type AccountLevelGeoDirectionalGroup struct {
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 	Codes       []string `json:"codes"`
 }
 
-// IPAddrDTO wraps an IP address range or CIDR block
-type IPAddrDTO struct {
+// IPAddrRange wraps an IP address range or CIDR block
+type IPAddrRange struct {
 	Start   string `json:"start,omitempty" terraform:"start"`
 	End     string `json:"end,omitempty" terraform:"end"`
 	CIDR    string `json:"cidr,omitempty" terraform:"cidr"`
 	Address string `json:"address,omitempty" terraform:"address"`
 }
 
-// AccountLevelIPDirectionalGroupDTO wraps an account-level, IP directional-group response
-type AccountLevelIPDirectionalGroupDTO struct {
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	IPs         []IPAddrDTO `json:"ips"`
+// AccountLevelIPDirectionalGroup wraps an account-level, IP directional-group response
+type AccountLevelIPDirectionalGroup struct {
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	IPs         []IPAddrRange `json:"ips"`
 }
 
 // DirectionalPoolListDTO wraps a list of account-level directional-groups response from a index request
@@ -51,18 +51,18 @@ type DirectionalPoolListDTO struct {
 
 // AccountLevelGeoDirectionalGroupListDTO wraps a list of account-level, geo directional-groups response from a index request
 type AccountLevelGeoDirectionalGroupListDTO struct {
-	AccountName string                               `json:"zoneName"`
-	GeoGroups   []AccountLevelGeoDirectionalGroupDTO `json:"geoGroups"`
-	Queryinfo   QueryInfo                            `json:"queryInfo"`
-	Resultinfo  ResultInfo                           `json:"resultInfo"`
+	AccountName string                            `json:"zoneName"`
+	GeoGroups   []AccountLevelGeoDirectionalGroup `json:"geoGroups"`
+	Queryinfo   QueryInfo                         `json:"queryInfo"`
+	Resultinfo  ResultInfo                        `json:"resultInfo"`
 }
 
 // AccountLevelIPDirectionalGroupListDTO wraps an account-level, IP directional-group response
 type AccountLevelIPDirectionalGroupListDTO struct {
-	AccountName string                              `json:"zoneName"`
-	IPGroups    []AccountLevelIPDirectionalGroupDTO `json:"ipGroups"`
-	Queryinfo   QueryInfo                           `json:"queryInfo"`
-	Resultinfo  ResultInfo                          `json:"resultInfo"`
+	AccountName string                           `json:"zoneName"`
+	IPGroups    []AccountLevelIPDirectionalGroup `json:"ipGroups"`
+	Queryinfo   QueryInfo                        `json:"queryInfo"`
+	Resultinfo  ResultInfo                       `json:"resultInfo"`
 }
 
 // Geos allows access to the Geo DirectionalPools API
@@ -134,13 +134,13 @@ type GeoDirectionalPoolsService struct {
 }
 
 // Select requests all geo directional-pools, by query and account, providing pagination and error handling
-func (s *GeoDirectionalPoolsService) Select(k GeoDirectionalPoolKey, query string) ([]AccountLevelGeoDirectionalGroupDTO, error) {
+func (s *GeoDirectionalPoolsService) Select(k GeoDirectionalPoolKey, query string) ([]AccountLevelGeoDirectionalGroup, error) {
 	// TODO: Sane Configuration for timeouts / retries
 	maxerrs := 5
 	waittime := 5 * time.Second
 
 	// init accumulators
-	dtos := []AccountLevelGeoDirectionalGroupDTO{}
+	dtos := []AccountLevelGeoDirectionalGroup{}
 	errcnt := 0
 	offset := 0
 
@@ -170,12 +170,12 @@ func (s *GeoDirectionalPoolsService) Select(k GeoDirectionalPoolKey, query strin
 }
 
 // SelectWithOffset requests list of geo directional-pools, by query & account, and an offset, returning the directional-group, the list-metadata, the actual response, or an error
-func (s *GeoDirectionalPoolsService) SelectWithOffset(k GeoDirectionalPoolKey, query string, offset int) ([]AccountLevelGeoDirectionalGroupDTO, ResultInfo, *http.Response, error) {
+func (s *GeoDirectionalPoolsService) SelectWithOffset(k GeoDirectionalPoolKey, query string, offset int) ([]AccountLevelGeoDirectionalGroup, ResultInfo, *http.Response, error) {
 	var tld AccountLevelGeoDirectionalGroupListDTO
 
 	res, err := s.client.get(k.QueryURI(query, offset), &tld)
 
-	pis := []AccountLevelGeoDirectionalGroupDTO{}
+	pis := []AccountLevelGeoDirectionalGroup{}
 	for _, pi := range tld.GeoGroups {
 		pis = append(pis, pi)
 	}
@@ -183,8 +183,8 @@ func (s *GeoDirectionalPoolsService) SelectWithOffset(k GeoDirectionalPoolKey, q
 }
 
 // Find requests a geo directional-pool by name & account
-func (s *GeoDirectionalPoolsService) Find(k GeoDirectionalPoolKey) (AccountLevelGeoDirectionalGroupDTO, *http.Response, error) {
-	var t AccountLevelGeoDirectionalGroupDTO
+func (s *GeoDirectionalPoolsService) Find(k GeoDirectionalPoolKey) (AccountLevelGeoDirectionalGroup, *http.Response, error) {
+	var t AccountLevelGeoDirectionalGroup
 	res, err := s.client.get(k.URI(), &t)
 	return t, res, err
 }
@@ -235,13 +235,13 @@ type IPDirectionalPoolsService struct {
 }
 
 // Select requests all IP directional-pools, using pagination and error handling
-func (s *IPDirectionalPoolsService) Select(k IPDirectionalPoolKey, query string) ([]AccountLevelIPDirectionalGroupDTO, error) {
+func (s *IPDirectionalPoolsService) Select(k IPDirectionalPoolKey, query string) ([]AccountLevelIPDirectionalGroup, error) {
 	// TODO: Sane Configuration for timeouts / retries
 	maxerrs := 5
 	waittime := 5 * time.Second
 
 	// init accumulators
-	gs := []AccountLevelIPDirectionalGroupDTO{}
+	gs := []AccountLevelIPDirectionalGroup{}
 	errcnt := 0
 	offset := 0
 
@@ -271,12 +271,12 @@ func (s *IPDirectionalPoolsService) Select(k IPDirectionalPoolKey, query string)
 }
 
 // SelectWithOffset requests all IP directional-pools, by query & account, and an offset, returning the list of IP groups, list metadata & the actual response, or an error
-func (s *IPDirectionalPoolsService) SelectWithOffset(k IPDirectionalPoolKey, query string, offset int) ([]AccountLevelIPDirectionalGroupDTO, ResultInfo, *http.Response, error) {
+func (s *IPDirectionalPoolsService) SelectWithOffset(k IPDirectionalPoolKey, query string, offset int) ([]AccountLevelIPDirectionalGroup, ResultInfo, *http.Response, error) {
 	var tld AccountLevelIPDirectionalGroupListDTO
 
 	res, err := s.client.get(k.QueryURI(query, offset), &tld)
 
-	pis := []AccountLevelIPDirectionalGroupDTO{}
+	pis := []AccountLevelIPDirectionalGroup{}
 	for _, pi := range tld.IPGroups {
 		pis = append(pis, pi)
 	}
@@ -285,8 +285,8 @@ func (s *IPDirectionalPoolsService) SelectWithOffset(k IPDirectionalPoolKey, que
 }
 
 // Find requests a directional-pool by name & account
-func (s *IPDirectionalPoolsService) Find(k IPDirectionalPoolKey) (AccountLevelIPDirectionalGroupDTO, *http.Response, error) {
-	var t AccountLevelIPDirectionalGroupDTO
+func (s *IPDirectionalPoolsService) Find(k IPDirectionalPoolKey) (AccountLevelIPDirectionalGroup, *http.Response, error) {
+	var t AccountLevelIPDirectionalGroup
 	res, err := s.client.get(k.URI(), &t)
 	return t, res, err
 }
